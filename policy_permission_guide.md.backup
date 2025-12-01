@@ -1,0 +1,781 @@
+# 🔐 Policy & Permission Guide - CMMS Laravel + Filament v4
+
+**Author:** AI Assistant  
+**Date:** November 16, 2025  
+**Project:** CMMS (Computerized Maintenance Management System)
+
+---
+
+## 📚 Table of Contents
+
+1. [Overview](#overview)
+2. [Understanding Laravel Policies](#understanding-laravel-policies)
+3. [Current Policy Implementation](#current-policy-implementation)
+4. [How to Create New Policies](#how-to-create-new-policies)
+5. [How to Modify Existing Policies](#how-to-modify-existing-policies)
+6. [Role-Based Access in Filament Resources](#role-based-access-in-filament-resources)
+7. [Testing Policies](#testing-policies)
+8. [Common Patterns & Examples](#common-patterns--examples)
+
+---
+
+## 1. Overview
+
+### What are Policies?
+
+Policies in Laravel are classes that organize authorization logic around a particular model or resource. They allow you to control who can:
+- View records (`viewAny`, `view`)
+- Create new records (`create`)
+- Update existing records (`update`)
+- Delete records (`delete`, `forceDelete`)
+- Restore soft-deleted records (`restore`)
+
+### Current Role System
+
+Your CMMS project has 6 roles:
+
+| Role | Department | Access Level |
+|------|------------|--------------|
+| `super_admin` | N/A | Full access to everything |
+| `manager` | N/A | Access to all resources except super_admin management |
+| `asisten_manager` | utility/electric/mechanic | Department-specific access |
+| `technician` | utility/electric/mechanic | Limited access, can execute PM and WO |
+| `tech_store` | N/A | Parts management only |
+| `operator` | N/A | Barcode system only (no Filament access) |
+
+---
+
+## 2. Understanding Laravel Policies
+
+### Policy Methods
+
+Each policy method receives the authenticated user as the first parameter:
+
+```php
+public function viewAny(User $user): bool
+{
+    // Can the user see the list page?
+    return true; // or false
+}
+
+public function view(User $user, Model $model): bool
+{
+    // Can the user see this specific record?
+    return true; // or false
+}
+
+public function create(User $user): bool
+{
+    // Can the user create new records?
+    return true; // or false
+}
+
+public function update(User $user, Model $model): bool
+{
+    // Can the user edit this record?
+    return true; // or false
+}
+
+public function delete(User $user, Model $model): bool
+{
+    // Can the user delete this record?
+    return true; // or false
+}
+
+public function restore(User $user, Model $model): bool
+{
+    // Can the user restore a soft-deleted record?
+    return true; // or false
+}
+
+public function forceDelete(User $user, Model $model): bool
+{
+    // Can the user permanently delete?
+    return true; // or false
+}
+```
+
+---
+
+## 3. Current Policy Implementation
+
+### AreaPolicy (Master Data)
+
+**File:** `app/Policies/AreaPolicy.php`
+
+**Applied to:** Area, SubArea, Asset, SubAsset, Part resources
+
+```php
+<?php
+
+namespace App\Policies;
+
+use App\Models\Area;
+use App\Models\User;
+
+class AreaPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        // Only super_admin and manager can see master data
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function view(User $user, Area $area): bool
+    {
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function create(User $user): bool
+    {
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function update(User $user, Area $area): bool
+    {
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function delete(User $user, Area $area): bool
+    {
+        // Only super_admin can delete
+        return $user->role === 'super_admin';
+    }
+
+    public function restore(User $user, Area $area): bool
+    {
+        return $user->role === 'super_admin';
+    }
+
+    public function forceDelete(User $user, Area $area): bool
+    {
+        return $user->role === 'super_admin';
+    }
+}
+```
+
+### UserPolicy (User Management)
+
+**File:** `app/Policies/UserPolicy.php`
+
+```php
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+
+class UserPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        // Only super_admin and manager can see users
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function view(User $user, User $model): bool
+    {
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function create(User $user): bool
+    {
+        return in_array($user->role, ['super_admin', 'manager']);
+    }
+
+    public function update(User $user, User $model): bool
+    {
+        // super_admin can edit anyone
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+        
+        // manager cannot edit super_admin
+        if ($user->role === 'manager' && $model->role !== 'super_admin') {
+            return true;
+        }
+        
+        return false;
+    }
+
+    public function delete(User $user, User $model): bool
+    {
+        // Only super_admin can delete
+        // Cannot delete self
+        return $user->role === 'super_admin' && $user->id !== $model->id;
+    }
+
+    public function forceDelete(User $user, User $model): bool
+    {
+        return $user->role === 'super_admin' && $user->id !== $model->id;
+    }
+}
+```
+
+### PmSchedulePolicy (PM Management)
+
+**File:** `app/Policies/PmSchedulePolicy.php`
+
+**Key Difference:** Technicians can VIEW but CANNOT CREATE/EDIT PM schedules. Only Asisten Manager can create and assign PM schedules to technicians.
+
+```php
+<?php
+
+namespace App\Policies;
+
+use App\Models\PmSchedule;
+use App\Models\User;
+
+class PmSchedulePolicy
+{
+    public function viewAny(User $user): bool
+    {
+        // All roles can access PM Schedule menu (filtered by query)
+        return in_array($user->role, ['super_admin', 'manager', 'asisten_manager', 'technician']);
+    }
+
+    public function view(User $user, PmSchedule $pmSchedule): bool
+    {
+        // Super admin and manager can view all
+        if (in_array($user->role, ['super_admin', 'manager'])) {
+            return true;
+        }
+        
+        // Asisten manager can view PM in their department
+        if ($user->role === 'asisten_manager') {
+            return $pmSchedule->department === $user->department;
+        }
+        
+        // Technician can only view PM assigned to them
+        if ($user->role === 'technician') {
+            return $pmSchedule->assigned_to_gpid === $user->gpid;
+        }
+        
+        return false;
+    }
+
+    public function create(User $user): bool
+    {
+        // Technicians CANNOT create PM schedules (they only execute)
+        return in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
+    }
+
+    public function update(User $user, PmSchedule $pmSchedule): bool
+    {
+        // Technician cannot edit PM schedules
+        if ($user->role === 'technician') {
+            return false;
+        }
+        
+        // Super admin and manager can edit all
+        if (in_array($user->role, ['super_admin', 'manager'])) {
+            return true;
+        }
+        
+        // Asisten manager can edit PM in their department
+        if ($user->role === 'asisten_manager') {
+            return $pmSchedule->department === $user->department;
+        }
+        
+        return false;
+    }
+
+    public function delete(User $user, PmSchedule $pmSchedule): bool
+    {
+        return $user->role === 'super_admin';
+    }
+
+    public function restore(User $user, PmSchedule $pmSchedule): bool
+    {
+        return $user->role === 'super_admin';
+    }
+
+    public function forceDelete(User $user, PmSchedule $pmSchedule): bool
+    {
+        return $user->role === 'super_admin';
+    }
+}
+```
+
+**⚠️ Important PM Schedule Workflow:**
+- **Asisten Manager** creates PM schedules and assigns them to technicians
+- **Technician** can only VIEW and EXECUTE their assigned PM schedules
+- Technicians do NOT have Create or Edit buttons in the UI
+- This enforces proper workflow: Manager plans → Technician executes
+
+### Policy Registration
+
+**File:** `app/Providers/AppServiceProvider.php`
+
+```php
+use Illuminate\Support\Facades\Gate;
+use App\Models\Area;
+use App\Policies\AreaPolicy;
+use App\Models\User;
+use App\Policies\UserPolicy;
+use App\Models\PmSchedule;
+use App\Policies\PmSchedulePolicy;
+
+public function boot(): void
+{
+    Gate::policy(Area::class, AreaPolicy::class);
+    Gate::policy(User::class, UserPolicy::class);
+    Gate::policy(PmSchedule::class, PmSchedulePolicy::class);
+}
+```
+
+---
+
+## 4. How to Create New Policies
+
+### Step 1: Generate Policy File
+
+```bash
+php artisan make:policy WorkOrderPolicy --model=WorkOrder
+```
+
+### Step 2: Define Authorization Logic
+
+**File:** `app/Policies/WorkOrderPolicy.php`
+
+```php
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\WorkOrder;
+
+class WorkOrderPolicy
+{
+    /**
+     * Determine if user can view any work orders
+     */
+    public function viewAny(User $user): bool
+    {
+        // All roles except operator can see work orders
+        return in_array($user->role, [
+            'super_admin',
+            'manager',
+            'asisten_manager',
+            'technician'
+        ]);
+    }
+
+    /**
+     * Determine if user can view a specific work order
+     */
+    public function view(User $user, WorkOrder $workOrder): bool
+    {
+        // Super admin and manager can see all
+        if (in_array($user->role, ['super_admin', 'manager'])) {
+            return true;
+        }
+        
+        // Asisten manager and technician can only see their department's WO
+        if (in_array($user->role, ['asisten_manager', 'technician'])) {
+            return $workOrder->assign_to === $user->department;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Determine if user can create work orders
+     */
+    public function create(User $user): bool
+    {
+        // Everyone except operator can create WO
+        return $user->role !== 'operator';
+    }
+
+    /**
+     * Determine if user can update work order
+     */
+    public function update(User $user, WorkOrder $workOrder): bool
+    {
+        // Can only edit if status is submitted or reviewed
+        if (!in_array($workOrder->status, ['submitted', 'reviewed'])) {
+            return false;
+        }
+        
+        // Super admin and manager can edit all
+        if (in_array($user->role, ['super_admin', 'manager'])) {
+            return true;
+        }
+        
+        // Others can only edit their department's WO
+        return $workOrder->assign_to === $user->department;
+    }
+
+    /**
+     * Determine if user can delete work order
+     */
+    public function delete(User $user, WorkOrder $workOrder): bool
+    {
+        // Only super_admin can delete
+        // Only if status is submitted
+        return $user->role === 'super_admin' && $workOrder->status === 'submitted';
+    }
+}
+```
+
+### Step 3: Register the Policy
+
+**File:** `app/Providers/AppServiceProvider.php`
+
+```php
+use App\Models\WorkOrder;
+use App\Policies\WorkOrderPolicy;
+
+public function boot(): void
+{
+    Gate::policy(Area::class, AreaPolicy::class);
+    Gate::policy(User::class, UserPolicy::class);
+    Gate::policy(WorkOrder::class, WorkOrderPolicy::class); // Add this line
+}
+```
+
+---
+
+## 5. How to Modify Existing Policies
+
+### Example: Allow tech_store to view Parts
+
+**Before:**
+```php
+// AreaPolicy.php
+public function viewAny(User $user): bool
+{
+    return in_array($user->role, ['super_admin', 'manager']);
+}
+```
+
+**After:**
+```php
+// AreaPolicy.php
+public function viewAny(User $user): bool
+{
+    // Add tech_store for Parts resource
+    return in_array($user->role, ['super_admin', 'manager', 'tech_store']);
+}
+```
+
+### Example: Allow asisten_manager to create Areas
+
+**Before:**
+```php
+public function create(User $user): bool
+{
+    return in_array($user->role, ['super_admin', 'manager']);
+}
+```
+
+**After:**
+```php
+public function create(User $user): bool
+{
+    // Allow asisten_manager to create
+    return in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
+}
+```
+
+---
+
+## 6. Role-Based Access in Filament Resources
+
+### Method 1: Using canAccess() in Resource
+
+**File:** `app/Filament/Resources/Parts/PartResource.php`
+
+```php
+public static function canAccess(): bool
+{
+    $user = Auth::user();
+    
+    // Allow super_admin, manager, and tech_store
+    return $user && in_array($user->role, ['super_admin', 'manager', 'tech_store']);
+}
+```
+
+### Method 2: Using Personalized Queries
+
+**File:** `app/Filament/Resources/PmSchedules/PmScheduleResource.php`
+
+```php
+public static function getEloquentQuery(): Builder
+{
+    $query = parent::getEloquentQuery();
+    $user = Auth::user();
+    
+    return match($user->role) {
+        // Technician sees only their PM
+        'technician' => $query->where('assigned_to_gpid', $user->gpid),
+        
+        // Asisten manager sees their department's PM
+        'asisten_manager' => $query->where('department', $user->department),
+        
+        // Manager and super_admin see all
+        default => $query,
+    };
+}
+```
+
+### Method 3: Conditional Actions in Tables
+
+**File:** `app/Filament/Resources/WorkOrders/Tables/WorkOrdersTable.php`
+
+```php
+->recordActions([
+    ViewAction::make(),
+    
+    EditAction::make()
+        ->visible(fn ($record) => in_array($record->status, ['submitted', 'reviewed'])),
+    
+    \Filament\Actions\Action::make('approve')
+        ->label('Approve')
+        ->action(function ($record) {
+            $record->update(['status' => 'approved']);
+        })
+        // Only asisten_manager and manager can approve
+        ->visible(fn ($record) => 
+            $record->status === 'reviewed' && 
+            in_array(auth()->user()->role, ['asisten_manager', 'manager'])
+        ),
+])
+```
+
+### Method 4: Hiding Actions for Specific Roles (PM Schedule Example)
+
+**Hiding "New PM Schedule" button from technicians:**
+
+**File:** `app/Filament/Resources/PmSchedules/Pages/ListPmSchedules.php`
+
+```php
+protected function getHeaderActions(): array
+{
+    return [
+        CreateAction::make()
+            ->visible(fn () => 
+                in_array(\Illuminate\Support\Facades\Auth::user()->role, 
+                    ['super_admin', 'manager', 'asisten_manager']
+                )
+            ),
+    ];
+}
+```
+
+**Hiding Edit action from technicians:**
+
+**File:** `app/Filament/Resources/PmSchedules/Tables/PmSchedulesTable.php`
+
+```php
+->recordActions([
+    ViewAction::make(),
+    EditAction::make()
+        ->visible(fn ($record) => 
+            \Illuminate\Support\Facades\Auth::user()->role !== 'technician'
+        ),
+])
+```
+
+**Result:** Technicians can only view their assigned PM schedules but cannot create or edit them.
+
+---
+
+## 7. Testing Policies
+
+### Manual Testing Steps
+
+1. **Login as different roles:**
+   ```
+   Super Admin:     sa001@cmms.com
+   Manager:         mgr001@cmms.com
+   Asisten Manager: asm001@cmms.com (mechanic)
+   Technician:      tcm001@cmms.com (mechanic)
+   Tech Store:      ts001@cmms.com
+   ```
+
+2. **Test each resource:**
+   - Can you see the menu item?
+   - Can you access the index page?
+   - Can you create new records?
+   - Can you edit records?
+   - Can you delete records?
+
+3. **Test personalized queries:**
+   - Login as technician TCM001
+   - Go to PM Schedules
+   - You should ONLY see PM assigned to your GPID
+   - Login as manager
+   - You should see ALL PM schedules
+
+### Testing in Tinker
+
+```bash
+php artisan tinker
+```
+
+```php
+// Get a user
+$user = App\Models\User::where('gpid', 'TCM001')->first();
+
+// Get a work order
+$wo = App\Models\WorkOrder::first();
+
+// Test policy manually
+$policy = new App\Policies\WorkOrderPolicy();
+$canView = $policy->view($user, $wo);
+echo $canView ? 'YES' : 'NO';
+
+// Test using Gate
+use Illuminate\Support\Facades\Gate;
+$canUpdate = Gate::forUser($user)->allows('update', $wo);
+echo $canUpdate ? 'YES' : 'NO';
+```
+
+---
+
+## 8. Common Patterns & Examples
+
+### Pattern 1: Department-Based Access
+
+```php
+public function viewAny(User $user): bool
+{
+    // Asisten manager and technician see only their department
+    if (in_array($user->role, ['asisten_manager', 'technician'])) {
+        return true; // Will be filtered by getEloquentQuery()
+    }
+    
+    // Manager and super_admin see all
+    return in_array($user->role, ['manager', 'super_admin']);
+}
+```
+
+### Pattern 2: Ownership-Based Access (GPID)
+
+```php
+public function view(User $user, PmSchedule $pmSchedule): bool
+{
+    // Technician can only view PM assigned to them
+    if ($user->role === 'technician') {
+        return $pmSchedule->assigned_to_gpid === $user->gpid;
+    }
+    
+    // Asisten manager can view PM in their department
+    if ($user->role === 'asisten_manager') {
+        return $pmSchedule->department === $user->department;
+    }
+    
+    // Manager and super_admin can view all
+    return in_array($user->role, ['manager', 'super_admin']);
+}
+```
+
+### Pattern 3: Status-Based Access
+
+```php
+public function delete(User $user, WorkOrder $workOrder): bool
+{
+    // Can only delete if status is submitted
+    if ($workOrder->status !== 'submitted') {
+        return false;
+    }
+    
+    // Only super_admin can delete
+    return $user->role === 'super_admin';
+}
+```
+
+### Pattern 4: Combined Conditions
+
+```php
+public function close(User $user, WorkOrder $workOrder): bool
+{
+    // Must be completed first
+    if ($workOrder->status !== 'completed') {
+        return false;
+    }
+    
+    // Must be manager or higher
+    if (!in_array($user->role, ['manager', 'super_admin', 'asisten_manager'])) {
+        return false;
+    }
+    
+    // Asisten manager can only close their department's WO
+    if ($user->role === 'asisten_manager') {
+        return $workOrder->assign_to === $user->department;
+    }
+    
+    return true;
+}
+```
+
+### Pattern 5: Cannot Edit/Delete Self
+
+```php
+public function delete(User $user, User $model): bool
+{
+    // Cannot delete yourself
+    if ($user->id === $model->id) {
+        return false;
+    }
+    
+    // Only super_admin can delete
+    return $user->role === 'super_admin';
+}
+```
+
+---
+
+## 🎯 Quick Reference: Role Permissions Matrix
+
+| Resource | super_admin | manager | asisten_manager | technician | tech_store |
+|----------|-------------|---------|-----------------|------------|------------|
+| **Master Data** (Area, SubArea, Asset, SubAsset) |
+| View All | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Create | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Edit | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Delete | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Parts** |
+| View All | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Create | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Edit | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Delete | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Users** |
+| View All | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Create | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Edit | ✅ | ✅* | ❌ | ❌ | ❌ |
+| Delete | ✅** | ❌ | ❌ | ❌ | ❌ |
+| **PM Schedules** |
+| View | ✅ (all) | ✅ (all) | ✅ (dept) | ✅ (own) | ❌ |
+| Create | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Edit | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Delete | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Work Orders** |
+| View | ✅ (all) | ✅ (all) | ✅ (dept) | ✅ (dept) | ❌ |
+| Create | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Review | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Approve | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Execute | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Close | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+*Manager cannot edit super_admin users  
+**Super_admin cannot delete themselves
+
+---
+
+## 📞 Need Help?
+
+If you encounter issues:
+
+1. Clear cache: `php artisan optimize:clear`
+2. Check policy registration in `AppServiceProvider.php`
+3. Test policy in tinker
+4. Check Filament resource `canAccess()` method
+5. Verify personalized query in `getEloquentQuery()`
+
+---
+
+**End of Guide** - Happy coding! 🚀

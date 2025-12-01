@@ -1,0 +1,682 @@
+// CMMS Database Schema for dbdiagram.io
+// Project: CMMS (Computerized Maintenance Management System)
+// Tech Stack: Laravel 12 + Filament v4 + PHP 8.4 + MySQL
+// Copyright © 2025 Nandang Wijaya. All Rights Reserved.
+// 
+// To use: Copy this entire file and paste it into https://dbdiagram.io/
+
+Project cmmseng {
+  database_type: 'MySQL'
+  Note: 'CMMS - Maintenance Management System for PepsiCo'
+}
+
+// ============================================
+// MASTER DATA TABLES
+// ============================================
+
+Table areas {
+  id bigint [pk, increment]
+  name varchar [not null]
+  code varchar [unique, not null]
+  description text
+  is_active tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    code [name: 'areas_code_index']
+    is_active [name: 'areas_is_active_index']
+  }
+  
+  Note: 'Level 1 hierarchy - Production areas'
+}
+
+Table sub_areas {
+  id bigint [pk, increment]
+  area_id bigint [ref: > areas.id, not null]
+  name varchar [not null]
+  code varchar [unique, not null]
+  description text
+  is_active tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    (area_id, is_active) [name: 'sub_areas_area_id_is_active_index']
+    code [name: 'sub_areas_code_index']
+  }
+  
+  Note: 'Level 2 hierarchy - Sub-areas within areas'
+}
+
+Table assets {
+  id bigint [pk, increment]
+  sub_area_id bigint [ref: > sub_areas.id, not null]
+  name varchar [not null]
+  code varchar [unique, not null]
+  model varchar
+  serial_number varchar
+  installation_date date
+  is_active tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    (sub_area_id, is_active) [name: 'assets_sub_area_id_is_active_index']
+    code [name: 'assets_code_index']
+  }
+  
+  Note: 'Level 3 hierarchy - Equipment/machines'
+}
+
+Table sub_assets {
+  id bigint [pk, increment]
+  asset_id bigint [ref: > assets.id, not null]
+  name varchar [not null]
+  code varchar [unique, not null]
+  description text
+  is_active tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    (asset_id, is_active) [name: 'sub_assets_asset_id_is_active_index']
+    code [name: 'sub_assets_code_index']
+  }
+  
+  Note: 'Level 4 hierarchy - Components of assets'
+}
+
+Table parts {
+  id bigint [pk, increment]
+  part_number varchar [unique, not null]
+  name varchar [not null]
+  description text
+  category varchar
+  unit varchar
+  min_stock int [default: 0]
+  current_stock int [default: 0]
+  unit_price decimal(10,2) [default: 0]
+  location varchar
+  last_restocked_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    part_number [name: 'parts_part_number_index']
+    category [name: 'parts_category_index']
+    current_stock [name: 'parts_current_stock_index']
+  }
+  
+  Note: 'Spare parts master data with two-way inventory sync'
+}
+
+Table users {
+  id bigint [pk, increment]
+  gpid varchar [unique, not null, note: 'Global Person ID - PepsiCo employee ID']
+  name varchar [not null]
+  email varchar [unique, not null]
+  role enum('super_admin', 'manager', 'assistant_manager', 'engineer', 'technician', 'operator') [not null]
+  department enum('engineering', 'production', 'quality', 'warehouse') [not null]
+  phone varchar
+  email_verified_at timestamp
+  password varchar [not null]
+  is_active tinyint [default: 1]
+  remember_token varchar
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    gpid [name: 'users_gpid_index']
+    is_active [name: 'users_is_active_index']
+    (role, department) [name: 'users_role_department_index']
+  }
+  
+  Note: 'User authentication with RBAC - Role Based Access Control'
+}
+
+// ============================================
+// WORK ORDER SYSTEM
+// ============================================
+
+Table work_orders {
+  id bigint [pk, increment]
+  wo_number varchar [unique, not null, note: 'WO-YYYYMMDD-XXXX']
+  created_by_gpid varchar [ref: > users.gpid]
+  operator_name varchar [not null]
+  shift enum('shift_1', 'shift_2', 'shift_3', 'general_shift') [not null]
+  problem_type enum('electrical', 'mechanical', 'operational', 'other') [not null]
+  assign_to enum('engineering', 'production', 'quality', 'warehouse') [not null]
+  area_id bigint [ref: > areas.id]
+  sub_area_id bigint [ref: > sub_areas.id]
+  asset_id bigint [ref: > assets.id]
+  sub_asset_id bigint [ref: > sub_assets.id]
+  description text [not null]
+  photos json
+  status enum('submitted', 'reviewed', 'approved', 'in_progress', 'completed', 'closed', 'cancelled') [default: 'submitted']
+  priority enum('low', 'medium', 'high', 'critical') [default: 'medium']
+  reviewed_at datetime
+  approved_at datetime
+  started_at datetime
+  completed_at datetime
+  closed_at datetime
+  total_downtime int [note: 'Total downtime in minutes']
+  mttr int [note: 'Mean Time To Repair in minutes']
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    wo_number [name: 'work_orders_wo_number_index']
+    created_by_gpid [name: 'work_orders_created_by_gpid_index']
+    (status, priority) [name: 'work_orders_status_priority_index']
+    (assign_to, status) [name: 'work_orders_assign_to_status_index']
+    (problem_type, status) [name: 'work_orders_problem_type_status_index']
+    (completed_at, status) [name: 'work_orders_completed_at_status_index']
+    created_at [name: 'work_orders_created_at_index']
+  }
+  
+  Note: 'Work Order lifecycle - 7 workflow actions with MTTR calculation'
+}
+
+Table wo_processes {
+  id bigint [pk, increment]
+  work_order_id bigint [ref: > work_orders.id, not null]
+  action enum('submit', 'review', 'approve', 'start', 'complete', 'close', 'cancel') [not null]
+  performed_by_gpid varchar [ref: > users.gpid, not null]
+  timestamp datetime [not null]
+  notes text
+  downtime_start datetime
+  downtime_end datetime
+  downtime_duration int [note: 'Downtime in minutes']
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (work_order_id, action) [name: 'wo_processes_work_order_id_action_index']
+    performed_by_gpid [name: 'wo_processes_performed_by_gpid_index']
+  }
+  
+  Note: 'Work order process tracking for audit trail'
+}
+
+Table wo_parts_usage {
+  id bigint [pk, increment]
+  work_order_id bigint [ref: > work_orders.id, not null]
+  part_id bigint [ref: > parts.id, not null]
+  quantity int [not null]
+  cost decimal(10,2) [note: 'Auto-calculated: unit_price × quantity']
+  status enum('requested', 'approved', 'issued', 'used') [default: 'requested']
+  notes text
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    work_order_id [name: 'wo_parts_usage_work_order_id_index']
+    part_id [name: 'wo_parts_usage_part_id_index']
+    status [name: 'wo_parts_usage_status_index']
+  }
+  
+  Note: 'Parts used in work orders with auto-deduction'
+}
+
+Table wo_costs {
+  id bigint [pk, increment]
+  work_order_id bigint [ref: - work_orders.id, not null, note: 'One-to-one relationship']
+  labour_cost decimal(10,2) [default: 0]
+  parts_cost decimal(10,2) [default: 0, note: 'Sum from wo_parts_usage']
+  downtime_cost decimal(10,2) [default: 0, note: 'downtime_minutes × hourly_rate']
+  total_cost decimal(10,2) [default: 0, note: 'labour + parts + downtime']
+  mttr int [note: 'Cached from work_orders.mttr']
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    work_order_id [name: 'wo_costs_work_order_id_index']
+  }
+  
+  Note: 'Work order cost tracking with configurable rates'
+}
+
+// ============================================
+// PREVENTIVE MAINTENANCE (PM) SYSTEM
+// ============================================
+
+Table pm_schedules {
+  id bigint [pk, increment]
+  code varchar [unique, not null, note: 'PM-YYYYMMDD-XXXX']
+  title varchar [not null]
+  description text
+  area_id bigint [ref: > areas.id]
+  sub_area_id bigint [ref: > sub_areas.id]
+  asset_id bigint [ref: > assets.id]
+  sub_asset_id bigint [ref: > sub_assets.id]
+  schedule_type enum('daily', 'weekly', 'monthly', 'running_hours') [not null]
+  frequency int [not null, note: 'Days/hours based on schedule_type']
+  week_day enum('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+  estimated_duration int [note: 'Minutes']
+  assigned_to_gpid varchar [ref: > users.gpid]
+  assigned_by_gpid varchar [ref: > users.gpid]
+  department enum('engineering', 'production', 'quality', 'warehouse') [not null]
+  status enum('draft', 'active', 'paused', 'completed') [default: 'draft']
+  is_active tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    code [name: 'pm_schedules_code_index']
+    assigned_to_gpid [name: 'pm_schedules_assigned_to_gpid_index']
+    (schedule_type, is_active) [name: 'pm_schedules_schedule_type_is_active_index']
+    (department, is_active) [name: 'pm_schedules_department_is_active_index']
+    (status, is_active) [name: 'pm_schedules_status_is_active_index']
+  }
+  
+  Note: 'PM schedule master with 4 schedule types'
+}
+
+Table pm_checklist_items {
+  id bigint [pk, increment]
+  pm_schedule_id bigint [ref: > pm_schedules.id, not null]
+  item_name varchar [not null]
+  item_type enum('checkbox', 'text', 'number', 'select') [default: 'checkbox']
+  options json [note: 'For select type']
+  order int [default: 0]
+  is_required tinyint [default: 1]
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (pm_schedule_id, order) [name: 'pm_checklist_items_pm_schedule_id_order_index']
+  }
+  
+  Note: 'Dynamic checklist for PM execution'
+}
+
+Table pm_executions {
+  id bigint [pk, increment]
+  pm_schedule_id bigint [ref: > pm_schedules.id, not null]
+  executed_by_gpid varchar [ref: > users.gpid, not null]
+  scheduled_date date [not null]
+  actual_start datetime
+  actual_end datetime
+  duration int [note: 'Actual duration in minutes']
+  checklist_data json [note: 'Filled checklist items']
+  notes text
+  photos json
+  status enum('scheduled', 'in_progress', 'completed', 'skipped') [default: 'scheduled']
+  compliance_status enum('on_time', 'late') [note: 'Based on grace period']
+  is_on_time tinyint [default: 0, note: 'Compliance flag']
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    scheduled_date [name: 'pm_executions_scheduled_date_index']
+    executed_by_gpid [name: 'pm_executions_executed_by_gpid_index']
+    (pm_schedule_id, status) [name: 'pm_executions_pm_schedule_id_status_index']
+    (scheduled_date, status) [name: 'pm_executions_scheduled_date_status_index']
+    (status, scheduled_date) [name: 'pm_executions_status_scheduled_date_index']
+    (actual_start, actual_end) [name: 'pm_executions_actual_start_actual_end_index']
+  }
+  
+  Note: 'PM execution tracking with compliance status'
+}
+
+Table pm_parts_usage {
+  id bigint [pk, increment]
+  pm_execution_id bigint [ref: > pm_executions.id, not null]
+  part_id bigint [ref: > parts.id, not null]
+  quantity int [not null]
+  cost decimal(10,2)
+  notes text
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    pm_execution_id [name: 'pm_parts_usage_pm_execution_id_index']
+    part_id [name: 'pm_parts_usage_part_id_index']
+  }
+  
+  Note: 'Parts used in PM execution'
+}
+
+Table pm_costs {
+  id bigint [pk, increment]
+  pm_execution_id bigint [ref: - pm_executions.id, not null, note: 'One-to-one']
+  labour_cost decimal(10,2) [default: 0]
+  parts_cost decimal(10,2) [default: 0]
+  overhead_cost decimal(10,2) [default: 0]
+  total_cost decimal(10,2) [default: 0]
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    pm_execution_id [name: 'pm_costs_pm_execution_id_index']
+  }
+  
+  Note: 'PM cost tracking'
+}
+
+Table pm_compliances {
+  id bigint [pk, increment]
+  period enum('weekly', 'monthly', 'quarterly', 'yearly') [not null]
+  period_start date [not null]
+  period_end date [not null]
+  total_pm int [default: 0]
+  completed_pm int [default: 0]
+  overdue_pm int [default: 0]
+  compliance_percentage decimal(5,2) [default: 0]
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (period, period_start) [name: 'pm_compliances_period_period_start_index']
+    (period, period_start, period_end) [unique, name: 'pm_compliances_period_period_start_period_end_unique']
+  }
+  
+  Note: 'PM compliance tracking - auto-calculated by scheduled task'
+}
+
+// ============================================
+// INVENTORY MANAGEMENT
+// ============================================
+
+Table inventories {
+  id bigint [pk, increment]
+  part_id bigint [ref: > parts.id, not null]
+  area_id bigint [ref: > areas.id]
+  sub_area_id bigint [ref: > sub_areas.id]
+  asset_id bigint [ref: > assets.id]
+  sub_asset_id bigint [ref: > sub_assets.id]
+  quantity int [default: 0]
+  min_stock int [default: 0]
+  max_stock int
+  location varchar
+  last_restocked_at datetime
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    part_id [name: 'inventories_part_id_index']
+    (part_id, quantity) [name: 'inventories_part_id_quantity_index']
+  }
+  
+  Note: 'Location-based inventory with two-way sync to parts'
+}
+
+Table inventory_movements {
+  id bigint [pk, increment]
+  part_id bigint [ref: > parts.id, not null]
+  movement_type enum('in', 'out', 'adjustment', 'transfer') [not null]
+  quantity int [not null]
+  quantity_before int [not null]
+  quantity_after int [not null]
+  reference_type varchar [note: 'App\\Models\\WorkOrder, App\\Models\\PmExecution']
+  reference_id bigint
+  performed_by_gpid varchar [ref: > users.gpid, not null]
+  notes text
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    part_id [name: 'inventory_movements_part_id_index']
+    (reference_type, reference_id) [name: 'inventory_movements_reference_type_reference_id_index']
+    performed_by_gpid [name: 'inventory_movements_performed_by_gpid_index']
+    created_at [name: 'inventory_movements_created_at_index']
+  }
+  
+  Note: 'Inventory movement tracking for audit trail'
+}
+
+Table stock_alerts {
+  id bigint [pk, increment]
+  part_id bigint [ref: > parts.id, not null]
+  alert_type enum('low_stock', 'out_of_stock', 'overstock') [not null]
+  triggered_at datetime [not null]
+  is_resolved tinyint [default: 0]
+  resolved_at datetime
+  resolved_by_gpid varchar [ref: > users.gpid]
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (part_id, is_resolved) [name: 'stock_alerts_part_id_is_resolved_index']
+    (is_resolved, triggered_at) [name: 'stock_alerts_is_resolved_triggered_at_index']
+    alert_type [name: 'stock_alerts_alert_type_index']
+  }
+  
+  Note: 'Stock alerts with Telegram notifications'
+}
+
+// ============================================
+// BARCODE & QR CODE SYSTEM
+// ============================================
+
+Table barcode_tokens {
+  id bigint [pk, increment]
+  token varchar [unique, not null, note: 'UUID for QR code']
+  equipment_type varchar [not null, note: 'area, sub_area, asset, sub_asset']
+  is_active tinyint [default: 1]
+  usage_count int [default: 0]
+  last_used_at datetime
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  
+  indexes {
+    token [name: 'barcode_tokens_token_index']
+    is_active [name: 'barcode_tokens_is_active_index']
+  }
+  
+  Note: 'QR code generation for public WO submission'
+}
+
+Table running_hours {
+  id bigint [pk, increment]
+  asset_id bigint [ref: > assets.id, not null]
+  recorded_at datetime [not null]
+  hours decimal(10,2) [not null]
+  cycles int
+  recorded_by_gpid varchar [ref: > users.gpid]
+  notes text
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (asset_id, recorded_at) [name: 'running_hours_asset_id_recorded_at_index']
+  }
+  
+  Note: 'Running hours tracking for running_hours based PM'
+}
+
+// ============================================
+// ACTIVITY LOGGING
+// ============================================
+
+Table activity_logs {
+  id bigint [pk, increment]
+  user_gpid varchar [note: 'Who performed the action']
+  user_name varchar
+  user_role varchar
+  action varchar [not null, note: 'created, updated, deleted, restored']
+  model varchar [not null, note: 'App\\Models\\WorkOrder']
+  model_id bigint
+  description varchar
+  properties json [note: 'old and new attributes']
+  ip_address varchar
+  user_agent varchar
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    user_gpid [name: 'activity_logs_user_gpid_index']
+    model [name: 'activity_logs_model_index']
+    action [name: 'activity_logs_action_index']
+    created_at [name: 'activity_logs_created_at_index']
+  }
+  
+  Note: 'Comprehensive audit trail - auto-logged via LogsActivity trait'
+}
+
+// ============================================
+// FILAMENT IMPORT/EXPORT TABLES
+// ============================================
+
+Table imports {
+  id bigint [pk, increment]
+  completed_at timestamp
+  file_name varchar
+  file_path varchar
+  importer varchar [note: 'App\\Filament\\Imports\\UserImporter']
+  processed_rows int [default: 0]
+  total_rows int [default: 0]
+  successful_rows int [default: 0]
+  user_id bigint [ref: > users.id]
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Filament import tracking (e.g., User Excel import)'
+}
+
+Table failed_import_rows {
+  id bigint [pk, increment]
+  data json [not null]
+  import_id bigint [ref: > imports.id, not null]
+  validation_error text
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Failed import rows for review'
+}
+
+Table exports {
+  id bigint [pk, increment]
+  completed_at timestamp
+  file_disk varchar
+  file_name varchar
+  exporter varchar
+  processed_rows int [default: 0]
+  total_rows int [default: 0]
+  successful_rows int [default: 0]
+  user_id bigint [ref: > users.id]
+  created_at timestamp
+  updated_at timestamp
+  
+  Note: 'Filament export tracking'
+}
+
+// ============================================
+// LARAVEL FRAMEWORK TABLES
+// ============================================
+
+Table migrations {
+  id int [pk, increment]
+  migration varchar [not null]
+  batch int [not null]
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar [not null]
+  created_at timestamp
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint
+  ip_address varchar
+  user_agent text
+  payload longtext [not null]
+  last_activity int [not null]
+  
+  indexes {
+    user_id [name: 'sessions_user_id_index']
+    last_activity [name: 'sessions_last_activity_index']
+  }
+}
+
+Table failed_jobs {
+  id bigint [pk, increment]
+  uuid varchar [unique, not null]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table jobs {
+  id bigint [pk, increment]
+  queue varchar [not null]
+  payload longtext [not null]
+  attempts tinyint [not null]
+  reserved_at int
+  available_at int [not null]
+  created_at int [not null]
+  
+  indexes {
+    queue [name: 'jobs_queue_index']
+  }
+}
+
+Table job_batches {
+  id varchar [pk]
+  name varchar [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext
+  cancelled_at int
+  created_at int [not null]
+  finished_at int
+}
+
+Table cache {
+  key varchar [pk]
+  value mediumtext [not null]
+  expiration int [not null]
+}
+
+Table cache_locks {
+  key varchar [pk]
+  owner varchar [not null]
+  expiration int [not null]
+}
+
+Table notifications {
+  id char(36) [pk, note: 'UUID']
+  type varchar [not null]
+  notifiable_type varchar [not null]
+  notifiable_id bigint [not null]
+  data text [not null]
+  read_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    (notifiable_type, notifiable_id) [name: 'notifications_notifiable_type_notifiable_id_index']
+  }
+  
+  Note: 'Laravel notifications (Telegram integration)'
+}
+
+// ============================================
+// RELATIONSHIPS SUMMARY
+// ============================================
+
+// Equipment Hierarchy: areas -> sub_areas -> assets -> sub_assets (Cascade delete)
+// Work Orders: Reference all 4 levels + user (created_by_gpid)
+// PM Schedules: Reference all 4 levels + user (assigned_to/by_gpid)
+// Inventory: Parts with location-based tracking (areas/assets)
+// Cost Tracking: One-to-one with WO and PM executions
+// Activity Logs: Polymorphic tracking for 6 core models
+// Barcode: QR codes for public WO submission
+// Two-way Sync: Parts ↔ Inventories (current_stock syncing)

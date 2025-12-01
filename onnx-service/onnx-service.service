@@ -1,0 +1,16 @@
+[Unit]
+Description=ONNX Prediction Service for CMMS Equipment Monitoring
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/onnx-service
+Environment="PATH=/var/www/onnx-service/venv/bin"
+ExecStart=/var/www/onnx-service/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:5000 --timeout 120 --access-logfile /var/log/onnx-service/access.log --error-logfile /var/log/onnx-service/error.log app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

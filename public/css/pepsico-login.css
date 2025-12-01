@@ -1,0 +1,28 @@
+/* PepsiCo CMMS Custom Login Styles */
+body {
+    background-image: url('/images/pepsico-bg.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+.fi-simple-main {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 0.75rem !important;
+}
+
+.fi-logo {
+    max-height: 4rem !important;
+}
+
+/* PepsiCo blue button styling */
+.fi-btn-primary {
+    background-color: #004b93 !important;
+}
+
+.fi-btn-primary:hover {
+    background-color: #003d7a !important;
+}

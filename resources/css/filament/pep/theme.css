@@ -1,0 +1,24 @@
+/* PepsiCo CMMS Custom Styles */
+
+/* Login page background */
+.fi-simple-page {
+    background-image: url('/images/pepsico-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Login card customization */
+.fi-simple-page .fi-simple-main {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* Optional: Add PepsiCo blue accent */
+.fi-simple-page .fi-btn-primary {
+    background-color: #004b93;
+}
+
+.fi-simple-page .fi-btn-primary:hover {
+    background-color: #003d7a;
+}

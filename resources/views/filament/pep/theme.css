@@ -1,0 +1,8 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config "../../tailwind.config.js";
+
+/* ubah warna tulisan brand di topbar */
+.fi-layout .fi-topbar .fi-brand {
+    @apply text-blue-600;
+}

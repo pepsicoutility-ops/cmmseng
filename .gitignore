@@ -1,0 +1,79 @@
+*.log
+.DS_Store
+.env
+.env.*
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+npm-debug.log
+yarn-error.log
+
+# Cache files
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+
+# Log files
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Uploaded files (photos, documents)
+/storage/app/public/wo-photos/*
+!/storage/app/public/wo-photos/.gitkeep
+/public/storage
+
+# Testing
+/coverage
+/.phpunit.cache
+/phpunit.xml
+
+# Deployment & documentation (optional - remove if you want to track)
+DIRECT_DEPLOYMENT_GUIDE.md
+DEPLOYMENT_INSTRUCTIONS.md
+setup-vps-part1.sh
+setup-vps-part2.sh
+SECURITY_TEST_REPORT.md
+TESTING_SUMMARY.md
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+._*
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+nbproject/
+
+# OS files
+Thumbs.db
+Desktop.ini

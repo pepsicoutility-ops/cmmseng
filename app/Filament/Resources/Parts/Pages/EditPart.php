@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Filament\Resources\Parts\Pages;
+
+use App\Filament\Resources\Parts\PartResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditPart extends EditRecord
+{
+    protected static string $resource = PartResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
+        ];
+    }
+}
