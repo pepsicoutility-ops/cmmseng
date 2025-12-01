@@ -100,12 +100,29 @@ class User extends Authenticatable implements FilamentUser
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<PmSchedule>
      */
-public function canAccessPanel(Panel $panel): bool
-{ 
-    {
-      return $this->hasRole('super_admin', 'manager', 'asisten_manager', 'technician', 'tech_store', 'operator');
+    /**
+     * Determine if user can access the Filament panel
+     * 
+     * @param Panel $panel
+     * @return bool
+     */
+    public function canAccessPanel(Panel $panel): bool
+    { 
+        // Check if user is active
+        if (!$this->is_active) {
+            return false;
+        }
+        
+        // Allow all active users with valid roles
+        return in_array($this->role, [
+            'super_admin', 
+            'manager', 
+            'asisten_manager', 
+            'technician', 
+            'tech_store', 
+            'operator'
+        ]);
     }
-}
     public function pmSchedulesAssigned()
     {
         return $this->hasMany(PmSchedule::class, 'assigned_to_gpid', 'gpid');
@@ -170,17 +187,17 @@ public function canAccessPanel(Panel $panel): bool
     // Department helpers
     public function isUtilityDepartment(): bool
     {
-        return $this->department === 'Utility';
+        return $this->department === 'utility';
     }
 
     public function isMechanicDepartment(): bool
     {
-        return $this->department === 'Mechanic';
+        return $this->department === 'mechanic';
     }
 
     public function isElectricDepartment(): bool
     {
-        return $this->department === 'Electric';
+        return $this->department === 'electric';
     }
 
     // Combined access helpers

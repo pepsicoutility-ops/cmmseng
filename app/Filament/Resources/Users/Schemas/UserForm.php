@@ -46,7 +46,6 @@ class UserForm
                             ->placeholder('e.g., +62 812-3456-7890'),
                         TextInput::make('password')
                             ->password()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
                             ->maxLength(255)
@@ -86,8 +85,8 @@ class UserForm
                             ])
                             ->native(false)
                             ->required(fn (Get $get): bool => in_array($get('role'), ['asisten_manager', 'technician']))
-                            ->visible(fn (Get $get): bool => in_array($get('role'), ['asisten_manager', 'technician']))
-                            ->helperText('Required for Asisten Manager and Technician roles'),
+                            ->helperText('Required for Asisten Manager and Technician roles')
+                            ->placeholder('Select an option'),
                         Toggle::make('is_active')
                             ->label('Active Status')
                             ->default(true)

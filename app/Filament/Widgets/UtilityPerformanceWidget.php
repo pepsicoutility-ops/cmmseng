@@ -20,11 +20,8 @@ class UtilityPerformanceWidget extends BaseWidget
 
     public static function canViewAny(): bool
     {
-        $user = Auth::user();
-        return $user && (
-            $user->role === 'super_admin' ||
-            $user->department === 'utility'
-        );
+        // Only visible on UtilityPerformanceAnalysis page, not main dashboard
+        return false;
     }
 
     protected function getStats(): array

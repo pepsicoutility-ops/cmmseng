@@ -16,11 +16,8 @@ class Chiller2TableWidget extends BaseWidget
     
     public static function canViewAny(): bool
     {
-        $user = Auth::user();
-        return $user && (
-            $user->role === 'super_admin' ||
-            $user->department === 'utility'
-        );
+        // Only visible on UtilityPerformanceAnalysis page, not main dashboard
+        return false;
     }
 
     public function table(Table $table): Table

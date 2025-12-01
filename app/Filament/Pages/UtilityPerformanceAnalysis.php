@@ -37,6 +37,13 @@ class UtilityPerformanceAnalysis extends Page
 
     protected function getHeaderWidgets(): array
     {
+        $user = Auth::user();
+        
+        // Only show widgets for super_admin or utility department
+        if (!$user || (!($user->role === 'super_admin' || $user->department === 'utility'))) {
+            return [];
+        }
+        
         return [
             // AI Prediction & Insights Section (NEW)
             \App\Filament\Widgets\AiPredictionStatsWidget::class,
