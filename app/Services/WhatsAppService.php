@@ -7,18 +7,18 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    protected string $apiUrl;
-    protected string $apiToken;
+    protected ?string $apiUrl;
+    protected ?string $apiToken;
     protected string $session;
-    protected string $groupId;
+    protected ?string $groupId;
     protected bool $enabled;
 
     public function __construct()
     {
-        $this->apiUrl = config('services.waha.api_url');
-        $this->apiToken = config('services.waha.api_token');
+        $this->apiUrl = config('services.waha.api_url') ?? '';
+        $this->apiToken = config('services.waha.api_token') ?? '';
         $this->session = config('services.waha.session', 'default');
-        $this->groupId = config('services.waha.group_id');
+        $this->groupId = config('services.waha.group_id') ?? '';
         $this->enabled = config('services.waha.enabled', false);
     }
 

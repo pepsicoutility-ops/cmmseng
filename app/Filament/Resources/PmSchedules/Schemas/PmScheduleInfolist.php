@@ -5,14 +5,14 @@ namespace App\Filament\Resources\PmSchedules\Schemas;
 use App\Models\PmSchedule;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
+use Filament\Infolists\Infolist;
 
 class PmScheduleInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('code'),
                 TextEntry::make('title'),
                 TextEntry::make('description')

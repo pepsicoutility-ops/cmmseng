@@ -5,14 +5,15 @@ namespace App\Filament\Resources\Areas\Schemas;
 use App\Models\Area;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Schemas\Schema;
 
 class AreaInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('name'),
                 TextEntry::make('code'),
                 TextEntry::make('description')

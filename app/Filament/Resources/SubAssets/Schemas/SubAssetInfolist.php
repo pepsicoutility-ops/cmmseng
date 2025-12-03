@@ -5,14 +5,14 @@ namespace App\Filament\Resources\SubAssets\Schemas;
 use App\Models\SubAsset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
+use Filament\Infolists\Infolist;
 
 class SubAssetInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('asset.name')
                     ->label('Asset'),
                 TextEntry::make('name'),

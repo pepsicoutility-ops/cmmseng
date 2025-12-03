@@ -5,14 +5,14 @@ namespace App\Filament\Resources\WorkOrders\Schemas;
 use App\Models\WorkOrder;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Schema;
+use Filament\Infolists\Infolist;
 
 class WorkOrderInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('wo_number'),
                 TextEntry::make('created_by_gpid')
                     ->placeholder('-'),

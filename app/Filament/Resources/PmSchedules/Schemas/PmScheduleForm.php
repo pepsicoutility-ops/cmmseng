@@ -12,17 +12,17 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Schema;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Forms\Form;
 use Illuminate\Support\Facades\Auth;
 
 class PmScheduleForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Form $form): Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Section::make('PM Information')
                     ->schema([
                         TextInput::make('code')

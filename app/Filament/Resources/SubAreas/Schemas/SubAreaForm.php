@@ -7,14 +7,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
+use Filament\Forms\Form;
 
 class SubAreaForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Form $form): Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Select::make('area_id')
                     ->label('Area')
                     ->options(Area::where('is_active', true)->pluck('name', 'id'))

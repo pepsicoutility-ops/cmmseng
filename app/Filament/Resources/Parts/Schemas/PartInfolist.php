@@ -4,14 +4,14 @@ namespace App\Filament\Resources\Parts\Schemas;
 
 use App\Models\Part;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
+use Filament\Infolists\Infolist;
 
 class PartInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('part_number'),
                 TextEntry::make('name'),
                 TextEntry::make('description')

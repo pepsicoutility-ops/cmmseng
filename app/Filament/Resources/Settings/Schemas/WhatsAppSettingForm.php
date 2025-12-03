@@ -6,15 +6,15 @@ use App\Services\WhatsAppService;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
+use Filament\Forms\Form;
 use Filament\Schemas\Components\Section;
 
 class WhatsAppSettingForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Form $form): Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Section::make('WAHA Cloud Configuration')
                     ->description('Configure WhatsApp Business API via WAHA Cloud for automatic notifications')
                     ->schema(static fn(): array => [

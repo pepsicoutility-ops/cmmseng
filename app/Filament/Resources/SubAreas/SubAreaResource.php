@@ -11,8 +11,9 @@ use App\Filament\Resources\SubAreas\Schemas\SubAreaInfolist;
 use App\Filament\Resources\SubAreas\Tables\SubAreasTable;
 use App\Models\SubArea;
 use BackedEnum;
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,14 +41,14 @@ class SubAreaResource extends Resource
         return 'Master Data';
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(Form $form): Form
     {
-        return SubAreaForm::configure($schema);
+        return SubAreaForm::configure($form);
     }
 
-    public static function infolist(Schema $schema): Schema
+    public static function infolist(Infolist $infolist): Infolist
     {
-        return SubAreaInfolist::configure($schema);
+        return SubAreaInfolist::configure($infolist);
     }
 
     public static function table(Table $table): Table

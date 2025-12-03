@@ -4,14 +4,14 @@ namespace App\Filament\Resources\PmExecutions\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Schema;
+use Filament\Infolists\Infolist;
 
 class PmExecutionInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 TextEntry::make('pmSchedule.code')
                     ->label('PM Code'),
                 TextEntry::make('pmSchedule.title')

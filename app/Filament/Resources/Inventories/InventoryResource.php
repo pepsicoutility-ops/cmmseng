@@ -9,8 +9,8 @@ use App\Filament\Resources\Inventories\Schemas\InventoryForm;
 use App\Filament\Resources\Inventories\Tables\InventoriesTable;
 use App\Models\Inventorie;
 use BackedEnum;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,9 +37,9 @@ class InventoryResource extends Resource
         return 'Inventory Management';
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(Form $form): Form
     {
-        return InventoryForm::configure($schema);
+        return InventoryForm::configure($form);
     }
 
     public static function table(Table $table): Table

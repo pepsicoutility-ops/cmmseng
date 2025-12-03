@@ -9,15 +9,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Schema;
+use Filament\Forms\Get;
+use Filament\Forms\Schema;
 
 class AssetForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(\Filament\Forms\Form $form): \Filament\Forms\Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Section::make('Location Information')
                     ->description('Select the area and sub-area for this asset')
                     ->schema([

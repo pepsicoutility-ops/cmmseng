@@ -11,8 +11,9 @@ use App\Filament\Resources\Areas\Schemas\AreaInfolist;
 use App\Filament\Resources\Areas\Tables\AreasTable;
 use App\Models\Area;
 use BackedEnum;
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,14 +41,14 @@ class AreaResource extends Resource
         return 'Master Data';
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(Form $form): Form
     {
-        return AreaForm::configure($schema);
+        return AreaForm::configure($form);
     }
 
-    public static function infolist(Schema $schema): Schema
+    public static function infolist(Infolist $infolist): Infolist
     {
-        return AreaInfolist::configure($schema);
+        return AreaInfolist::configure($infolist);
     }
 
     public static function table(Table $table): Table

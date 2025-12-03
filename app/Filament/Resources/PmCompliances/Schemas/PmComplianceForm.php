@@ -5,14 +5,14 @@ namespace App\Filament\Resources\PmCompliances\Schemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
+use Filament\Forms\Form;
 
 class PmComplianceForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Form $form): Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Select::make('period')
                     ->options(['week' => 'Week', 'month' => 'Month'])
                     ->required(),

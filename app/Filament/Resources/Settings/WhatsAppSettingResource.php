@@ -6,8 +6,8 @@ use App\Filament\Resources\Settings\Pages\ManageWhatsAppSetting;
 use App\Filament\Resources\Settings\Schemas\WhatsAppSettingForm;
 use App\Services\WhatsAppService;
 use BackedEnum;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,9 +32,9 @@ class WhatsAppSettingResource extends Resource
         return 'Settings';
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(Form $form): Form
     {
-        return WhatsAppSettingForm::configure($schema);
+        return WhatsAppSettingForm::configure($form);
     }
 
     public static function getPages(): array
