@@ -175,14 +175,8 @@
 <body>
     <div class="maintenance-container">
         <div class="logo">
-            <!-- PepsiCo Logo SVG -->
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="95" fill="#fff" opacity="0.95"/>
-                <circle cx="100" cy="100" r="80" fill="#0055A5"/>
-                <circle cx="100" cy="100" r="60" fill="#E32934"/>
-                <path d="M100 50 L130 90 L70 90 Z" fill="#fff"/>
-                <circle cx="100" cy="120" r="15" fill="#fff"/>
-            </svg>
+            <!-- PepsiCo Logo -->
+            <img src="/images/pepsico-logo.jpeg" alt="PepsiCo Logo" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);">
         </div>
 
         <div class="content">
@@ -196,8 +190,9 @@
             <h1>System Maintenance</h1>
             <p class="subtitle">We'll be back shortly</p>
             <p class="message">
-                {{ $exception->getMessage() ?: 'Our CMMS Engineering system is currently undergoing scheduled maintenance to improve your experience.' }}
-            </p>
+    Our CMMS Engineering system is currently undergoing scheduled maintenance to improve your experience.
+</p>
+
 
             <div class="info-box">
                 <p><strong>What's happening?</strong></p>
