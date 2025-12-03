@@ -5,15 +5,14 @@ namespace App\Filament\Resources\Parts\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
-
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 class PartForm
 {
-    public static function configure(Form $form): Form
+    public static function configure(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Part Information')
                     ->description('Basic part details and identification')
                     ->schema([

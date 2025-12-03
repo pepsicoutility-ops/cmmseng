@@ -11,9 +11,8 @@ use App\Filament\Resources\SubAssets\Schemas\SubAssetInfolist;
 use App\Filament\Resources\SubAssets\Tables\SubAssetsTable;
 use App\Models\SubAsset;
 use BackedEnum;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,14 +40,14 @@ class SubAssetResource extends Resource
         return 'Master Data';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return SubAssetForm::configure($form);
+        return SubAssetForm::configure($schema);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return SubAssetInfolist::configure($infolist);
+        return SubAssetInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

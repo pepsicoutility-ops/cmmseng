@@ -11,9 +11,8 @@ use App\Filament\Resources\Parts\Schemas\PartInfolist;
 use App\Filament\Resources\Parts\Tables\PartsTable;
 use App\Models\Part;
 use BackedEnum;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,14 +40,14 @@ class PartResource extends Resource
         return 'Master Data';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return PartForm::configure($form);
+        return PartForm::configure($schema);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return PartInfolist::configure($infolist);
+        return PartInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

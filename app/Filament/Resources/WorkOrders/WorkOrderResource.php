@@ -11,8 +11,7 @@ use App\Filament\Resources\WorkOrders\Schemas\WorkOrderInfolist;
 use App\Filament\Resources\WorkOrders\Tables\WorkOrdersTable;
 use App\Models\WorkOrder;
 use BackedEnum;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,14 +56,14 @@ class WorkOrderResource extends Resource
         return 'Work Order Management';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return WorkOrderForm::configure($form);
+        return WorkOrderForm::configure($schema);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return WorkOrderInfolist::configure($infolist);
+        return WorkOrderInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

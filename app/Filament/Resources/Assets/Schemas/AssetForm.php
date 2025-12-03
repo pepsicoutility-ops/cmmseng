@@ -8,16 +8,16 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Get;
-use Filament\Forms\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 
 class AssetForm
 {
-    public static function configure(\Filament\Forms\Form $form): \Filament\Forms\Form
+    public static function configure(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Location Information')
                     ->description('Select the area and sub-area for this asset')
                     ->schema([

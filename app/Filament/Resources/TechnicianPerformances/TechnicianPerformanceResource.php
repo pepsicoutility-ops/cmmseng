@@ -7,7 +7,6 @@ use App\Models\User;
 use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -90,11 +89,6 @@ class TechnicianPerformanceResource extends Resource
         }
         
         return $query;
-    }
-
-    public static function form(Schema $schema): Schema
-    {
-        return $schema->components([]);
     }
 
     public static function table(Table $table): Table

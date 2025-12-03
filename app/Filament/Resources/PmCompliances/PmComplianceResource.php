@@ -9,8 +9,8 @@ use App\Filament\Resources\PmCompliances\Schemas\PmComplianceForm;
 use App\Filament\Resources\PmCompliances\Tables\PmCompliancesTable;
 use App\Models\PmCompliance;
 use BackedEnum;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
@@ -50,9 +50,9 @@ class PmComplianceResource extends Resource
         return 'PM Management';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return PmComplianceForm::configure($form);
+        return PmComplianceForm::configure($schema);
     }
 
     public static function table(Table $table): Table

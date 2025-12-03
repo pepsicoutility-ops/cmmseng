@@ -11,9 +11,8 @@ use App\Filament\Resources\Assets\Schemas\AssetInfolist;
 use App\Filament\Resources\Assets\Tables\AssetsTable;
 use App\Models\Asset;
 use BackedEnum;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,14 +40,14 @@ class AssetResource extends Resource
         return 'Master Data';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return AssetForm::configure($form);
+        return AssetForm::configure($schema);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return AssetInfolist::configure($infolist);
+        return AssetInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

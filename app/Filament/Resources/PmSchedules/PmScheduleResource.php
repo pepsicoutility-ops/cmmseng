@@ -11,9 +11,8 @@ use App\Filament\Resources\PmSchedules\Schemas\PmScheduleInfolist;
 use App\Filament\Resources\PmSchedules\Tables\PmSchedulesTable;
 use App\Models\PmSchedule;
 use BackedEnum;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,14 +58,14 @@ class PmScheduleResource extends Resource
         return 'PM Management';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return PmScheduleForm::configure($form);
+        return PmScheduleForm::configure($schema);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return PmScheduleInfolist::configure($infolist);
+        return PmScheduleInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table

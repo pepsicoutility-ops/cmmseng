@@ -7,7 +7,6 @@ use App\Models\Part;
 use UnitEnum;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -29,12 +28,6 @@ class InventoryReportResource extends Resource
     protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedCubeTransparent;
     
     protected static ?int $navigationSort = 3;
-
-    public static function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([]);
-    }
 
     public static function table(Table $table): Table
     {

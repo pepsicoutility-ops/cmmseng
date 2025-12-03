@@ -6,7 +6,6 @@ use App\Filament\Resources\WoReports\Pages\ManageWoReports;
 use App\Models\WorkOrder;
 use BackedEnum;
 use UnitEnum;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -35,12 +34,6 @@ class WoReportResource extends Resource
     {
         $user = Auth::user();
         return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
-    }
-
-    public static function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([]);
     }
 
     public static function table(Table $table): Table

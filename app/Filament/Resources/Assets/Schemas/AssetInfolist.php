@@ -5,13 +5,13 @@ namespace App\Filament\Resources\Assets\Schemas;
 use App\Models\Asset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 
 class AssetInfolist
 {
-    public static function configure(Infolist $infolist): Infolist
+    public static function configure(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 TextEntry::make('subArea.name')
                     ->label('Sub area'),
