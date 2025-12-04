@@ -92,7 +92,7 @@ class AhuChecklistForm
                         TextInput::make('ahu_vrf_mb_ss_1c_pf')->label('VRF MB-SS-1C: PF'),
                     ]),
                 
-                Section::make('Inline Filters A & B')
+                Section::make('Intake Filters A & B')
                     ->description('IF A & B filter measurements')
                     ->columns(3)
                     ->schema([
@@ -104,7 +104,7 @@ class AhuChecklistForm
                         TextInput::make('if_hepa_b')->label('IF HEPA B'),
                     ]),
                 
-                Section::make('Inline Filters C & D')
+                Section::make('Intake Filters C & D')
                     ->description('IF C & D filter measurements')
                     ->columns(3)
                     ->schema([
@@ -116,7 +116,7 @@ class AhuChecklistForm
                         TextInput::make('if_hepa_d')->label('IF HEPA D'),
                     ]),
                 
-                Section::make('Inline Filters E & F')
+                Section::make('Intake Filters E & F')
                     ->description('IF E & F filter measurements')
                     ->columns(3)
                     ->schema([

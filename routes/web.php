@@ -150,9 +150,9 @@ Route::post('/barcode/wo/submit', function(\Illuminate\Http\Request $request) {
     try {
         $wo = \App\Models\WorkOrder::create([
             'wo_number' => $woNumber,
-            'created_by_gpid' => $request->gpid,
+            'created_by_gpid' => $request->query('gpid'),
             'operator_name' => $request->operator_name,
-            'shift' => $request->shift,
+            'shift' => $request->query('shift'),
             'problem_type' => $request->problem_type,
             'assign_to' => $request->assign_to,
             'area_id' => $request->area_id,
@@ -174,7 +174,7 @@ Route::post('/barcode/wo/submit', function(\Illuminate\Http\Request $request) {
     
     return redirect()->route('barcode.wo.success', [
         'wo_number' => $wo->wo_number,
-        'token' => $request->token
+        'token' => $request->query('token')
     ]);
 })->name('barcode.wo.submit');
 
@@ -322,7 +322,7 @@ Route::post('/barcode/running-hours/submit', function(\Illuminate\Http\Request $
         'asset_id' => $request->asset_id,
         'hours' => $request->hours,
         'cycles' => $request->cycles,
-        'recorded_by_gpid' => $request->gpid,
+        'recorded_by_gpid' => $request->query('gpid'),
         'notes' => $request->notes,
         'recorded_at' => now(),
     ]);
@@ -358,7 +358,7 @@ Route::post('/barcode/pm-checklist/submit', function(\Illuminate\Http\Request $r
     // Create PM Execution record
     \App\Models\PmExecution::create([
         'pm_schedule_id' => $request->pm_schedule_id,
-        'executed_by_gpid' => $request->gpid,
+        'executed_by_gpid' => $request->query('gpid'),
         'scheduled_date' => now()->toDateString(),
         'actual_start' => now(),
         'actual_end' => now(),
@@ -371,8 +371,8 @@ Route::post('/barcode/pm-checklist/submit', function(\Illuminate\Http\Request $r
     ]);
     
     return redirect()->route('barcode.pm.success', [
-        'gpid' => $request->gpid,
-        'token' => $request->token
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token')
     ]);
 })->name('barcode.pm-checklist.submit');
 
@@ -406,13 +406,13 @@ Route::post('/barcode/request-parts/submit', function(\Illuminate\Http\Request $
         'quantity' => $request->quantity,
         'movement_type' => 'out',
         'reference_type' => 'parts_request',
-        'moved_by_gpid' => $request->gpid,
+        'moved_by_gpid' => $request->query('gpid'),
         'notes' => "Request: {$request->reason} (Urgency: {$request->urgency}, Dept: {$request->department})",
     ]);
     
     return redirect()->route('barcode.parts.success', [
-        'gpid' => $request->gpid,
-        'token' => $request->token
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token')
     ]);
 })->name('barcode.request-parts.submit');
 
@@ -727,6 +727,17 @@ Route::post('/barcode/chiller2/submit', function(\Illuminate\Http\Request $reque
 })->name('barcode.chiller2.submit');
 
 // AHU Routes
+// Success route must come BEFORE the dynamic {token} route
+Route::get('/barcode/ahu/success', function(\Illuminate\Http\Request $request) {
+    return view('barcode.ahu-success', [
+        'title' => $request->query('title', 'AHU Checklist'),
+        'shift' => $request->query('shift'),
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token'),
+        'back_url' => $request->query('back_url')
+    ]);
+})->name('barcode.ahu.success');
+
 Route::get('/barcode/ahu/{token}', function($token) {
     $barcodeToken = \App\Models\BarcodeToken::where('token', $token)
         ->where('is_active', true)
@@ -804,9 +815,11 @@ Route::post('/barcode/ahu/submit', function(\Illuminate\Http\Request $request) {
     }
     
     return redirect()->route('barcode.ahu.success', [
+        'title' => 'AHU Checklist',
         'shift' => $request->shift,
         'gpid' => $request->gpid,
-        'token' => $request->token
+        'token' => $request->token,
+        'back_url' => route('barcode.ahu', ['token' => $request->token])
     ]);
 })->name('barcode.ahu.submit');
 
@@ -814,9 +827,9 @@ Route::post('/barcode/ahu/submit', function(\Illuminate\Http\Request $request) {
 Route::get('/barcode/compressor/success', function(\Illuminate\Http\Request $request) {
     return view('barcode.compressor-success', [
         'title' => $request->title,
-        'shift' => $request->shift,
-        'gpid' => $request->gpid,
-        'token' => $request->token,
+        'shift' => $request->query('shift'),
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token'),
         'back_url' => $request->back_url
     ]);
 })->name('barcode.compressor.success');
@@ -824,31 +837,25 @@ Route::get('/barcode/compressor/success', function(\Illuminate\Http\Request $req
 Route::get('/barcode/chiller/success', function(\Illuminate\Http\Request $request) {
     return view('barcode.chiller-success', [
         'title' => $request->title,
-        'shift' => $request->shift,
-        'gpid' => $request->gpid,
-        'token' => $request->token,
+        'shift' => $request->query('shift'),
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token'),
         'back_url' => $request->back_url
     ]);
 })->name('barcode.chiller.success');
 
 Route::get('/barcode/pm/success', function(\Illuminate\Http\Request $request) {
     return view('barcode.pm-success', [
-        'gpid' => $request->gpid,
-        'token' => $request->token
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token')
     ]);
 })->name('barcode.pm.success');
 
 Route::get('/barcode/parts/success', function(\Illuminate\Http\Request $request) {
     return view('barcode.parts-success', [
-        'gpid' => $request->gpid,
-        'token' => $request->token
+        'gpid' => $request->query('gpid'),
+        'token' => $request->query('token')
     ]);
 })->name('barcode.parts.success');
 
-Route::get('/barcode/ahu/success', function(\Illuminate\Http\Request $request) {
-    return view('barcode.ahu-success', [
-        'shift' => $request->shift,
-        'gpid' => $request->gpid,
-        'token' => $request->token
-    ]);
-})->name('barcode.ahu.success');
+
