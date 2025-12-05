@@ -29,13 +29,13 @@ class AssetsTable
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('subArea.name')
-                    ->label('Sub Area')
+                    ->label('Lines')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                 TextColumn::make('name')
-                    ->label('Asset Name')
+                    ->label('Machine')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('code')
@@ -60,7 +60,7 @@ class AssetsTable
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('sub_assets_count')
-                    ->label('Sub Assets')
+                    ->label('Equipments')
                     ->counts('subAssets')
                     ->badge()
                     ->color('warning'),
@@ -86,7 +86,7 @@ class AssetsTable
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('sub_area_id')
-                    ->label('Sub Area')
+                    ->label('Line')
                     ->options(SubArea::pluck('name', 'id'))
                     ->searchable()
                     ->preload(),

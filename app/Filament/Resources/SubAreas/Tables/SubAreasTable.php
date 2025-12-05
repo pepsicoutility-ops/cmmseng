@@ -28,7 +28,7 @@ class SubAreasTable
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('name')
-                    ->label('Sub Area Name')
+                    ->label('Lines')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('code')
@@ -38,7 +38,7 @@ class SubAreasTable
                     ->badge()
                     ->color('info'),
                 TextColumn::make('assets_count')
-                    ->label('Assets')
+                    ->label('Machines')
                     ->counts('assets')
                     ->badge()
                     ->color('success'),

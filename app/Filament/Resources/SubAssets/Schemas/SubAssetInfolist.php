@@ -14,7 +14,7 @@ class SubAssetInfolist
         return $schema
             ->schema([
                 TextEntry::make('asset.name')
-                    ->label('Asset'),
+                    ->label('Equipments'),
                 TextEntry::make('name'),
                 TextEntry::make('code'),
                 TextEntry::make('description')

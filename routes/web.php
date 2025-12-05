@@ -406,13 +406,13 @@ Route::post('/barcode/request-parts/submit', function(\Illuminate\Http\Request $
         'quantity' => $request->quantity,
         'movement_type' => 'out',
         'reference_type' => 'parts_request',
-        'moved_by_gpid' => $request->query('gpid'),
+        'performed_by_gpid' => $request->gpid,
         'notes' => "Request: {$request->reason} (Urgency: {$request->urgency}, Dept: {$request->department})",
     ]);
     
     return redirect()->route('barcode.parts.success', [
-        'gpid' => $request->query('gpid'),
-        'token' => $request->query('token')
+        'gpid' => $request->gpid,
+        'token' => $request->token
     ]);
 })->name('barcode.request-parts.submit');
 
@@ -446,9 +446,9 @@ Route::get('/api/sub-assets', function(\Illuminate\Http\Request $request) {
 });
 
 Route::get('/api/parts', function() {
-    return \App\Models\Part::where('is_active', true)
-        ->select('id', 'part_number', 'name', 'current_stock')
+    return \App\Models\Part::select('id', 'part_number', 'name', 'current_stock')
         ->where('current_stock', '>', 0)
+        ->whereNull('deleted_at')
         ->orderBy('name')
         ->get();
 });

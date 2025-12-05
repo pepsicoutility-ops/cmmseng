@@ -26,6 +26,9 @@ class AreaResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     
     protected static ?string $navigationLabel = 'Areas';
+    protected static ?string $modelLabel = 'Areas';
+    protected static ?string $pluralModelLabel = 'Areas';
+    protected static ?string $breadcrumb = 'Areas';
     
     protected static ?int $navigationSort = 1;
     

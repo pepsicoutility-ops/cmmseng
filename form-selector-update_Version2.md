@@ -1,3 +1,14 @@
+# Form Selector UI Update
+
+This update addresses the following:
+- **Enterprise UI:** Cleaner look with solid backgrounds and refined typography (Inter font).
+- **Online/Offline Status:** Real-time status indicator in the header and a toast notification when offline.
+- **Install Logic:** The "Install" button in the bottom navigation now automatically hides if the app is already installed (running in standalone mode).
+- **Card Design:** More professional, minimalist card design with soft colored backgrounds for icons.
+
+### Updated Code (`form-selector.blade.php`)
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,12 +75,6 @@
             z-index: 50;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
         }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -125,7 +130,7 @@
             <button onclick="filterCategory('all')" class="category-chip active bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md transition-all">
                 All Forms
             </button>
-            @if($department === 'utility')
+            @if($department === 'utility' || $department === 'all')
             <button onclick="filterCategory('compressor')" class="category-chip bg-white border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap hover:bg-gray-50 transition-all">
                 Compressors
             </button>
@@ -154,14 +159,14 @@
             @endif
 
             <!-- PM Checklist -->
-            @if($department === 'utility')
+            @if($department === 'utility' || $department === 'all')
             <a href="/barcode/pm-checklist/{{ $token }}" class="form-item block" data-category="preventive" data-keywords="pm preventive checklist">
                 <div class="bg-white rounded-2xl p-4 h-full flex flex-col items-center text-center card-press shadow-[0_2px_8px_rgb(0,0,0,0.04)] border border-gray-100">
                     <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-3 text-blue-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     </div>
                     <h3 class="text-sm font-bold text-gray-800 leading-tight">PM Checklist</h3>
-                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Preventive Maintenance</p>
+                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Utility Block</p>
                 </div>
             </a>
             @endif
@@ -174,7 +179,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
                     </div>
                     <h3 class="text-sm font-bold text-gray-800 leading-tight">Compressor 1</h3>
-                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Comp 1</p>
+                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Main Block</p>
                 </div>
             </a>
             @endif
@@ -187,33 +192,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
                     </div>
                     <h3 class="text-sm font-bold text-gray-800 leading-tight">Compressor 2</h3>
-                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Comp 2</p>
-                </div>
-            </a>
-            @endif
-
-            <!-- Chiller 1 -->
-            @if($department === 'utility')
-            <a href="/barcode/chiller1/{{ $token }}" class="form-item block" data-category="chiller" data-keywords="chiller 1 one">
-                <div class="bg-white rounded-2xl p-4 h-full flex flex-col items-center text-center card-press shadow-[0_2px_8px_rgb(0,0,0,0.04)] border border-gray-100">
-                    <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mb-3 text-teal-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-800 leading-tight">Chiller 1</h3>
-                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Chiller HVAC</p>
-                </div>
-            </a>
-            @endif
-
-            <!-- Chiller 2 -->
-            @if($department === 'utility')
-            <a href="/barcode/chiller2/{{ $token }}" class="form-item block" data-category="chiller" data-keywords="chiller 2 two">
-                <div class="bg-white rounded-2xl p-4 h-full flex flex-col items-center text-center card-press shadow-[0_2px_8px_rgb(0,0,0,0.04)] border border-gray-100">
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-3 text-amber-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-800 leading-tight">Chiller 2</h3>
-                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Chiller Proses</p>
+                    <p class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wide">Main Block</p>
                 </div>
             </a>
             @endif
@@ -232,7 +211,7 @@
             @endif
 
             <!-- AHU -->
-            @if($department === 'utility')
+             @if($department === 'utility')
             <a href="/barcode/ahu/{{ $token }}" class="form-item block" data-category="preventive" data-keywords="ahu air handling">
                 <div class="bg-white rounded-2xl p-4 h-full flex flex-col items-center text-center card-press shadow-[0_2px_8px_rgb(0,0,0,0.04)] border border-gray-100">
                     <div class="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center mb-3 text-sky-600">
@@ -308,6 +287,14 @@
             </button>
         </div>
     </div>
+
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
 
     <script>
         // --- ONLINE / OFFLINE LOGIC ---
@@ -396,13 +383,13 @@
         function filterCategory(cat) {
             // Reset Chip Styles
             document.querySelectorAll('.category-chip').forEach(btn => {
-                btn.classList.remove('bg-gray-900', 'text-white', 'active', 'shadow-md');
+                btn.classList.remove('bg-gray-900', 'text-white', 'active');
                 btn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
             });
             
             // Set Active Chip Style
             event.target.classList.remove('bg-white', 'text-gray-600', 'border', 'border-gray-200');
-            event.target.classList.add('bg-gray-900', 'text-white', 'active', 'shadow-md');
+            event.target.classList.add('bg-gray-900', 'text-white', 'active');
 
             // Filter Logic
             const items = document.querySelectorAll('.form-item');
@@ -428,13 +415,6 @@
             const icon = event.currentTarget.querySelector('svg');
             icon.classList.add('animate-spin');
             setTimeout(() => window.location.reload(), 500);
-        }
-
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.error('Service Worker registration failed:', err));
         }
     </script>
 </body>

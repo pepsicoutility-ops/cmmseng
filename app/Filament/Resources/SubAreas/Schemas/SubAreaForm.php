@@ -23,12 +23,12 @@ class SubAreaForm
                     ->required()
                     ->native(false),
                 TextInput::make('name')
-                    ->label('Sub Area Name')
+                    ->label('Line')
                     ->required()
                     ->maxLength(255)
                     ->placeholder('e.g., EP, PC, TC, DBM, LBCSS'),
                 TextInput::make('code')
-                    ->label('Sub Area Code')
+                    ->label('Line Code')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(50)

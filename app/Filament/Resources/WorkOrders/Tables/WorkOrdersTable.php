@@ -50,11 +50,11 @@ class WorkOrdersTable
                     ])
                     ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
                 TextColumn::make('asset.name')
-                    ->label('Asset')
+                    ->label('Machine')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('assign_to')
-                    ->label('Assigned To')
+                    ->label('Category')
                     ->badge()
                     ->colors([
                         'success' => 'utility',

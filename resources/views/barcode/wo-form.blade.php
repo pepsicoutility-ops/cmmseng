@@ -222,12 +222,12 @@
                         </select>
                     </div>
 
-                    <!-- Assign To -->
+                    <!-- Category -->
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Assign To Department *</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Category *</label>
                         <select name="assign_to" required 
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Department</option>
+                            <option value="">Select Category</option>
                             <option value="utility">Utility</option>
                             <option value="mechanic">Mechanic</option>
                             <option value="electric">Electric</option>
@@ -246,30 +246,30 @@
                         </select>
                     </div>
 
-                    <!-- Sub Area -->
+                    <!-- Line -->
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Sub Area *</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Line *</label>
                         <select name="sub_area_id" id="sub_area_id" required 
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Sub Area</option>
+                            <option value="">Select Line</option>
                         </select>
                     </div>
-
-                    <!-- Asset -->
+                    
+                    <!-- Machine -->
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Asset *</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Machine *</label>
                         <select name="asset_id" id="asset_id" required 
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Asset</option>
+                            <option value="">Select Machine</option>
                         </select>
                     </div>
 
-                    <!-- Sub Asset -->
+                    <!-- Equipment -->
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">Sub Asset *</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Equipment *</label>
                         <select name="sub_asset_id" id="sub_asset_id" required 
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Sub Asset</option>
+                            <option value="">Select Equipment</option>
                         </select>
                     </div>
 
@@ -283,7 +283,7 @@
 
                     <!-- Photos -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">Photos (Max 5)</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Photos (Max 2)</label>
                         <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                             <input type="file" name="photos[]" id="photoInput" multiple accept="image/*" capture="environment"
                                 class="hidden">
@@ -298,7 +298,7 @@
                             <p class="text-sm text-gray-500 mt-2">or tap to select from gallery</p>
                         </div>
                         <div id="photoPreview" class="mt-3"></div>
-                        <p class="text-sm text-gray-500 mt-2">Max 5MB per image, up to 5 photos</p>
+                        <p class="text-sm text-gray-500 mt-2">Max 5MB per image, up to 2 photos</p>
                     </div>
 
                     <!-- Submit Button -->

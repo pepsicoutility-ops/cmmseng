@@ -25,8 +25,10 @@ class AssetResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
     
-    protected static ?string $navigationLabel = 'Assets';
-    
+    protected static ?string $navigationLabel = 'Machines';
+    protected static ?string $modelLabel = 'Machines';
+    protected static ?string $pluralModelLabel = 'Machines';
+    protected static ?string $breadcrumb = 'Machines';
     protected static ?int $navigationSort = 3;
     
     public static function canAccess(): bool

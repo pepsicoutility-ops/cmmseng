@@ -25,7 +25,10 @@ class SubAreaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     
-    protected static ?string $navigationLabel = 'Sub Areas';
+    protected static ?string $navigationLabel = 'Lines';
+    protected static ?string $modelLabel = 'Lines';
+    protected static ?string $pluralModelLabel = 'Lines';
+    protected static ?string $breadcrumb = 'Lines';
     
     protected static ?int $navigationSort = 2;
     

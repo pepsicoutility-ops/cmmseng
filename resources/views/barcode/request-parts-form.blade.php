@@ -32,8 +32,8 @@
             <input type="hidden" name="token" value="{{ $token }}">
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h3 class="font-bold text-lg mb-4">Requestor Information</h3>
-                <input type="text" name="gpid" placeholder="GPID" required class="w-full px-4 py-3 border rounded-lg mb-3">
-                <input type="text" name="requestor_name" readonly placeholder="Name" class="w-full px-4 py-3 bg-gray-50 border rounded-lg mb-3">
+                <input type="text" id="gpidInput" name="gpid" placeholder="GPID" required class="w-full px-4 py-3 border rounded-lg mb-3">
+                <input type="text" id="nameInput" name="requestor_name" readonly placeholder="Name (will auto-fill)" class="w-full px-4 py-3 bg-gray-50 border rounded-lg mb-3">
                 <select name="department" required class="w-full px-4 py-3 border rounded-lg">
                     <option value="">Select Department</option>
                     <option value="utility">Utility</option>
@@ -44,8 +44,8 @@
             
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h3 class="font-bold text-lg mb-4">Part Details</h3>
-                <select name="part_id" required class="w-full px-4 py-3 border rounded-lg mb-3">
-                    <option value="">Select Part</option>
+                <select id="partSelect" name="part_id" required class="w-full px-4 py-3 border rounded-lg mb-3">
+                    <option value="">Loading parts...</option>
                 </select>
                 <input type="number" name="quantity" placeholder="Quantity" required min="1" class="w-full px-4 py-3 border rounded-lg mb-3">
                 <select name="urgency" required class="w-full px-4 py-3 border rounded-lg">
@@ -73,20 +73,57 @@
             navigator.serviceWorker.register('/service-worker.js');
         }
         
+        // GPID auto-complete name
+        const gpidInput = document.getElementById('gpidInput');
+        const nameInput = document.getElementById('nameInput');
+        
+        gpidInput.addEventListener('blur', function() {
+            const gpid = this.value.trim();
+            if (gpid) {
+                fetch(`/api/user-by-gpid/${gpid}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.name) {
+                            nameInput.value = data.name;
+                        } else {
+                            nameInput.value = '';
+                            alert('GPID not found. Please check and try again.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching user:', err);
+                        nameInput.value = '';
+                    });
+            }
+        });
+        
         // Load parts list
+        const partSelect = document.getElementById('partSelect');
+        
         fetch('/api/parts')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to load parts');
+                return res.json();
+            })
             .then(parts => {
-                const select = document.querySelector('select[name="part_id"]');
+                partSelect.innerHTML = '<option value="">Select Part</option>';
+                
+                if (parts.length === 0) {
+                    partSelect.innerHTML = '<option value="">No parts available</option>';
+                    return;
+                }
+                
                 parts.forEach(part => {
                     const option = document.createElement('option');
                     option.value = part.id;
-                    option.textContent = `${part.part_number} - ${part.name}`;
-                    select.appendChild(option);
+                    option.textContent = `${part.part_number} - ${part.name} (Stock: ${part.current_stock})`;
+                    partSelect.appendChild(option);
                 });
+            })
+            .catch(err => {
+                console.error('Error loading parts:', err);
+                partSelect.innerHTML = '<option value="">Error loading parts</option>';
             });
-        
-        // Form submission
     </script>
 </body>
 </html>

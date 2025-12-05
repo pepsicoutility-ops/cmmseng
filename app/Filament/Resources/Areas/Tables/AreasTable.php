@@ -30,7 +30,7 @@ class AreasTable
                     ->badge()
                     ->color('info'),
                 TextColumn::make('sub_areas_count')
-                    ->label('Sub Areas')
+                    ->label('Line')
                     ->counts('subAreas')
                     ->badge()
                     ->color('success'),

@@ -64,7 +64,7 @@ class WorkOrderForm
                             ->required()
                             ->native(false),
                         Select::make('assign_to')
-                            ->label('Assign To Department')
+                            ->label('Category')
                             ->options([
                                 'utility' => 'Utility',
                                 'mechanic' => 'Mechanic',
@@ -114,7 +114,7 @@ class WorkOrderForm
                             ->disabled(fn ($record) => $record !== null)
                             ->native(false),
                         Select::make('sub_area_id')
-                            ->label('Sub Area')
+                            ->label('Line')
                             ->options(fn (Get $get) => SubArea::query()
                                 ->where('area_id', $get('area_id'))
                                 ->where('is_active', true)
@@ -130,7 +130,7 @@ class WorkOrderForm
                             ->disabled(fn (Get $get, $record) => !$get('area_id') || $record !== null)
                             ->native(false),
                         Select::make('asset_id')
-                            ->label('Asset')
+                            ->label('Machine')
                             ->options(fn (Get $get) => Asset::query()
                                 ->where('sub_area_id', $get('sub_area_id'))
                                 ->where('is_active', true)
@@ -143,7 +143,7 @@ class WorkOrderForm
                             ->disabled(fn (Get $get, $record) => !$get('sub_area_id') || $record !== null)
                             ->native(false),
                         Select::make('sub_asset_id')
-                            ->label('Sub Asset (Optional)')
+                            ->label('Equipment (Optional)')
                             ->options(fn (Get $get) => SubAsset::query()
                                 ->where('asset_id', $get('asset_id'))
                                 ->where('is_active', true)

@@ -20,8 +20,10 @@ class SubAssetsTable
         return $table
             ->columns([
                 TextColumn::make('asset.name')
+                    ->label('Machines')
                     ->searchable(),
                 TextColumn::make('name')
+                ->label('Equipments')
                     ->searchable(),
                 TextColumn::make('code')
                     ->searchable(),

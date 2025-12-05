@@ -21,7 +21,7 @@ class SubAssetForm
         return $schema
             ->components([
                 Section::make('Location Information')
-                    ->description('Select the complete hierarchy for this sub-asset')
+                    ->description('Select the complete hierarchy for this equipment')
                     ->components([
                         Select::make('area_id')
                             ->label('Area')
@@ -36,7 +36,7 @@ class SubAssetForm
                             ->required()
                             ->native(false),
                         Select::make('sub_area_id')
-                            ->label('Sub Area')
+                            ->label('Line')
                             ->options(fn (Get $get) => SubArea::query()
                                 ->where('area_id', $get('area_id'))
                                 ->where('is_active', true)
@@ -49,7 +49,7 @@ class SubAssetForm
                             ->native(false)
                             ->disabled(fn (Get $get) => !$get('area_id')),
                         Select::make('asset_id')
-                            ->label('Asset')
+                            ->label('Machine')
                             ->options(fn (Get $get) => Asset::query()
                                 ->where('sub_area_id', $get('sub_area_id'))
                                 ->where('is_active', true)
@@ -65,12 +65,12 @@ class SubAssetForm
                     ->description('Enter the sub-asset details')
                     ->components([
                         TextInput::make('name')
-                            ->label('Sub Asset Name')
+                            ->label('Equipment')
                             ->required()
                             ->maxLength(255)
                             ->placeholder('e.g., Fryer, S9 Overview'),
                         TextInput::make('code')
-                            ->label('Sub Asset Code')
+                            ->label('Equipment Code')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(50)

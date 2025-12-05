@@ -26,11 +26,11 @@ class WorkOrderInfolist
                 TextEntry::make('area.name')
                     ->label('Area'),
                 TextEntry::make('subArea.name')
-                    ->label('Sub area'),
+                    ->label('Lines'),
                 TextEntry::make('asset.name')
-                    ->label('Asset'),
+                    ->label('Machine'),
                 TextEntry::make('subAsset.name')
-                    ->label('Sub asset'),
+                    ->label('Equipment'),
                 TextEntry::make('description')
                     ->columnSpanFull(),
                 ImageEntry::make('photos')

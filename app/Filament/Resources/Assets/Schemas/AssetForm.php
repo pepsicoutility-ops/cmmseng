@@ -19,7 +19,7 @@ class AssetForm
         return $schema
             ->components([
                 Section::make('Location Information')
-                    ->description('Select the area and sub-area for this asset')
+                    ->description('Select the area and line for this asset')
                     ->schema([
                         Select::make('area_id')
                             ->label('Area')
@@ -31,7 +31,7 @@ class AssetForm
                             ->required()
                             ->native(false),
                         Select::make('sub_area_id')
-                            ->label('Sub Area')
+                            ->label('Line')
                             ->options(fn (Get $get) => SubArea::query()
                                 ->where('area_id', $get('area_id'))
                                 ->where('is_active', true)
@@ -43,16 +43,16 @@ class AssetForm
                             ->disabled(fn (Get $get) => !$get('area_id')),
                     ])->columns(2),
                     
-                Section::make('Asset Information')
-                    ->description('Enter the asset details')
+                Section::make('Machine Information')
+                    ->description('Enter the machine details')
                     ->schema([
                         TextInput::make('name')
-                            ->label('Asset Name')
+                            ->label(' Machine Name')
                             ->required()
                             ->maxLength(255)
                             ->placeholder('e.g., Processing Unit, VMM, EXTRUDER'),
                         TextInput::make('code')
-                            ->label('Asset Code')
+                            ->label(' Machine Code')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(50)

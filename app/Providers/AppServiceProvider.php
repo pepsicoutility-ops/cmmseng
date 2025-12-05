@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Area;
 use App\Models\Asset;
+use App\Models\InventoryMovement;
 use App\Models\Part;
 use App\Models\PmSchedule;
 use App\Models\SubArea;
@@ -15,6 +16,7 @@ use App\Policies\PartPolicy;
 use App\Policies\PmSchedulePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WorkOrderPolicy;
+use App\Observers\InventoryMovementObserver;
 use App\Observers\PartObserver;
 use App\Observers\WorkOrderObserver;
 use Illuminate\Support\Facades\Gate;
@@ -59,5 +61,6 @@ class AppServiceProvider extends ServiceProvider
         // Register observers
         Part::observe(PartObserver::class);
         WorkOrder::observe(WorkOrderObserver::class);
+        InventoryMovement::observe(InventoryMovementObserver::class);
     }
 }

@@ -25,7 +25,10 @@ class SubAssetResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCubeTransparent;
     
-    protected static ?string $navigationLabel = 'Sub Assets';
+    protected static ?string $navigationLabel = 'Equipments';
+    protected static ?string $modelLabel = 'Equipments';
+    protected static ?string $pluralModelLabel = 'Equipments';
+    protected static ?string $breadcrumb = 'Equipments';
     
     protected static ?int $navigationSort = 4;
     
