@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return redirect('pep/login');
+    $token = '765b55ac-4658-4fc9-8779-5b0e214f737c';
+
+    return redirect()->route('barcode.form-selector', ['token' => $token]);
 });
 
 // WhatsApp Test Routes (Super Admin only)
