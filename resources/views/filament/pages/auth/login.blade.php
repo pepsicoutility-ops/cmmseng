@@ -32,7 +32,7 @@
 
     {{ $this->form }}
 
-    <x-filament-support::actions
+    <x-filament::actions
         :actions="$this->getCachedFormActions()"
         :full-width="$this->hasFullWidthFormActions()"
     />

@@ -145,7 +145,7 @@
             @endif
 
             <!-- PM Checklist -->
-            @if($department === 'utility' || $department === 'all')
+            @if($department === 'utility'|| $department === 'mechanic' || $department === 'electric')
             <a href="/barcode/pm-checklist/{{ $token }}" class="form-item block" data-category="preventive" data-keywords="pm preventive checklist">
                 <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center h-full card-press">
                     <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-3">
