@@ -123,18 +123,18 @@
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Sub Area</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Line</label>
                         <select name="sub_area_id" id="subAreaSelect" required disabled
                                 class="form-select w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="">Select Sub Area</option>
+                            <option value="">Select Line</option>
                         </select>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Asset / Equipment</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Machine / Equipment</label>
                         <select name="asset_id" id="assetSelect" required disabled
                                 class="form-select w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="">Select Asset</option>
+                            <option value="">Select Machine</option>
                         </select>
                     </div>
                 </div>
@@ -241,8 +241,8 @@
             const subAreaSelect = document.getElementById('subAreaSelect');
             const assetSelect = document.getElementById('assetSelect');
             
-            subAreaSelect.innerHTML = '<option value="">Select Sub Area</option>';
-            assetSelect.innerHTML = '<option value="">Select Asset</option>';
+            subAreaSelect.innerHTML = '<option value="">Select Line</option>';
+            assetSelect.innerHTML = '<option value="">Select Machine</option>';
             subAreaSelect.disabled = true;
             assetSelect.disabled = true;
             
@@ -264,7 +264,7 @@
         document.getElementById('subAreaSelect').addEventListener('change', function() {
             vibrate();
             const assetSelect = document.getElementById('assetSelect');
-            assetSelect.innerHTML = '<option value="">Select Asset</option>';
+            assetSelect.innerHTML = '<option value="">Select Machine</option>';
             assetSelect.disabled = true;
             
             if (this.value) {

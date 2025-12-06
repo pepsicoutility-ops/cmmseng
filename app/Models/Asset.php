@@ -39,6 +39,16 @@ class Asset extends Model
         return $this->hasMany(SubAsset::class);
     }
 
+    public function equipments(): HasMany
+    {
+        return $this->hasMany(SubAsset::class);
+    }
+
+    public function line(): BelongsTo
+    {
+        return $this->belongsTo(SubArea::class, 'sub_area_id');
+    }
+
     public function pmSchedules(): HasMany
     {
         return $this->hasMany(PmSchedule::class);

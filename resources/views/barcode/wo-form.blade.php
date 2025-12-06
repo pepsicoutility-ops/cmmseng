@@ -462,9 +462,9 @@
             const subAssetSelect = document.getElementById('sub_asset_id');
             
             // Reset dependent dropdowns
-            subAreaSelect.innerHTML = '<option value="">Select Sub Area</option>';
-            assetSelect.innerHTML = '<option value="">Select Asset</option>';
-            subAssetSelect.innerHTML = '<option value="">Select Sub Asset</option>';
+            subAreaSelect.innerHTML = '<option value="">Select Line</option>';
+            assetSelect.innerHTML = '<option value="">Select Machine</option>';
+            subAssetSelect.innerHTML = '<option value="">Select Equipment</option>';
             
             if (areaId) {
                 fetch(`/api/sub-areas?area_id=${areaId}`)
@@ -487,8 +487,8 @@
             const assetSelect = document.getElementById('asset_id');
             const subAssetSelect = document.getElementById('sub_asset_id');
             
-            assetSelect.innerHTML = '<option value="">Select Asset</option>';
-            subAssetSelect.innerHTML = '<option value="">Select Sub Asset</option>';
+            assetSelect.innerHTML = '<option value="">Select Machine</option>';
+            subAssetSelect.innerHTML = '<option value="">Select Equipment</option>';
             
             if (subAreaId) {
                 fetch(`/api/assets?sub_area_id=${subAreaId}`)
@@ -510,7 +510,7 @@
             const assetId = this.value;
             const subAssetSelect = document.getElementById('sub_asset_id');
             
-            subAssetSelect.innerHTML = '<option value="">Select Sub Asset</option>';
+            subAssetSelect.innerHTML = '<option value="">Select Equipment</option>';
             
             if (assetId) {
                 fetch(`/api/sub-assets?asset_id=${assetId}`)

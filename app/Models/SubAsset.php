@@ -30,6 +30,11 @@ class SubAsset extends Model
         return $this->belongsTo(Asset::class);
     }
 
+    public function machine(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class, 'asset_id');
+    }
+
     public function pmSchedules(): HasMany
     {
         return $this->hasMany(PmSchedule::class);

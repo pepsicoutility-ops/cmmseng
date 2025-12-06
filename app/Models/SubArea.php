@@ -35,6 +35,11 @@ class SubArea extends Model
         return $this->hasMany(Asset::class);
     }
 
+    public function machines(): HasMany
+    {
+        return $this->hasMany(Asset::class);
+    }
+
     public function workOrders(): HasMany
     {
         return $this->hasMany(WorkOrder::class);

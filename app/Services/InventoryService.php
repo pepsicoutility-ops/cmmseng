@@ -107,11 +107,8 @@ class InventoryService
         int $referenceId
     ): void {
         $part = Part::findOrFail($partId);
-        
-        // Deduct from current stock
-        $part->decrement('current_stock', $quantity);
-        
-        // Create inventory movement
+
+        // Create inventory movement (observer adjusts stock)
         InventoryMovement::create([
             'part_id' => $partId,
             'movement_type' => 'out',
@@ -122,7 +119,9 @@ class InventoryService
             'notes' => "Auto deduct from {$referenceType} #{$referenceId}"
         ]);
         
-        // Check and create stock alert if necessary
+        // Reload part after observer updated stock, then check alerts
+        $part->refresh();
+
         $this->checkStockAlert($part);
     }
     
@@ -132,23 +131,19 @@ class InventoryService
     public function addStock(int $partId, int $quantity, string $notes = null): void
     {
         $part = Part::findOrFail($partId);
-        
-        // Add to current stock
-        $part->increment('current_stock', $quantity);
-        
-        // Update last restocked timestamp
-        $part->update(['last_restocked_at' => now()]);
-        
-        // Create inventory movement
+
+        // Create inventory movement (observer adjusts stock and restock timestamp)
         InventoryMovement::create([
             'part_id' => $partId,
             'movement_type' => 'in',
             'quantity' => $quantity,
             'reference_type' => 'manual',
-            'performed_by_gpid' => Auth::user()->gpid,
+            'performed_by_gpid' => Auth::user()->gpid ?? 'SYSTEM',
             'notes' => $notes ?? 'Manual stock addition'
         ]);
-        
+
+        $part->refresh();
+
         // Resolve stock alerts if stock is sufficient now
         if ($part->current_stock >= $part->min_stock) {
             StockAlert::where('part_id', $partId)
@@ -167,25 +162,20 @@ class InventoryService
     public function adjustStock(int $partId, int $quantity, string $notes = null): void
     {
         $part = Part::findOrFail($partId);
-        
-        $oldStock = $part->current_stock;
-        $difference = $quantity - $oldStock;
-        
-        // Update stock to exact quantity
-        $part->update(['current_stock' => $quantity]);
-        
-        // Create inventory movement
+
+        // For adjustment, quantity represents the new exact stock level; observer will set before/after.
         InventoryMovement::create([
             'part_id' => $partId,
             'movement_type' => 'adjustment',
-            'quantity' => abs($difference),
+            'quantity' => $quantity,
             'reference_type' => 'manual',
-            'performed_by_gpid' => Auth::user()->gpid,
+            'performed_by_gpid' => Auth::user()->gpid ?? 'SYSTEM',
             'notes' => $notes ?? 'Stock adjustment'
         ]);
         
-        // Check stock alert
         $part->refresh();
+
+        // Check stock alert with updated stock
         $this->checkStockAlert($part);
         
         // Resolve alerts if stock is sufficient now

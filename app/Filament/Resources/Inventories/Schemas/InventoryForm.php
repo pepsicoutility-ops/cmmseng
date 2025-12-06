@@ -76,7 +76,7 @@ class InventoryForm
                             ->live()
                             ->afterStateUpdated(fn (Set $set) => $set('sub_area_id', null)),
                         Select::make('sub_area_id')
-                            ->label('Sub Area')
+                            ->label('Line')
                             ->relationship('subArea', 'name', fn ($query, Get $get) => 
                                 $query->where('area_id', $get('area_id'))
                             )
@@ -86,7 +86,7 @@ class InventoryForm
                             ->afterStateUpdated(fn (Set $set) => $set('asset_id', null))
                             ->disabled(fn (Get $get) => !$get('area_id')),
                         Select::make('asset_id')
-                            ->label('Asset')
+                            ->label('Machine')
                             ->relationship('asset', 'name', fn ($query, Get $get) => 
                                 $query->where('sub_area_id', $get('sub_area_id'))
                             )
@@ -96,7 +96,7 @@ class InventoryForm
                             ->afterStateUpdated(fn (Set $set) => $set('sub_asset_id', null))
                             ->disabled(fn (Get $get) => !$get('sub_area_id')),
                         Select::make('sub_asset_id')
-                            ->label('Sub Asset')
+                            ->label('Equipment')
                             ->relationship('subAsset', 'name', fn ($query, Get $get) => 
                                 $query->where('asset_id', $get('asset_id'))
                             )

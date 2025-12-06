@@ -61,8 +61,8 @@ class SubAssetForm
                             ->disabled(fn (Get $get) => !$get('sub_area_id')),
                     ])->columns(3),
                     
-                Section::make('Sub Asset Information')
-                    ->description('Enter the sub-asset details')
+                Section::make('Equipment Information')
+                    ->description('Enter the equipment details')
                     ->components([
                         TextInput::make('name')
                             ->label('Equipment')

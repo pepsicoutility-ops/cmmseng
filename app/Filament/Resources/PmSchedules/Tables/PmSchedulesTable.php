@@ -29,11 +29,11 @@ class PmSchedulesTable
                     ->sortable()
                     ->limit(30),
                 TextColumn::make('asset.name')
-                    ->label('Asset')
+                    ->label('Machine')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('subAsset.name')
-                    ->label('Sub Asset')
+                    ->label('Equipment')
                     ->searchable()
                     ->placeholder('—'),
                 TextColumn::make('assignedTo.name')

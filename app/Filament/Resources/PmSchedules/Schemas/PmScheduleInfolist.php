@@ -22,13 +22,13 @@ class PmScheduleInfolist
                     ->label('Area')
                     ->placeholder('-'),
                 TextEntry::make('subArea.name')
-                    ->label('Sub area')
+                    ->label('Line')
                     ->placeholder('-'),
                 TextEntry::make('asset.name')
-                    ->label('Asset')
+                    ->label('Machine')
                     ->placeholder('-'),
                 TextEntry::make('subAsset.name')
-                    ->label('Sub asset')
+                    ->label('Equipment')
                     ->placeholder('-'),
                 TextEntry::make('schedule_type')
                     ->badge(),

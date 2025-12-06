@@ -28,7 +28,17 @@ class Area extends Model
         return $this->hasMany(SubArea::class);
     }
 
+    public function lines(): HasMany
+    {
+        return $this->hasMany(SubArea::class);
+    }
+
     public function assets(): HasMany
+    {
+        return $this->hasMany(Asset::class);
+    }
+
+    public function machines(): HasMany
     {
         return $this->hasMany(Asset::class);
     }
