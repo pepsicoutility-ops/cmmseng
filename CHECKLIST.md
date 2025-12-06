@@ -4544,17 +4544,6 @@ shift | date | suction_temperature | discharge_temperature | ... | created_by_gp
 
 ### Configuration Added:
 
-**Environment Variables:**
-```env
-TELEGRAM_BOT_TOKEN=8284433418:AAFHpxq3fGinfk_kxUP-cxn-mpkn685P4Ao
-TELEGRAM_CHAT_ID=-1003090861388
-```
-
-**Telegram Group:**
-- Name: "Utility Monitoring"
-- Type: Supergroup
-- Chat ID: -1003090861388
-
 **Integration Status:**
 - ✅ Bot token configured
 - ✅ Chat ID configured for utility monitoring group
