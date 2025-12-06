@@ -150,9 +150,9 @@ Route::post('/barcode/wo/submit', function(\Illuminate\Http\Request $request) {
     try {
         $wo = \App\Models\WorkOrder::create([
             'wo_number' => $woNumber,
-            'created_by_gpid' => $request->query('gpid'),
+            'created_by_gpid' => $request->gpid,
             'operator_name' => $request->operator_name,
-            'shift' => $request->query('shift'),
+            'shift' => $request->shift,
             'problem_type' => $request->problem_type,
             'assign_to' => $request->assign_to,
             'area_id' => $request->area_id,
@@ -174,7 +174,7 @@ Route::post('/barcode/wo/submit', function(\Illuminate\Http\Request $request) {
     
     return redirect()->route('barcode.wo.success', [
         'wo_number' => $wo->wo_number,
-        'token' => $request->query('token')
+        'token' => $request->token
     ]);
 })->name('barcode.wo.submit');
 
@@ -857,5 +857,4 @@ Route::get('/barcode/parts/success', function(\Illuminate\Http\Request $request)
         'token' => $request->query('token')
     ]);
 })->name('barcode.parts.success');
-
 
