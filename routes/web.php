@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    $token = '46d579f5-b3e8-4af5-82f5-fb8cee9b2a17';
+    $token = '765b55ac-4658-4fc9-8779-5b0e214f737c';
 
     return redirect()->route('barcode.form-selector', ['token' => $token]);
 });
