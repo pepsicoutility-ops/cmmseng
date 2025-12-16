@@ -44,7 +44,7 @@ class Chiller1Trend extends ChartWidget
                     'borderWidth'     => 2,
                 ],
                 [
-                    'label'           => 'Cond Pressure (bar)',
+                    'label'           => 'Cond Pressure (kPa)',
                     'data'            => $records->pluck('conds_p'),
                     'borderColor'     => '#FF4D4F', // red
                     'backgroundColor' => 'rgba(255, 77, 79, 0.14)',
