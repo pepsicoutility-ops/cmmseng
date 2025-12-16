@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -221,14 +222,18 @@ class PmExecutionForm
                         Textarea::make('notes')
                             ->label('Notes')
                             ->rows(4)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->dehydrated(),
                         FileUpload::make('photos')
                             ->label('Photos')
                             ->image()
                             ->multiple()
                             ->maxFiles(10)
                             ->directory('pm-executions/photos')
-                            ->columnSpanFull(),
+                            ->disk('public')
+                            ->visibility('public')
+                            ->columnSpanFull()
+                            ->dehydrated(),
                     ]),
             ]);
     }

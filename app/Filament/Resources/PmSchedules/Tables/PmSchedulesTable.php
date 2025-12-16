@@ -156,12 +156,12 @@ class PmSchedulesTable
                         
                         \Filament\Notifications\Notification::make()
                             ->title('PM Execution Started')
-                            ->body('You can now fill in the checklist and complete the PM.')
+                            ->body('PM Execution has been created. You can edit it from PM Executions list.')
                             ->success()
                             ->send();
                         
-                        // Redirect to edit page
-                        return redirect(\App\Filament\Resources\PmExecutions\PmExecutionResource::getUrl('edit', ['record' => $execution->id]));
+                        // Redirect to PM Executions table
+                        return redirect(\App\Filament\Resources\PmExecutions\PmExecutionResource::getUrl('index'));
                     })
                     ->visible(fn ($record) => 
                         $record->status === 'active' && 

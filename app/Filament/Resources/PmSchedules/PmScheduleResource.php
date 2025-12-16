@@ -31,7 +31,7 @@ class PmScheduleResource extends Resource
     
     /**
      * Personalized query based on user role
-     * - Technician: See ONLY their own PM schedules
+     * - Technician: See ONLY their own PM schedules (excluding those with in-progress execution)
      * - Asisten Manager: See PM schedules in their department
      * - Manager/Super Admin: See all PM schedules
      */
@@ -41,7 +41,14 @@ class PmScheduleResource extends Resource
         $user = Auth::user();
         
         return match($user->role) {
-            'technician' => $query->where('assigned_to_gpid', $user->gpid),
+            'technician' => $query->where('assigned_to_gpid', $user->gpid)
+                ->whereDoesntHave('pmExecutions', function ($q) {
+                    $q->where('status', 'in_progress')
+                      ->orWhere(function ($subQ) {
+                          $subQ->whereDate('created_at', today())
+                               ->whereIn('status', ['in_progress', 'completed']);
+                      });
+                }),
             'asisten_manager' => $query->where('department', $user->department),
             default => $query,
         };

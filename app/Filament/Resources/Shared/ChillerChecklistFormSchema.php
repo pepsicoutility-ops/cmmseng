@@ -60,17 +60,17 @@ class ChillerChecklistFormSchema
                         ->step(0.01),
                     
                     TextInput::make('evap_p')
-                        ->label('Evap. P (bar)')
+                        ->label('Evap. P (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('conds_p')
-                        ->label('Conds. P (bar)')
+                        ->label('Conds. P (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('oil_p')
-                        ->label('Oil. P (bar)')
+                        ->label('Oil. P (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
@@ -160,17 +160,17 @@ class ChillerChecklistFormSchema
                         ->step(0.01),
                     
                     TextInput::make('cooler_liquid_inlet_pressure')
-                        ->label('Liquid Inlet Pressure (bar)')
+                        ->label('Liquid Inlet Pressure (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('cooler_liquid_outlet_pressure')
-                        ->label('Liquid Outlet Pressure (bar)')
+                        ->label('Liquid Outlet Pressure (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('cooler_pressure_drop')
-                        ->label('Pressure Drop (bar)')
+                        ->label('Pressure Drop (kPa)')
                         ->numeric()
                         ->step(0.01),
                 ])
@@ -184,17 +184,17 @@ class ChillerChecklistFormSchema
                         ->step(0.01),
                     
                     TextInput::make('cond_liquid_inlet_pressure')
-                        ->label('Liquid Inlet Pressure (bar)')
+                        ->label('Liquid Inlet Pressure (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('cond_liquid_outlet_pressure')
-                        ->label('Liquid Outlet Pressure (bar)')
+                        ->label('Liquid Outlet Pressure (kPa)')
                         ->numeric()
                         ->step(0.01),
                     
                     TextInput::make('cond_pressure_drop')
-                        ->label('Pressure Drop (bar)')
+                        ->label('Pressure Drop (kPa)')
                         ->numeric()
                         ->step(0.01),
                 ])

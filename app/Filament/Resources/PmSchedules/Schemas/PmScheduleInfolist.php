@@ -59,6 +59,12 @@ class PmScheduleInfolist
                 TextEntry::make('deleted_at')
                     ->dateTime()
                     ->visible(fn (PmSchedule $record): bool => $record->trashed()),
+                TextEntry::make('manual_url')
+                      ->label('Manual Book')
+    ->url(fn ($record) => $record->manual_url)
+    ->openUrlInNewTab()
+    ->formatStateUsing(fn () => 'Open Manual Book')
+    ->icon('heroicon-o-book-open')
             ]);
     }
 }

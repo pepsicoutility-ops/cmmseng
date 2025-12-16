@@ -60,11 +60,11 @@ class Chiller1TableWidget extends BaseWidget
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('evap_p')
-                    ->label('Evap Press (Bar)')
+                    ->label('Evap Press (kPa)')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('conds_p')
-                    ->label('Cond Press (Bar)')
+                    ->label('Cond Press (kPa)')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('motor_amps')

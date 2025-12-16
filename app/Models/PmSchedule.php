@@ -75,6 +75,7 @@ class PmSchedule extends Model
         'department',
         'status',
         'is_active',
+        'manual_url',
     ];
 
     protected $casts = [

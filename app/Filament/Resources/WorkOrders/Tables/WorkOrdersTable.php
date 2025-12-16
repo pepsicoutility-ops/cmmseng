@@ -230,7 +230,9 @@ class WorkOrdersTable
                             ->image()
                             ->multiple()
                             ->maxFiles(5)
-                            ->directory('work-orders/completed'),
+                            ->directory('work-orders')
+                            ->disk('public')
+                            ->visibility('public'),
                         \Filament\Forms\Components\Repeater::make('parts_usage')
                             ->label('Parts Used')
                             ->schema([

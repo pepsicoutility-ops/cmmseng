@@ -52,6 +52,7 @@ class UtilityPerformanceAnalysis extends Page
             // Chiller 1 Section
             \App\Filament\Widgets\Chiller1StatsWidget::class,
             \App\Filament\Widgets\Chiller1TableWidget::class,
+            \App\Filament\Widgets\Chiller1Trend::class,
             
             // Chiller 2 Section
             \App\Filament\Widgets\Chiller2StatsWidget::class,

@@ -21,7 +21,11 @@ class EditPmExecution extends EditRecord
                 ->modalHeading('Complete PM Execution')
                 ->modalDescription('Are you sure you want to complete this PM execution? This will set the completion time and calculate compliance.')
                 ->action(function () {
-                    $execution = $this->record;
+                    // IMPORTANT: Save form data first (notes, photos, checklist_data)
+                    $formData = $this->form->getState();
+                    $this->record->update($formData);
+                    
+                    $execution = $this->record->fresh();
                     
                     $execution->update([
                         'actual_end' => now(),

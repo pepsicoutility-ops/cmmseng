@@ -94,7 +94,10 @@ class WorkOrderForm
                             ->multiple()
                             ->maxFiles(5)
                             ->directory('work-orders')
-                            ->columnSpanFull(),
+                            ->disk('public')
+                            ->visibility('public')
+                            ->columnSpanFull()
+                            ->dehydrated(),
                     ])->columns(3),
                     
                 Section::make('Equipment Location')

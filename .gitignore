@@ -25,6 +25,12 @@ Homestead.yaml
 Thumbs.db
 npm-debug.log
 yarn-error.log
+manual-book.blade.php
+manual-book-infolist.blade.php
+# Ignore custom manual book views
+/resources/views/filament/pm/manual-book.blade.php
+/resources/views/filament/pm/manual-book-infolist.blade.php
+
 
 # Cache files
 /bootstrap/cache/*

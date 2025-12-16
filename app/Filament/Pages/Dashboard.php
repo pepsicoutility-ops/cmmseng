@@ -29,6 +29,7 @@ class Dashboard extends BaseDashboard
         $utilityWidgets = [
             \App\Filament\Widgets\Chiller1StatsWidget::class,
             \App\Filament\Widgets\Chiller1TableWidget::class,
+            \App\Filament\Widgets\Chiller1Trend::class,
             \App\Filament\Widgets\Chiller2StatsWidget::class,
             \App\Filament\Widgets\Chiller2TableWidget::class,
             \App\Filament\Widgets\Compressor1StatsWidget::class,

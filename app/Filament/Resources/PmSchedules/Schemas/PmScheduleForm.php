@@ -180,6 +180,12 @@ class PmScheduleForm
                             ->default('active')
                             ->required()
                             ->native(false),
+                        TextInput::make('manual_url')
+                            ->label('Manual Book URL (PDF)')
+                            ->url()
+                            ->placeholder('https://example.com/manual.pdf')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
                     ])->columns(2),
             ]);
     }

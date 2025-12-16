@@ -82,12 +82,12 @@ class Chiller1StatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-o-fire')
                 ->color($avgDisSuperheat > 15 ? 'warning' : 'success'),
             
-            Stat::make('Avg Evaporator Pressure', number_format($avgEvapPressure, 2) . ' Bar')
+            Stat::make('Avg Evaporator Pressure', number_format($avgEvapPressure, 2) . ' kPa')
                 ->description('Average evaporator pressure today')
                 ->descriptionIcon('heroicon-o-arrow-down-circle')
                 ->color('info'),
             
-            Stat::make('Avg Condenser Pressure', number_format($avgCondsPressure, 2) . ' Bar')
+            Stat::make('Avg Condenser Pressure', number_format($avgCondsPressure, 2) . ' kPa')
                 ->description('Average condenser pressure today')
                 ->descriptionIcon('heroicon-o-arrow-up-circle')
                 ->color('warning'),
@@ -140,7 +140,7 @@ class Chiller1StatsWidget extends BaseWidget
             }
         }
         
-        // Evaporator pressure: ideal range 3-6 Bar
+        // Evaporator pressure: ideal range 3-6 kPa
         if ($checklist->evap_p !== null) {
             if ($checklist->evap_p >= 3 && $checklist->evap_p <= 6) {
                 $tempPressureScore += 15;
@@ -149,7 +149,7 @@ class Chiller1StatsWidget extends BaseWidget
             }
         }
         
-        // Condenser pressure: ideal range 10-16 Bar
+        // Condenser pressure: ideal range 10-16 kPa
         if ($checklist->conds_p !== null) {
             if ($checklist->conds_p >= 10 && $checklist->conds_p <= 16) {
                 $tempPressureScore += 20;

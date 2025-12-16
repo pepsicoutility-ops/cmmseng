@@ -64,12 +64,12 @@ class Chiller2StatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-o-fire')
                 ->color($avgDisSuperheat > 15 ? 'warning' : 'success'),
             
-            Stat::make('Avg Evaporator Pressure', number_format($avgEvapPressure, 2) . ' Bar')
+            Stat::make('Avg Evaporator Pressure', number_format($avgEvapPressure, 2) . ' kPa')
                 ->description('Average evaporator pressure today')
                 ->descriptionIcon('heroicon-o-arrow-down-circle')
                 ->color('info'),
             
-            Stat::make('Avg Condenser Pressure', number_format($avgCondsPressure, 2) . ' Bar')
+            Stat::make('Avg Condenser Pressure', number_format($avgCondsPressure, 2) . ' kPa')
                 ->description('Average condenser pressure today')
                 ->descriptionIcon('heroicon-o-arrow-up-circle')
                 ->color('warning'),

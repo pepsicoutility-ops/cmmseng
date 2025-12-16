@@ -6,6 +6,9 @@ use App\Models\WorkOrder;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
+use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Schemas\Components\Section;
 
 class WorkOrderInfolist
 {
@@ -33,14 +36,15 @@ class WorkOrderInfolist
                     ->label('Equipment'),
                 TextEntry::make('description')
                     ->columnSpanFull(),
-                ImageEntry::make('photos')
-                    ->label('Problem Photos')
-                    ->disk('public')
-                    ->visible(fn ($record) => $record->photos && count($record->photos) > 0)
-                    ->columnSpanFull()
-                    ->height(200)
-                    ->width(200)
-                    ->square(),
+               Section::make('Photos')
+                    ->schema([
+                        ViewEntry::make('photos')
+                            ->label('')
+                            ->view('filament.pm.photos-display')
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->visible(fn($record) => $record->photos && count($record->photos) > 0),
                 TextEntry::make('status')
                     ->badge(),
                 TextEntry::make('priority')

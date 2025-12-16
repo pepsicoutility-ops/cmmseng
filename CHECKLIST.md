@@ -58,9 +58,10 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 23: Utility Checklists Import/Export (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 24: Telegram Bot Configuration (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 25: Parts Request PWA Enhancement & Inventory Observer (100% COMPLETE - Dec 5, 2025)** ✅
+- **Phase 26: PM Manual Book & Enhanced Photo Display (100% COMPLETE - Dec 10, 2025)** ✅
 
-**🎯 Current Status (December 5, 2025):**
-- **Total Phases Completed:** 25 phases ✅
+**🎯 Current Status (December 16, 2025):**
+- **Total Phases Completed:** 26 phases ✅
 - **System Status:** Production-ready with full feature set
 - **All Core Features:** Operational and tested
 - **Integration Status:** Telegram (configured with bot token), WhatsApp, AI/ML (ONNX + OpenAI), Power BI all configured
@@ -4741,11 +4742,331 @@ Route::post('/barcode/request-parts/submit', function(Request $request) {
 
 ---
 
-**Last Updated:** 2025-12-05  
+## Phase 26: PM Manual Book & Enhanced Photo Display ✅
+
+**Completion Date:** 2025-12-10  
+**Status:** 100% COMPLETE ✅
+
+### Overview:
+Enhanced PM Execution and Work Order systems with PM Manual Book integration, improved photo display, and workflow optimizations.
+
+### 1. PM Manual Book Feature
+
+#### Database Schema:
+- ✅ Added `manual_url` column to `pm_schedules` table (string, nullable)
+- ✅ Migration: `2025_12_10_180452_add_manual_url_to_pm_schedules_table.php`
+
+#### PM Schedule Integration:
+- ✅ Updated `PmSchedule` model - Added `manual_url` to fillable array
+- ✅ Updated `PmScheduleForm` - Added TextInput field for manual URL
+  - Validation: URL format, nullable, max 255 characters
+  - Section: Assignment Details
+  - Full width column span
+
+#### PM Execution View Page:
+- ✅ Added Manual Book link in `PmExecutionInfolist`
+  - Field: `TextEntry::make('pmSchedule.manual_url')`
+  - Label: "PM Manual Book"
+  - Icon: `heroicon-o-document-text`
+  - Opens in new tab
+  - URL auto-conversion for Google Drive links
+  - Format: `/file/d/{fileId}/preview` for embedding
+
+#### Google Drive Integration:
+- ✅ Automatic URL conversion from sharing link to preview format
+- ✅ Supports direct PDF embedding
+- ✅ Opens in new browser tab for easy access
+
+### 2. Enhanced Photo Display System
+
+#### Custom Blade View Component:
+- ✅ Created `resources/views/filament/pm/photos-display.blade.php`
+- ✅ Responsive grid layout: 2-4 columns (mobile to desktop)
+- ✅ Features:
+  - Image preview with object-cover (height 48)
+  - Hover effect with black overlay
+  - "Click to enlarge" text on hover
+  - Opens full image in new tab
+  - Rounded corners and shadows
+  - Fallback message for empty photos
+
+#### PM Execution Photos:
+- ✅ Fixed photos not saving - Added `->dehydrated()` to FileUpload
+- ✅ Added disk and visibility settings: `->disk('public')->visibility('public')`
+- ✅ Display: ViewEntry with custom blade view
+- ✅ Section: Collapsible, visible only when photos exist
+- ✅ Storage path: `pm-executions/photos/`
+
+#### Work Order Photos:
+- ✅ Enhanced `WorkOrderForm` - Added dehydrated, disk, visibility to photos field
+- ✅ Fixed completion photos directory consistency
+  - Changed from `work-orders/completed` to `work-orders`
+  - Added disk and visibility to completion_photos
+- ✅ Photo merge system: Combines initial + completion photos
+- ✅ Display: Same ViewEntry with photos-display.blade.php
+- ✅ Storage path: `work-orders/`
+
+### 3. Complete PM Action Enhancement
+
+#### Problem Identified:
+- ❌ **Issue:** When clicking "Complete PM" button, form data (notes, photos, checklist) was not saved
+- ❌ **Cause:** Action directly updated status without calling `$this->form->getState()`
+
+#### Solution Implemented:
+- ✅ Updated `EditPmExecution.php` Complete PM action
+- ✅ Added form state retrieval before status update:
+  ```php
+  $formData = $this->form->getState();
+  $this->record->update($formData);
+  ```
+- ✅ Ensures notes, photos, and checklist_data are saved
+- ✅ Prevents data loss during completion
+
+#### Workflow:
+1. Technician fills form (notes, photos, checklist)
+2. Clicks "Complete PM" button
+3. **Form data saved first** ✅
+4. Status updated to "completed"
+5. Calculations performed (duration, compliance, cost)
+6. Inventory deducted for parts used
+7. Redirect to PM Executions index
+
+### 4. PM Schedule Visibility Enhancement
+
+#### Technician Table Filtering:
+- ✅ Updated `PmScheduleResource::getEloquentQuery()`
+- ✅ PM Schedules auto-hide after execution for technicians
+- ✅ Filter logic:
+  ```php
+  ->whereDoesntHave('pmExecutions', function ($q) {
+      $q->where('status', 'in_progress')
+        ->orWhere(function ($subQ) {
+            $subQ->whereDate('created_at', today())
+                 ->whereIn('status', ['in_progress', 'completed']);
+        });
+  })
+  ```
+
+#### Benefits:
+- ✅ Executed PM automatically removed from technician's list
+- ✅ Prevents duplicate execution on same day
+- ✅ Cleaner PM Schedule table
+- ✅ Only shows pending PMs
+- ✅ PM reappears next day (for recurring schedules)
+
+### 5. Execute PM Workflow Optimization
+
+#### Updated Execute PM Action:
+- ✅ Changed redirect destination in `PmSchedulesTable.php`
+- ✅ **Old behavior:** Redirect to Edit page after execute
+- ✅ **New behavior:** Redirect to PM Executions table (index)
+- ✅ Notification updated: "PM Execution has been created. You can edit it from PM Executions list."
+
+#### User Experience:
+1. Technician clicks "Execute PM" on PM Schedule
+2. Confirms execution
+3. PM Execution created with status `in_progress`
+4. **Redirects to PM Executions table** ✅
+5. PM Schedule disappears from technician's list ✅
+6. Technician can click Edit to fill checklist
+
+### 6. Notes Display Enhancement
+
+#### PM Execution Notes:
+- ✅ Fixed notes not displaying - Added `->dehydrated()` to textarea
+- ✅ Display: TextEntry in Infolist
+- ✅ Visibility: Only shown when notes exist
+- ✅ HTML rendering: Supports line breaks and formatting
+- ✅ Full column span for better readability
+
+### 7. Parts Used Display
+
+#### PM Execution Parts:
+- ✅ Added RepeatableEntry in Infolist
+- ✅ Display fields:
+  - Part Number and Name (from relationship)
+  - Quantity used
+  - Cost (Rp formatted)
+  - Notes (if any)
+- ✅ Section: Collapsible
+- ✅ Visible only when parts were used
+
+### 8. Checklist Items Display
+
+#### PM Execution Checklist:
+- ✅ Added Section for Checklist Items in Infolist
+- ✅ Custom formatting for checklist_data JSON
+- ✅ Displays item name and completed status
+- ✅ Collapsible section for better organization
+
+### Files Modified:
+
+#### Migrations:
+1. **`database/migrations/2025_12_10_180452_add_manual_url_to_pm_schedules_table.php`** (NEW)
+   - Adds manual_url column to pm_schedules table
+
+#### Models:
+2. **`app/Models/PmSchedule.php`**
+   - Added `manual_url` to fillable array
+
+#### Forms:
+3. **`app/Filament/Resources/PmSchedules/Schemas/PmScheduleForm.php`**
+   - Added TextInput for manual_url field
+
+4. **`app/Filament/Resources/PmExecutions/Schemas/PmExecutionForm.php`**
+   - Added `->dehydrated()` to notes textarea
+   - Added `->dehydrated()`, `->disk('public')`, `->visibility('public')` to photos
+
+5. **`app/Filament/Resources/WorkOrders/Schemas/WorkOrderForm.php`**
+   - Added `->dehydrated()`, `->disk('public')`, `->visibility('public')` to photos
+
+#### Infolists:
+6. **`app/Filament/Resources/PmExecutions/Schemas/PmExecutionInfolist.php`**
+   - Added TextEntry for PM Manual Book
+   - Added ViewEntry for Photos with custom blade view
+   - Added TextEntry for Notes
+   - Added RepeatableEntry for Parts Used
+   - Added Section for Checklist Items
+   - Imported RepeatableEntry and ViewEntry components
+
+7. **`app/Filament/Resources/WorkOrders/Schemas/WorkOrderInfolist.php`**
+   - Updated Photos section to use ViewEntry with custom blade view
+
+#### Tables:
+8. **`app/Filament/Resources/PmSchedules/Tables/PmSchedulesTable.php`**
+   - Updated Execute PM action redirect (index instead of edit)
+   - Updated notification message
+
+9. **`app/Filament/Resources/WorkOrders/Tables/WorkOrdersTable.php`**
+   - Changed completion_photos directory from `work-orders/completed` to `work-orders`
+   - Added `->disk('public')` and `->visibility('public')`
+
+#### Pages:
+10. **`app/Filament/Resources/PmExecutions/Pages/EditPmExecution.php`**
+    - Fixed Complete PM action to save form data before status update
+
+#### Resources:
+11. **`app/Filament/Resources/PmSchedules/PmScheduleResource.php`**
+    - Enhanced technician query to hide executed PMs
+
+#### Views:
+12. **`resources/views/filament/pm/photos-display.blade.php`** (NEW)
+    - Custom blade component for photo grid display
+    - Responsive layout with hover effects
+    - Click to enlarge functionality
+
+### Testing Results:
+
+#### Before Fixes:
+- ❌ Photos displayed as broken images (403 Forbidden)
+- ❌ Notes not saving when clicking Complete PM
+- ❌ Photos not persisting to database
+- ❌ PM Manual Book not accessible
+- ❌ Executed PM still visible in technician's list
+- ❌ Redirected to Edit page after Execute PM
+
+#### After Fixes:
+- ✅ Photos display correctly in responsive grid
+- ✅ Notes save and display properly
+- ✅ Photos persist to database with correct paths
+- ✅ PM Manual Book link opens in new tab
+- ✅ Google Drive PDFs embed correctly
+- ✅ Executed PM disappears from technician's list
+- ✅ Redirect to PM Executions table after Execute PM
+- ✅ Complete PM button saves all form data
+- ✅ Work Order photos use consistent directory
+
+### Technical Implementation:
+
+#### Photo URL Generation:
+```php
+// Using asset() helper for correct path
+$photoUrl = asset('storage/' . $photo);
+```
+
+#### PM Manual URL Display:
+```php
+TextEntry::make('pmSchedule.manual_url')
+    ->label('PM Manual Book')
+    ->icon('heroicon-o-document-text')
+    ->url(fn ($state) => $state, shouldOpenInNewTab: true)
+    ->visible(fn ($state) => !empty($state))
+```
+
+#### Form Data Dehydration:
+```php
+// Ensures data is saved to database
+->dehydrated()
+->disk('public')
+->visibility('public')
+```
+
+#### Query Filtering:
+```php
+// Hide executed PMs for technicians
+->whereDoesntHave('pmExecutions', function ($q) {
+    $q->where('status', 'in_progress')
+      ->orWhere(function ($subQ) {
+          $subQ->whereDate('created_at', today())
+               ->whereIn('status', ['in_progress', 'completed']);
+      });
+})
+```
+
+### Benefits:
+
+1. **Enhanced Documentation:**
+   - PM Manual Book accessible from execution view
+   - Google Drive integration for centralized manuals
+   - No need to search for equipment documentation
+
+2. **Improved Visual Experience:**
+   - Professional photo grid layout
+   - Responsive design (mobile-friendly)
+   - Hover effects and click-to-enlarge
+   - Consistent photo display across PM and WO
+
+3. **Data Integrity:**
+   - All form data saved properly
+   - No data loss during PM completion
+   - Proper file storage with public visibility
+
+4. **Better Workflow:**
+   - Executed PMs auto-hide from technician list
+   - Prevents duplicate execution
+   - Cleaner work queue
+   - Direct access to PM Executions table
+
+5. **Consistency:**
+   - Same photo display system for PM and WO
+   - Unified storage directories
+   - Consistent disk and visibility settings
+
+### Integration Points:
+
+- **PM Schedule System:** Manual URL field
+- **PM Execution System:** Manual display, photos, notes
+- **Work Order System:** Enhanced photo display
+- **Storage System:** Public disk with proper symlink
+- **Google Drive:** Direct PDF embedding
+- **Filament Components:** ViewEntry, RepeatableEntry, TextEntry
+
+### Documentation:
+
+- ✅ Implementation fully documented in CHECKLIST.md
+- ✅ All code changes tracked
+- ✅ Technical details provided
+- ✅ Testing results documented
+- ✅ Benefits and integration points listed
+
+---
+
+**Last Updated:** 2025-12-16  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 25 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 26 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 26: PM Manual Book + Enhanced Photo Display + Complete PM fix + Execute PM workflow (Dec 10, 2025)
 - Phase 25: Parts Request PWA fixes + InventoryMovement Observer (automatic stock deduction)
 - Phase 24: Telegram Bot Configuration (Utility Monitoring group)
 - Phase 23: Complete Import/Export for all 5 utility checklists (Excel + PDF)
