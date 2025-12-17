@@ -61,7 +61,7 @@ class AhuTableWidget extends BaseWidget
                             'if_pre_filter_a', 'if_pre_filter_b', 'if_pre_filter_c',
                             'if_pre_filter_d', 'if_pre_filter_e', 'if_pre_filter_f'
                         ];
-                        return collect($pfFields)->sum(fn($field) => $record->$field ?? 0);
+                        return collect($pfFields)->sum(fn($field) => (int)($record->$field ?? 0));
                     })
                     ->badge()
                     ->color('info'),
@@ -75,7 +75,7 @@ class AhuTableWidget extends BaseWidget
                             'if_medium_a', 'if_medium_b', 'if_medium_c',
                             'if_medium_d', 'if_medium_e', 'if_medium_f'
                         ];
-                        return collect($mfFields)->sum(fn($field) => $record->$field ?? 0);
+                        return collect($mfFields)->sum(fn($field) => (int)($record->$field ?? 0));
                     })
                     ->badge()
                     ->color('warning'),
@@ -89,7 +89,7 @@ class AhuTableWidget extends BaseWidget
                             'if_hepa_a', 'if_hepa_b', 'if_hepa_c',
                             'if_hepa_d', 'if_hepa_e', 'if_hepa_f'
                         ];
-                        return collect($hfFields)->sum(fn($field) => $record->$field ?? 0);
+                        return collect($hfFields)->sum(fn($field) => (int)($record->$field ?? 0));
                     })
                     ->badge()
                     ->color(fn ($state) => $state > 5 ? 'danger' : ($state > 0 ? 'warning' : 'success')),
