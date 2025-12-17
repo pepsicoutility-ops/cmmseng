@@ -53,7 +53,7 @@ class AhuStatsWidget extends BaseWidget
             ->get()
             ->sum(function($record) use ($pfFields) {
                 return collect($pfFields)->sum(function($field) use ($record) {
-                    return $record->$field ?? 0;
+                    return (int)($record->$field ?? 0);
                 });
             });
         
@@ -62,7 +62,7 @@ class AhuStatsWidget extends BaseWidget
             ->get()
             ->sum(function($record) use ($mfFields) {
                 return collect($mfFields)->sum(function($field) use ($record) {
-                    return $record->$field ?? 0;
+                    return (int)($record->$field ?? 0);
                 });
             });
         
@@ -71,7 +71,7 @@ class AhuStatsWidget extends BaseWidget
             ->get()
             ->sum(function($record) use ($hfFields) {
                 return collect($hfFields)->sum(function($field) use ($record) {
-                    return $record->$field ?? 0;
+                    return (int)($record->$field ?? 0);
                 });
             });
         
@@ -143,7 +143,9 @@ class AhuStatsWidget extends BaseWidget
         
         $counts = [];
         foreach ($hfFields as $field => $name) {
-            $counts[$name] = $records->sum($field) ?? 0;
+            $counts[$name] = $records->sum(function($record) use ($field) {
+                return (int)($record->$field ?? 0);
+            });
         }
         
         arsort($counts);
@@ -182,7 +184,7 @@ class AhuStatsWidget extends BaseWidget
                 ->get()
                 ->sum(function($record) use ($pfFields) {
                     return collect($pfFields)->sum(function($field) use ($record) {
-                        return $record->$field ?? 0;
+                        return (int)($record->$field ?? 0);
                     });
                 });
             $trend[] = $total;
