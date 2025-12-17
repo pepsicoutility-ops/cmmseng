@@ -59,9 +59,10 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 24: Telegram Bot Configuration (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 25: Parts Request PWA Enhancement & Inventory Observer (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 26: PM Manual Book & Enhanced Photo Display (100% COMPLETE - Dec 10, 2025)** ✅
+- **Phase 27: AHU Filter Monitoring Enhancement (100% COMPLETE - Dec 17, 2025)** ✅
 
-**🎯 Current Status (December 16, 2025):**
-- **Total Phases Completed:** 26 phases ✅
+**🎯 Current Status (December 17, 2025):**
+- **Total Phases Completed:** 27 phases ✅
 - **System Status:** Production-ready with full feature set
 - **All Core Features:** Operational and tested
 - **Integration Status:** Telegram (configured with bot token), WhatsApp, AI/ML (ONNX + OpenAI), Power BI all configured
@@ -5061,11 +5062,232 @@ TextEntry::make('pmSchedule.manual_url')
 
 ---
 
-**Last Updated:** 2025-12-16  
+## Phase 27: AHU Filter Monitoring Enhancement ✅
+
+**Completion Date:** 2025-12-17  
+**Status:** 100% COMPLETE ✅
+
+### Overview:
+Enhanced AHU filter monitoring system with individual field checking, warning/danger thresholds, and color-coded display for better maintenance visibility.
+
+### 1. Monitoring Logic Enhancement
+
+#### Previous Implementation:
+- ❌ Sum all filter values across all fields
+- ❌ Compare total against single threshold
+- ❌ Problem: 10 filters at 20 Pa each = 200 total (triggers alert), but all individually normal
+
+#### New Implementation:
+- ✅ Check each filter field individually
+- ✅ Compare against equipment-specific thresholds
+- ✅ Show specific filter names exceeding limits
+- ✅ Display records only when ANY individual field exceeds threshold
+
+### 2. Warning & Danger Thresholds
+
+#### Threshold Configuration:
+```php
+// Pre-Filter (PF)
+- Warning: 100-150 Pa
+- Danger: >150 Pa
+
+// Medium Filter (MF)
+- Warning: 200-250 Pa
+- Danger: >250 Pa
+
+// HEPA Filter (HF)
+- Warning: 400-450 Pa
+- Danger: >450 Pa
+```
+
+### 3. AhuStatsWidget Updates
+
+**File:** `app/Filament/Widgets/AhuStatsWidget.php`
+
+#### Counting System:
+- ✅ Separate counts for warning and danger filters
+- ✅ Per-field integer casting: `(int)($record->$field ?? 0)`
+- ✅ Warning count: Filters in warning range (e.g., 100-150 for PF)
+- ✅ Danger count: Filters exceeding danger threshold (e.g., >150 for PF)
+
+#### Display Format:
+- ✅ HTML with inline CSS styles for color separation
+- ✅ Orange (#f59e0b) for WARNING text
+- ✅ Red (#ef4444) for DANGER text
+- ✅ Format: `WARNING: 2 | DANGER: 14`
+- ✅ Uses `HtmlString` for proper rendering
+
+#### Card Colors:
+- ✅ Red card: Any danger filters present
+- ✅ Orange card: Only warning filters (no danger)
+- ✅ Green card: All filters normal
+
+#### Statistics Provided:
+1. **PF Need Attention:** Count of PF filters needing attention
+2. **MF Need Attention:** Count of MF filters needing attention
+3. **HF Need Attention:** Count of HF filters needing attention
+4. **Worst AHU Points:** 5 AHUs with most HF threshold exceedances
+5. **PF Trend Chart:** 7-day history of PF filters ≥100 Pa
+
+### 4. AhuTableWidget Updates
+
+**File:** `app/Filament/Widgets/AhuTableWidget.php`
+
+#### Filter Logic:
+- ✅ Show records where ANY field exceeds warning threshold:
+  - PF fields: ≥100 Pa
+  - MF fields: ≥200 Pa
+  - HF fields: ≥400 Pa
+- ✅ Individual foreach loops for each filter type
+- ✅ Integer casting before comparison
+
+#### Display System:
+- ✅ Separate danger and warning items
+- ✅ HTML inline styles for multi-color display
+- ✅ Changed from Badge component (single color) to HTML rendering
+
+#### Column Format:
+```php
+// Critical PF Column
+[DANGER] MB1.1 (500), MB1.2 (500) [WARNING] PAU-1A (120)
+// Red text for danger, orange text for warning
+
+// Critical MF Column
+[DANGER] PAU-MB1 (400) [WARNING] MB1.1 (220)
+
+// Critical HF Column
+[DANGER] IF-A (500), IF-B (455) [WARNING] IF-C (420)
+```
+
+#### Item Collection:
+- ✅ Danger array: Filters exceeding danger threshold
+- ✅ Warning array: Filters in warning range only
+- ✅ Display format: `Filter Name (Value)`
+- ✅ Combined output with distinct colors
+
+### 5. Technical Implementation
+
+#### Integer Casting:
+```php
+(int)($record->$field ?? 0) >= 100
+```
+- Required because AhuChecklist model stores values as strings
+- Prevents "non-numeric value encountered" errors
+- Applied to all numeric comparisons
+
+#### HTML Color Coding:
+```php
+'<span style="color: #ef4444; font-weight: 600;">[DANGER] ' 
+    . implode(', ', $danger) . '</span>'
+'<span style="color: #f59e0b; font-weight: 600;">[WARNING] ' 
+    . implode(', ', $warning) . '</span>'
+```
+- Inline styles ensure consistent color rendering
+- Font-weight 600 for better visibility
+- Tailwind color codes for consistency
+
+#### HtmlString Usage (Stats Widget):
+```php
+->description(new \Illuminate\Support\HtmlString(
+    '<span style="color: #f59e0b; font-weight: 600;">WARNING: ' . $totalPfWarning . '</span> | ' .
+    '<span style="color: #ef4444; font-weight: 600;">DANGER: ' . $totalPfDanger . '</span>'
+))
+```
+- Enables HTML rendering in Filament stats description
+- Allows multi-color text in single description field
+
+### 6. Bug Fixes Applied
+
+#### Issues Resolved:
+1. ✅ Stats widget not appearing - Fixed integer casting
+2. ✅ Wrong monitoring logic - Changed to per-field checking
+3. ✅ Danger items not displaying - Fixed early return in conditional
+4. ✅ Warning items not showing - Combined danger and warning arrays
+5. ✅ Same color for warning/danger - Implemented HTML inline styles
+6. ✅ Syntax errors - Multiple targeted fixes with proper context
+
+### 7. Files Modified
+
+**Widgets:**
+- ✅ `app/Filament/Widgets/AhuStatsWidget.php`
+  - Updated counting logic
+  - Added HTML color-coded descriptions
+  - Enhanced card color logic
+  
+- ✅ `app/Filament/Widgets/AhuTableWidget.php`
+  - Rewrote filter logic for individual field checking
+  - Implemented HTML color-coded columns
+  - Separated danger and warning display
+
+**Cache Commands:**
+```bash
+php artisan cache:clear
+php artisan config:clear
+```
+
+### 8. Benefits
+
+#### Operational Improvements:
+1. **Accurate Monitoring:**
+   - Individual filter tracking vs. misleading totals
+   - Specific filter identification for replacement
+   - Prevents unnecessary filter changes
+
+2. **Clear Visual Distinction:**
+   - Orange warning = Schedule replacement soon
+   - Red danger = Replace immediately
+   - Easy priority identification
+
+3. **Better Decision Making:**
+   - Know exactly which filters need attention
+   - See filter names with actual pressure values
+   - Prioritize based on color coding
+
+4. **Consistent Display:**
+   - Same format in stats and table widgets
+   - Unified color scheme across dashboard
+   - Professional appearance
+
+### 9. Testing Results
+
+#### Stats Widget:
+- ✅ PF: Shows "WARNING: 2 | DANGER: 14" (total 16)
+- ✅ MF: Shows "WARNING: 1 | DANGER: 10" (total 11)
+- ✅ HF: Shows "WARNING: 2 | DANGER: 6" (total 8)
+- ✅ Card colors: Red when danger present, orange for warning only
+- ✅ Colors: Orange text for WARNING, red text for DANGER
+
+#### Table Widget:
+- ✅ Filters records correctly (any field ≥ threshold)
+- ✅ Displays danger items in red
+- ✅ Displays warning items in orange
+- ✅ Shows filter names with values: "MB1.1 (500)"
+- ✅ Handles multiple items per column
+
+### 10. Integration Points
+
+- **Utility Performance Dashboard:** Real-time filter monitoring
+- **AHU Checklist System:** Data source for analysis
+- **Widget Auto-refresh:** 30-second polling for updates
+- **Color System:** Tailwind CSS colors (#ef4444, #f59e0b)
+- **Filament Components:** Stat widget, Table widget, HtmlString
+
+### Documentation:
+
+- ✅ Implementation fully documented in CHECKLIST.md
+- ✅ All code changes tracked
+- ✅ Threshold configuration documented
+- ✅ Testing results verified
+- ✅ Benefits and integration points listed
+
+---
+
+**Last Updated:** 2025-12-17  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 26 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 27 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 27: AHU Filter Monitoring Enhancement - Individual field checking + warning/danger thresholds + color-coded display (Dec 17, 2025)
 - Phase 26: PM Manual Book + Enhanced Photo Display + Complete PM fix + Execute PM workflow (Dec 10, 2025)
 - Phase 25: Parts Request PWA fixes + InventoryMovement Observer (automatic stock deduction)
 - Phase 24: Telegram Bot Configuration (Utility Monitoring group)

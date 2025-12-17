@@ -48,75 +48,111 @@ class AhuStatsWidget extends BaseWidget
             'if_hepa_d', 'if_hepa_e', 'if_hepa_f'
         ];
         
-        // Total PF today
-        $totalPfToday = AhuChecklist::whereDate('created_at', $today)
+        // Total PF that need replacement (≥100) today
+        $totalPfWarning = AhuChecklist::whereDate('created_at', $today)
             ->get()
             ->sum(function($record) use ($pfFields) {
-                return collect($pfFields)->sum(function($field) use ($record) {
-                    return (int)($record->$field ?? 0);
-                });
+                return collect($pfFields)->filter(function($field) use ($record) {
+                    $value = (int)($record->$field ?? 0);
+                    return $value >= 100 && $value <= 150;
+                })->count();
             });
         
-        // Total MF today
-        $totalMfToday = AhuChecklist::whereDate('created_at', $today)
+        $totalPfDanger = AhuChecklist::whereDate('created_at', $today)
+            ->get()
+            ->sum(function($record) use ($pfFields) {
+                return collect($pfFields)->filter(function($field) use ($record) {
+                    return (int)($record->$field ?? 0) > 150;
+                })->count();
+            });
+        
+        // Total MF that need replacement (≥200) today
+        $totalMfWarning = AhuChecklist::whereDate('created_at', $today)
             ->get()
             ->sum(function($record) use ($mfFields) {
-                return collect($mfFields)->sum(function($field) use ($record) {
-                    return (int)($record->$field ?? 0);
-                });
+                return collect($mfFields)->filter(function($field) use ($record) {
+                    $value = (int)($record->$field ?? 0);
+                    return $value >= 200 && $value <= 250;
+                })->count();
             });
         
-        // Total HF today
-        $totalHfToday = AhuChecklist::whereDate('created_at', $today)
+        $totalMfDanger = AhuChecklist::whereDate('created_at', $today)
+            ->get()
+            ->sum(function($record) use ($mfFields) {
+                return collect($mfFields)->filter(function($field) use ($record) {
+                    return (int)($record->$field ?? 0) > 250;
+                })->count();
+            });
+        
+        // Total HF that need replacement (≥400) today
+        $totalHfWarning = AhuChecklist::whereDate('created_at', $today)
             ->get()
             ->sum(function($record) use ($hfFields) {
-                return collect($hfFields)->sum(function($field) use ($record) {
-                    return (int)($record->$field ?? 0);
-                });
+                return collect($hfFields)->filter(function($field) use ($record) {
+                    $value = (int)($record->$field ?? 0);
+                    return $value >= 400 && $value <= 450;
+                })->count();
+            });
+        
+        $totalHfDanger = AhuChecklist::whereDate('created_at', $today)
+            ->get()
+            ->sum(function($record) use ($hfFields) {
+                return collect($hfFields)->filter(function($field) use ($record) {
+                    return (int)($record->$field ?? 0) > 450;
+                })->count();
             });
         
         // Worst 5 AHU points (most HF in last 30 days)
         $worst5 = $this->getWorstAhuPoints();
 
         return [
-            Stat::make('Total PF Today', number_format($totalPfToday))
-                ->description('Pre-filters across all AHU/PAU/VRF')
-                ->descriptionIcon('heroicon-o-funnel')
-                ->color('info')
+            Stat::make('PF Need Attention', ($totalPfWarning + $totalPfDanger))
+                ->description(new \Illuminate\Support\HtmlString(
+                    '<span style="color: #f59e0b; font-weight: 600;">WARNING: ' . $totalPfWarning . '</span> | ' .
+                    '<span style="color: #ef4444; font-weight: 600;">DANGER: ' . $totalPfDanger . '</span>'
+                ))
+                ->descriptionIcon('heroicon-o-exclamation-triangle')
+                ->color($totalPfDanger > 0 ? 'danger' : ($totalPfWarning > 0 ? 'warning' : 'success'))
                 ->chart($this->getPfTrend()),
             
-            Stat::make('Total MF Today', number_format($totalMfToday))
-                ->description('Medium filters across all AHU/PAU/VRF')
-                ->descriptionIcon('heroicon-o-funnel')
-                ->color('warning'),
+            Stat::make('MF Need Attention', ($totalMfWarning + $totalMfDanger))
+                ->description(new \Illuminate\Support\HtmlString(
+                    '<span style="color: #f59e0b; font-weight: 600;">WARNING: ' . $totalMfWarning . '</span> | ' .
+                    '<span style="color: #ef4444; font-weight: 600;">DANGER: ' . $totalMfDanger . '</span>'
+                ))
+                ->descriptionIcon('heroicon-o-exclamation-triangle')
+                ->color($totalMfDanger > 0 ? 'danger' : ($totalMfWarning > 0 ? 'warning' : 'success')),
             
-            Stat::make('Total HF Today', number_format($totalHfToday))
-                ->description('HEPA filters across all AHU/PAU/VRF')
-                ->descriptionIcon('heroicon-o-funnel')
-                ->color('danger'),
+            Stat::make('HF Need Attention', ($totalHfWarning + $totalHfDanger))
+                ->description(new \Illuminate\Support\HtmlString(
+                    '<span style="color: #f59e0b; font-weight: 600;">WARNING: ' . $totalHfWarning . '</span> | ' .
+                    '<span style="color: #ef4444; font-weight: 600;">DANGER: ' . $totalHfDanger . '</span>'
+                ))
+                ->descriptionIcon('heroicon-o-exclamation-triangle')
+                ->color($totalHfDanger > 0 ? 'danger' : ($totalMfWarning > 0 ? 'warning' : 'success')),
             
             Stat::make('Worst AHU Point #1', $worst5[0]['name'] ?? 'N/A')
-                ->description(($worst5[0]['count'] ?? 0) . ' HF issues in 30 days')
+                ->description(($worst5[0]['count'] ?? 0) . ' times exceed threshold')
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color('danger'),
             
             Stat::make('Worst AHU Point #2', $worst5[1]['name'] ?? 'N/A')
-                ->description(($worst5[1]['count'] ?? 0) . ' HF issues in 30 days')
+                ->description(($worst5[1]['count'] ?? 0) . ' times exceed threshold')
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color('danger'),
             
             Stat::make('Worst AHU Point #3', $worst5[2]['name'] ?? 'N/A')
-                ->description(($worst5[2]['count'] ?? 0) . ' HF issues in 30 days')
+                ->description(($worst5[2]['count'] ?? 0) . ' times exceed threshold')
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color('warning'),
             
             Stat::make('Worst AHU Point #4', $worst5[3]['name'] ?? 'N/A')
-                ->description(($worst5[3]['count'] ?? 0) . ' HF issues in 30 days')
+                ->description(($worst5[3]['count'] ?? 0) . ' times exceed threshold')
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color('warning'),
             
             Stat::make('Worst AHU Point #5', $worst5[4]['name'] ?? 'N/A')
-                ->description(($worst5[4]['count'] ?? 0) . ' HF issues in 30 days')
+                ->description(($worst5[4]['count'] ?? 0) . ' times exceed threshold')
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color('warning'),
         ];
@@ -143,9 +179,10 @@ class AhuStatsWidget extends BaseWidget
         
         $counts = [];
         foreach ($hfFields as $field => $name) {
-            $counts[$name] = $records->sum(function($record) use ($field) {
-                return (int)($record->$field ?? 0);
-            });
+            // Count how many times this field exceeded 400 (warning threshold)
+            $counts[$name] = $records->filter(function($record) use ($field) {
+                return (int)($record->$field ?? 0) >= 400;
+            })->count();
         }
         
         arsort($counts);
@@ -183,9 +220,9 @@ class AhuStatsWidget extends BaseWidget
             $total = AhuChecklist::whereDate('created_at', $date)
                 ->get()
                 ->sum(function($record) use ($pfFields) {
-                    return collect($pfFields)->sum(function($field) use ($record) {
-                        return (int)($record->$field ?? 0);
-                    });
+                    return collect($pfFields)->filter(function($field) use ($record) {
+                        return (int)($record->$field ?? 0) >= 100;
+                    })->count();
                 });
             $trend[] = $total;
         }
