@@ -60,9 +60,10 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 25: Parts Request PWA Enhancement & Inventory Observer (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 26: PM Manual Book & Enhanced Photo Display (100% COMPLETE - Dec 10, 2025)** ✅
 - **Phase 27: AHU Filter Monitoring Enhancement (100% COMPLETE - Dec 17, 2025)** ✅
+- **Phase 28: Equipment Trouble Tracking System (100% COMPLETE - Dec 21, 2025)** ✅
 
-**🎯 Current Status (December 17, 2025):**
-- **Total Phases Completed:** 27 phases ✅
+**🎯 Current Status (December 21, 2025):**
+- **Total Phases Completed:** 28 phases ✅
 - **System Status:** Production-ready with full feature set
 - **All Core Features:** Operational and tested
 - **Integration Status:** Telegram (configured with bot token), WhatsApp, AI/ML (ONNX + OpenAI), Power BI all configured
@@ -5282,11 +5283,383 @@ php artisan config:clear
 
 ---
 
-**Last Updated:** 2025-12-17  
+## Phase 28: Equipment Trouble Tracking System ✅
+
+**Completion Date:** 2025-12-21  
+**Status:** 100% COMPLETE ✅
+
+### Overview:
+Complete system for tracking equipment troubles from initial report through resolution, with real-time status monitoring and performance metrics.
+
+### 1. Database Schema
+
+**Migration:** `2025_12_21_141520_create_equipment_troubles_table.php`
+
+#### Table Structure:
+```sql
+CREATE TABLE equipment_troubles (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  equipment_id BIGINT FK→sub_assets,
+  title VARCHAR(255) NOT NULL,
+  issue_description TEXT NOT NULL,
+  priority ENUM('low','medium','high','critical') DEFAULT 'medium',
+  status ENUM('open','investigating','in_progress','resolved','closed') DEFAULT 'open',
+  reported_by BIGINT FK→users,
+  reported_at TIMESTAMP NOT NULL,
+  assigned_to BIGINT FK→users NULL,
+  acknowledged_at TIMESTAMP NULL,
+  started_at TIMESTAMP NULL,
+  resolved_at TIMESTAMP NULL,
+  closed_at TIMESTAMP NULL,
+  resolution_notes TEXT NULL,
+  downtime_minutes VARCHAR(255) NULL,
+  attachments JSON NULL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  
+  INDEX (status),
+  INDEX (priority),
+  INDEX (reported_at),
+  INDEX (equipment_id, status)
+);
+```
+
+#### Key Features:
+- ✅ Foreign key to `sub_assets` (Equipment)
+- ✅ 5-stage status workflow (open → investigating → in_progress → resolved → closed)
+- ✅ 4-level priority system (low, medium, high, critical)
+- ✅ Full timeline tracking (reported, acknowledged, started, resolved, closed)
+- ✅ Reporter and assignee tracking
+- ✅ Resolution documentation
+- ✅ Downtime calculation
+- ✅ Multiple attachments support (photos/documents)
+- ✅ Optimized indexes for filtering and performance
+
+### 2. Model Implementation
+
+**File:** `app/Models/EquipmentTrouble.php`
+
+#### Features:
+```php
+class EquipmentTrouble extends Model
+{
+    use LogsActivity; // Automatic audit logging
+    
+    // Relationships
+    - equipment() → SubAsset (Equipment details)
+    - reportedBy() → User (Who reported)
+    - assignedTo() → User (Assigned technician)
+    
+    // Scopes
+    - open() → Active troubles (open/investigating/in_progress)
+    - critical() → Critical priority only
+    - high() → High priority only
+    
+    // Accessors
+    - is_open → Boolean (is trouble still active)
+    - response_time → Minutes from report to acknowledge
+    - resolution_time → Minutes from report to resolution
+}
+```
+
+#### Automatic Calculations:
+- ✅ Response time: `reported_at` → `acknowledged_at`
+- ✅ Resolution time: `reported_at` → `resolved_at`
+- ✅ Real-time status checking
+
+### 3. Filament Resource
+
+**File:** `app/Filament/Resources/EquipmentTroubles/EquipmentTroubleResource.php`
+
+#### Navigation Settings:
+- ✅ Icon: `heroicon-o-exclamation-triangle`
+- ✅ Group: Maintenance
+- ✅ Badge: Shows count of open troubles (red badge)
+- ✅ Sort: 5
+
+#### Features:
+- ✅ Full CRUD operations (Create, Read, Update, Delete)
+- ✅ View page for detailed trouble information
+- ✅ Edit page for status updates
+- ✅ Dynamic badge showing open troubles count
+
+### 4. Form Schema
+
+**File:** `app/Filament/Resources/EquipmentTroubles/Schemas/EquipmentTroubleForm.php`
+
+#### Section 1: Trouble Information
+- ✅ **Equipment:** Searchable select dropdown (from SubAssets)
+- ✅ **Title:** Brief description (max 255 chars)
+- ✅ **Issue Description:** Detailed textarea (4 rows)
+- ✅ **Priority:** Select (Low/Medium/High/Critical) with colors
+- ✅ **Status:** Select (Open/Investigating/In Progress/Resolved/Closed)
+
+#### Section 2: Assignment
+- ✅ **Reported By:** Auto-filled with current user (hidden)
+- ✅ **Reported At:** DateTime picker (default: now)
+- ✅ **Assigned To:** Select technician (searchable)
+- ✅ **Acknowledged At:** Conditional (visible when not 'open')
+- ✅ **Started At:** Conditional (visible when in_progress/resolved/closed)
+- ✅ **Resolved At:** Conditional (visible when resolved/closed)
+- ✅ **Closed At:** Conditional (visible when closed)
+
+#### Section 3: Resolution (Collapsible)
+- ✅ **Resolution Notes:** Rich text editor (HTML support)
+- ✅ **Downtime Minutes:** Numeric input with suffix
+- ✅ **Attachments:** Multiple image uploads
+  - Disk: public
+  - Directory: trouble-attachments
+  - Max size: 5MB per file
+
+### 5. Table Display
+
+**File:** `app/Filament/Resources/EquipmentTroubles/Tables/EquipmentTroublesTable.php`
+
+#### Columns:
+1. **ID:** Sortable, searchable
+2. **Equipment Name:** Sortable, searchable, truncated (30 chars)
+3. **Title:** Sortable, searchable, wrapped, truncated (40 chars)
+4. **Priority Badge:** Color-coded with icons
+   - Gray → Low (arrow-down icon)
+   - Warning → Medium (minus icon)
+   - Danger → High (arrow-up icon)
+   - Danger → Critical (exclamation-triangle icon)
+5. **Status Badge:** Color-coded
+   - Danger → Open
+   - Warning → Investigating
+   - Info → In Progress
+   - Success → Resolved
+   - Gray → Closed
+6. **Reported By:** Sortable, searchable, toggleable
+7. **Assigned To:** Sortable, searchable, toggleable, default '-'
+8. **Reported At:** DateTime format (d M Y H:i)
+9. **Response Time:** Minutes with suffix, toggleable
+10. **Resolution Time:** Minutes with suffix, toggleable
+11. **Downtime:** Minutes with suffix, toggleable (hidden by default)
+
+#### Filters:
+- ✅ **Status Filter:** Multi-select (default: open)
+- ✅ **Priority Filter:** Multi-select
+- ✅ **Equipment Filter:** Searchable, preloaded dropdown
+
+#### Sorting:
+- ✅ Default: `reported_at DESC` (newest first)
+
+### 6. Info List (View Page)
+
+**File:** `app/Filament/Resources/EquipmentTroubles/Schemas/EquipmentTroubleInfolist.php`
+
+#### Section 1: Trouble Details
+- ✅ Trouble ID
+- ✅ Equipment name
+- ✅ Title (full width)
+- ✅ Description (markdown support)
+- ✅ Priority badge (color-coded)
+- ✅ Status badge (color-coded)
+
+#### Section 2: Timeline
+- ✅ Reported By (with name)
+- ✅ Reported At (formatted)
+- ✅ Assigned To (or '-')
+- ✅ Acknowledged At (or '-')
+- ✅ Started At (or '-')
+- ✅ Resolved At (or '-')
+- ✅ Closed At (or '-')
+- ✅ Response Time (minutes or '-')
+- ✅ Resolution Time (minutes or '-')
+- ✅ Total Downtime (minutes or '-')
+
+#### Section 3: Resolution (Collapsible)
+- ✅ Resolution notes (HTML display)
+- ✅ Attachments gallery (image grid)
+- ✅ Visible only when resolved/closed
+
+### 7. Dashboard Widget
+
+**File:** `app/Filament/Widgets/TroubleStatsWidget.php`
+
+#### 5 KPI Cards:
+1. **Open Troubles**
+   - Count of active troubles
+   - Description: "{X} Critical, {Y} High" or "No critical issues"
+   - Color: Red if critical, Warning if open, Success if none
+   - Icon: exclamation-triangle
+
+2. **Critical Equipment**
+   - Count of critical priority troubles
+   - Description: "Requires immediate attention"
+   - Color: Red if any, Success if none
+   - Icon: shield-exclamation
+
+3. **Resolved Today**
+   - Count of troubles resolved today
+   - Description: "Equipment back online"
+   - Color: Success
+   - Icon: check-circle
+
+4. **Avg Response Time**
+   - Average time to acknowledge (today)
+   - Format: "X min" or "-"
+   - Description: "Time to acknowledge"
+   - Color: Warning if >30 min, Success if ≤30 min
+   - Icon: clock
+
+5. **Avg Resolution Time**
+   - Average time to resolve (today)
+   - Format: "X min" or "-"
+   - Description: "Time to resolve"
+   - Color: Warning if >120 min, Success if ≤120 min
+   - Icon: wrench-screwdriver
+
+### 8. Files Created
+
+**Migration:**
+- ✅ `database/migrations/2025_12_21_141520_create_equipment_troubles_table.php`
+
+**Model:**
+- ✅ `app/Models/EquipmentTrouble.php`
+
+**Resource:**
+- ✅ `app/Filament/Resources/EquipmentTroubles/EquipmentTroubleResource.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Schemas/EquipmentTroubleForm.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Schemas/EquipmentTroubleInfolist.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Tables/EquipmentTroublesTable.php`
+
+**Pages:**
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/ListEquipmentTroubles.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/CreateEquipmentTrouble.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/EditEquipmentTrouble.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/ViewEquipmentTrouble.php`
+
+**Widget:**
+- ✅ `app/Filament/Widgets/TroubleStatsWidget.php`
+
+### 9. User Workflow
+
+#### Reporting Phase:
+1. User navigates to **Equipment Troubles** menu
+2. Click **Create** button
+3. Select equipment from dropdown
+4. Enter trouble title and detailed description
+5. Set priority level (Low/Medium/High/Critical)
+6. System auto-fills reporter and timestamp
+7. Optionally assign to technician
+8. Add photos/documents if available
+9. Submit → Status: **Open**
+
+#### Acknowledgment Phase:
+1. Assigned technician reviews trouble
+2. Updates status to **Investigating**
+3. Sets **Acknowledged At** timestamp
+4. System calculates response time automatically
+5. Technician can add notes or photos
+
+#### Resolution Phase:
+1. Technician starts work → Status: **In Progress**
+2. Sets **Started At** timestamp
+3. Performs repairs/maintenance
+4. Updates status to **Resolved**
+5. Sets **Resolved At** timestamp
+6. Enters resolution notes (what was done)
+7. Records total downtime
+8. Uploads completion photos
+9. System calculates resolution time
+
+#### Closing Phase:
+1. Manager/Supervisor reviews resolution
+2. Verifies equipment is operational
+3. Updates status to **Closed**
+4. Sets **Closed At** timestamp
+5. Record archived with full timeline
+
+### 10. Benefits
+
+#### For Maintenance Team:
+1. **Clear Priority System:**
+   - Immediate visibility of critical equipment
+   - Focus on high-priority issues first
+   - Prevent production downtime
+
+2. **Complete Tracking:**
+   - Full lifecycle documentation
+   - Response and resolution metrics
+   - Accountability for each stage
+
+3. **Performance Monitoring:**
+   - Average response times
+   - Average resolution times
+   - Equipment downtime tracking
+
+#### For Management:
+1. **Real-time Dashboard:**
+   - Live count of open troubles
+   - Critical equipment alerts
+   - Daily resolution progress
+
+2. **Historical Data:**
+   - Equipment failure patterns
+   - Technician performance
+   - Downtime cost analysis
+
+3. **Decision Support:**
+   - Identify problematic equipment
+   - Optimize technician assignments
+   - Plan preventive maintenance
+
+### 11. Integration Points
+
+- **Equipment Master Data:** Links to SubAssets table
+- **User Management:** Reporter and assignee tracking
+- **Activity Logs:** Automatic audit trail using LogsActivity trait
+- **File Storage:** Public disk for trouble attachments
+- **Dashboard:** Real-time widget with KPIs
+- **Filament UI:** Consistent with existing CMMS interface
+
+### 12. Technical Features
+
+#### Database:
+- ✅ Foreign key constraints with cascade delete
+- ✅ Optimized indexes for common queries
+- ✅ JSON column for flexible attachments storage
+- ✅ ENUM types for status and priority validation
+
+#### Model:
+- ✅ Automatic activity logging
+- ✅ Query scopes for filtering
+- ✅ Computed attributes (response_time, resolution_time, is_open)
+- ✅ Type casting for dates and JSON
+
+#### UI/UX:
+- ✅ Color-coded priorities and statuses
+- ✅ Conditional form fields (smart form)
+- ✅ Rich text editor for notes
+- ✅ Multiple file upload with preview
+- ✅ Responsive table with toggleable columns
+- ✅ Search and filter capabilities
+
+#### Performance:
+- ✅ Database indexes on frequently queried columns
+- ✅ Eager loading for relationships
+- ✅ Efficient query scopes
+- ✅ Minimal database queries
+
+### Documentation:
+
+- ✅ Complete implementation documented in CHECKLIST.md
+- ✅ Database schema fully described
+- ✅ Model features and relationships documented
+- ✅ Form and table configurations detailed
+- ✅ User workflow clearly outlined
+- ✅ Benefits and integration points listed
+
+---
+
+**Last Updated:** 2025-12-21  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 27 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 28 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 28: Equipment Trouble Tracking System - Complete lifecycle tracking with dashboard widget (Dec 21, 2025)
 - Phase 27: AHU Filter Monitoring Enhancement - Individual field checking + warning/danger thresholds + color-coded display (Dec 17, 2025)
 - Phase 26: PM Manual Book + Enhanced Photo Display + Complete PM fix + Execute PM workflow (Dec 10, 2025)
 - Phase 25: Parts Request PWA fixes + InventoryMovement Observer (automatic stock deduction)

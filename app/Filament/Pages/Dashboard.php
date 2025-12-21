@@ -32,6 +32,7 @@ class Dashboard extends BaseDashboard
             \App\Filament\Widgets\Chiller1Trend::class,
             \App\Filament\Widgets\Chiller2StatsWidget::class,
             \App\Filament\Widgets\Chiller2TableWidget::class,
+            \App\Filament\Widgets\Chiller2Trend::class,
             \App\Filament\Widgets\Compressor1StatsWidget::class,
             \App\Filament\Widgets\Compressor1TableWidget::class,
             \App\Filament\Widgets\Compressor2StatsWidget::class,
