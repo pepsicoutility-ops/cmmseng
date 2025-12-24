@@ -60,16 +60,18 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 25: Parts Request PWA Enhancement & Inventory Observer (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 26: PM Manual Book & Enhanced Photo Display (100% COMPLETE - Dec 10, 2025)** ✅
 - **Phase 27: AHU Filter Monitoring Enhancement (100% COMPLETE - Dec 17, 2025)** ✅
-- **Phase 28: Equipment Trouble Tracking System (100% COMPLETE - Dec 21, 2025)** ✅
+- **Phase 28: Equipment Trouble Tracking System (100% COMPLETE - Dec 21, 2025)** ?
+- **Phase 29: Excel Import Monitoring System (Users) (100% COMPLETE - Dec 21, 2025)** ?
+- **Phase 30: AI Chat (GPT-4 Turbo) (100% COMPLETE - Dec 21, 2025)** ?
 
-**🎯 Current Status (December 21, 2025):**
-- **Total Phases Completed:** 28 phases ✅
+**Current Status (December 21, 2025):**
+- **Total Phases Completed:** 30 phases ✅
 - **System Status:** Production-ready with full feature set
 - **All Core Features:** Operational and tested
 - **Integration Status:** Telegram (configured with bot token), WhatsApp, AI/ML (ONNX + OpenAI), Power BI all configured
 - **Mobile PWA:** Fully functional with 6 utility checklists + work order forms + parts request (auto stock deduction) ✅
 - **Documentation:** Complete across all phases
-- **Import/Export:** Excel & PDF export + Excel import for all 5 utility checklists ✅
+- **Import/Export:** Excel & PDF export + Excel import for all 5 utility checklists + batch user import monitoring ✅
 - **Inventory System:** Automatic stock deduction via InventoryMovementObserver ✅
 - **VPS Deployment:** Attempted (Phase 20) - encountered 403 CSRF issues, pending resolution
 
@@ -5289,13 +5291,14 @@ php artisan config:clear
 **Status:** 100% COMPLETE ✅
 
 ### Overview:
-Complete system for tracking equipment troubles from initial report through resolution, with real-time status monitoring and performance metrics.
+Complete system for tracking equipment troubles from initial report through resolution, with multi-technician assignment capability, role-based access control, and real-time workflow automation.
 
 ### 1. Database Schema
 
 **Migration:** `2025_12_21_141520_create_equipment_troubles_table.php`
+**Pivot Table:** `2025_12_21_155025_create_equipment_trouble_technician_table.php`
 
-#### Table Structure:
+#### Main Table Structure:
 ```sql
 CREATE TABLE equipment_troubles (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -5306,7 +5309,7 @@ CREATE TABLE equipment_troubles (
   status ENUM('open','investigating','in_progress','resolved','closed') DEFAULT 'open',
   reported_by BIGINT FK→users,
   reported_at TIMESTAMP NOT NULL,
-  assigned_to BIGINT FK→users NULL,
+  assigned_to BIGINT FK→users NULL, -- Legacy field, kept for backward compatibility
   acknowledged_at TIMESTAMP NULL,
   started_at TIMESTAMP NULL,
   resolved_at TIMESTAMP NULL,
@@ -5322,6 +5325,14 @@ CREATE TABLE equipment_troubles (
   INDEX (reported_at),
   INDEX (equipment_id, status)
 );
+
+CREATE TABLE equipment_trouble_technician (
+  equipment_trouble_id BIGINT FK→equipment_troubles CASCADE,
+  user_id BIGINT FK→users CASCADE,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  PRIMARY KEY (equipment_trouble_id, user_id)
+);
 ```
 
 #### Key Features:
@@ -5329,9 +5340,10 @@ CREATE TABLE equipment_troubles (
 - ✅ 5-stage status workflow (open → investigating → in_progress → resolved → closed)
 - ✅ 4-level priority system (low, medium, high, critical)
 - ✅ Full timeline tracking (reported, acknowledged, started, resolved, closed)
-- ✅ Reporter and assignee tracking
-- ✅ Resolution documentation
-- ✅ Downtime calculation
+- ✅ Reporter tracking
+- ✅ **Multi-technician assignment (up to 2 technicians) via pivot table**
+- ✅ Resolution documentation with rich text editor
+- ✅ **Automatic downtime calculation** (from started_at to resolved_at)
 - ✅ Multiple attachments support (photos/documents)
 - ✅ Optimized indexes for filtering and performance
 
@@ -5348,7 +5360,8 @@ class EquipmentTrouble extends Model
     // Relationships
     - equipment() → SubAsset (Equipment details)
     - reportedBy() → User (Who reported)
-    - assignedTo() → User (Assigned technician)
+    - assignedTo() → User (Legacy single assignment)
+    - technicians() → BelongsToMany (Multi-technician assignment, max 2)
     
     // Scopes
     - open() → Active troubles (open/investigating/in_progress)
@@ -5365,6 +5378,7 @@ class EquipmentTrouble extends Model
 #### Automatic Calculations:
 - ✅ Response time: `reported_at` → `acknowledged_at`
 - ✅ Resolution time: `reported_at` → `resolved_at`
+- ✅ Downtime: `started_at` → `resolved_at` (auto-calculated with abs())
 - ✅ Real-time status checking
 
 ### 3. Filament Resource
@@ -5376,12 +5390,14 @@ class EquipmentTrouble extends Model
 - ✅ Group: Maintenance
 - ✅ Badge: Shows count of open troubles (red badge)
 - ✅ Sort: 5
+- ✅ **Eager loading:** Technicians relationship for policy checks
 
 #### Features:
 - ✅ Full CRUD operations (Create, Read, Update, Delete)
 - ✅ View page for detailed trouble information
 - ✅ Edit page for status updates
 - ✅ Dynamic badge showing open troubles count
+- ✅ **All roles can see all troubles** (visibility controlled at action level)
 
 ### 4. Form Schema
 
@@ -5396,7 +5412,12 @@ class EquipmentTrouble extends Model
 
 #### Section 2: Assignment
 - ✅ **Reported By:** Auto-filled with current user (hidden)
-- ✅ **Reported At:** DateTime picker (default: now)
+- ✅ **Reported At:** DateTime picker (default: now, disabled for technicians with dehydrated)
+- ✅ **Assigned Technicians:** Multi-select (max 2 technicians)
+  - Searchable and preloaded
+  - Disabled for technicians
+  - Helper text: "Assistant manager can assign up to 2 technicians"
+  - Auto-synced via afterCreate/afterSave hooks
 - ✅ **Assigned To:** Select technician (searchable)
 - ✅ **Acknowledged At:** Conditional (visible when not 'open')
 - ✅ **Started At:** Conditional (visible when in_progress/resolved/closed)
@@ -5460,7 +5481,7 @@ class EquipmentTrouble extends Model
 #### Section 2: Timeline
 - ✅ Reported By (with name)
 - ✅ Reported At (formatted)
-- ✅ Assigned To (or '-')
+- ✅ **Assigned Technicians** (badge display with comma separator)
 - ✅ Acknowledged At (or '-')
 - ✅ Started At (or '-')
 - ✅ Resolved At (or '-')
@@ -5470,8 +5491,8 @@ class EquipmentTrouble extends Model
 - ✅ Total Downtime (minutes or '-')
 
 #### Section 3: Resolution (Collapsible)
-- ✅ Resolution notes (HTML display)
-- ✅ Attachments gallery (image grid)
+- ✅ Resolution notes (HTML display with image support)
+- ✅ Attachments gallery (custom view component)
 - ✅ Visible only when resolved/closed
 
 ### 7. Dashboard Widget
@@ -5511,13 +5532,37 @@ class EquipmentTrouble extends Model
    - Color: Warning if >120 min, Success if ≤120 min
    - Icon: wrench-screwdriver
 
-### 8. Files Created
+### 8. Policy & Authorization
 
-**Migration:**
+**File:** `app/Policies/EquipmentTroublePolicy.php`
+
+#### Permissions:
+- ✅ **viewAny:** All roles (super_admin, manager, asisten_manager, technician)
+- ✅ **view:** All roles can view all troubles
+- ✅ **create:** All roles can create troubles
+- ✅ **update:** 
+  - Manager/Assistant Manager: All troubles
+  - Technician: Only assigned troubles (via technicians relationship)
+- ✅ **delete:** Only manager/asisten_manager
+- ✅ **restore:** Manager and super_admin
+- ✅ **forceDelete:** Super_admin only
+
+#### Authorization Logic:
+- Technicians can view all troubles (for reporting purposes)
+- Only assigned technicians can execute workflow actions
+- Update permission checks `technicians` relationship membership
+
+### 9. Files Created
+
+**Migrations:**
 - ✅ `database/migrations/2025_12_21_141520_create_equipment_troubles_table.php`
+- ✅ `database/migrations/2025_12_21_155025_create_equipment_trouble_technician_table.php`
 
 **Model:**
-- ✅ `app/Models/EquipmentTrouble.php`
+- ✅ `app/Models/EquipmentTrouble.php` (with technicians BelongsToMany relationship)
+
+**Policy:**
+- ✅ `app/Policies/EquipmentTroublePolicy.php`
 
 **Resource:**
 - ✅ `app/Filament/Resources/EquipmentTroubles/EquipmentTroubleResource.php`
@@ -5527,50 +5572,78 @@ class EquipmentTrouble extends Model
 
 **Pages:**
 - ✅ `app/Filament/Resources/EquipmentTroubles/Pages/ListEquipmentTroubles.php`
-- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/CreateEquipmentTrouble.php`
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/CreateEquipmentTrouble.php` (with afterCreate sync)
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/EditEquipmentTrouble.php` (with afterSave sync)
+- ✅ `app/Filament/Resources/EquipmentTroubles/Pages/ViewEquipmentTrouble.php` (edit button hidden from technicians)
 - ✅ `app/Filament/Resources/EquipmentTroubles/Pages/EditEquipmentTrouble.php`
 - ✅ `app/Filament/Resources/EquipmentTroubles/Pages/ViewEquipmentTrouble.php`
 
 **Widget:**
 - ✅ `app/Filament/Widgets/TroubleStatsWidget.php`
 
-### 9. User Workflow
+### 10. User Workflow
 
-#### Reporting Phase:
-1. User navigates to **Equipment Troubles** menu
-2. Click **Create** button
-3. Select equipment from dropdown
-4. Enter trouble title and detailed description
-5. Set priority level (Low/Medium/High/Critical)
-6. System auto-fills reporter and timestamp
-7. Optionally assign to technician
+#### Reporting Phase (Technician):
+1. **Technician** discovers equipment trouble during rounds
+2. Navigate to **Equipment Troubles** menu
+3. Click **New Equipment Trouble** button
+4. Select equipment from searchable dropdown
+5. Enter trouble title and detailed issue description
+6. Set priority level (Low/Medium/High/Critical)
+7. System auto-fills reporter and reported_at timestamp
 8. Add photos/documents if available
 9. Submit → Status: **Open**
+10. All technicians can now view the trouble
 
-#### Acknowledgment Phase:
-1. Assigned technician reviews trouble
-2. Updates status to **Investigating**
-3. Sets **Acknowledged At** timestamp
-4. System calculates response time automatically
-5. Technician can add notes or photos
+#### Assignment Phase (Assistant Manager):
+1. **Assistant Manager** reviews open troubles
+2. Click **Edit** on the trouble
+3. Select **up to 2 technicians** from Assigned Technicians field
+4. System syncs technician assignments to pivot table
+5. Assigned technicians now see workflow action buttons
+6. Save changes
 
-#### Resolution Phase:
-1. Technician starts work → Status: **In Progress**
-2. Sets **Started At** timestamp
-3. Performs repairs/maintenance
-4. Updates status to **Resolved**
-5. Sets **Resolved At** timestamp
-6. Enters resolution notes (what was done)
-7. Records total downtime
-8. Uploads completion photos
-9. System calculates resolution time
+#### Investigation Phase (Assigned Technician):
+1. Assigned technician logs in and views Equipment Troubles
+2. Sees **Investigate** button on assigned troubles (other technicians don't see it)
+3. Clicks **Investigate** button
+4. Status changes to **Investigating**
+5. System records **acknowledged_at** timestamp
+6. Response time automatically calculated
+7. Technician can add notes or photos via Edit
 
-#### Closing Phase:
-1. Manager/Supervisor reviews resolution
-2. Verifies equipment is operational
-3. Updates status to **Closed**
-4. Sets **Closed At** timestamp
-5. Record archived with full timeline
+#### Work Phase (Assigned Technician):
+1. Technician ready to start repairs
+2. Clicks **Start Work** button (visible only to assigned technicians)
+3. Status changes to **In Progress**
+4. System records **started_at** timestamp
+5. Technician performs repairs/maintenance
+6. Can update notes and add photos during work
+
+#### Resolution Phase (Assigned Technician):
+1. Work completed, equipment operational
+2. Clicks **Resolve** button (visible only to assigned technicians)
+3. Modal opens with form:
+   - **Resolution Notes** (required): Rich text editor to describe what was done
+4. System automatically calculates **downtime_minutes**:
+   - Formula: `abs(started_at - resolved_at)` in minutes
+   - Displayed as read-only
+5. Submit form
+6. Status changes to **Resolved**
+7. System records **resolved_at** timestamp
+8. Resolution time automatically calculated
+9. Notification sent: "Trouble resolved - Equipment is back online"
+
+#### Closing Phase (Manager/Assistant Manager):
+1. Manager reviews resolved trouble
+2. Verifies equipment is operating normally
+3. Clicks **Close** button (visible only to manager/asisten_manager)
+4. Confirmation modal appears
+5. Confirms closure
+6. Status changes to **Closed**
+7. System records **closed_at** timestamp
+8. Record archived with full timeline
+9. All metrics finalized
 
 ### 10. Benefits
 
@@ -5609,23 +5682,80 @@ class EquipmentTrouble extends Model
 ### 11. Integration Points
 
 - **Equipment Master Data:** Links to SubAssets table
-- **User Management:** Reporter and assignee tracking
+- **User Management:** Multi-technician assignment via pivot table
 - **Activity Logs:** Automatic audit trail using LogsActivity trait
 - **File Storage:** Public disk for trouble attachments
-- **Dashboard:** Real-time widget with KPIs
+- **Dashboard:** Real-time widget with 5 KPIs
 - **Filament UI:** Consistent with existing CMMS interface
+- **Policy System:** Role-based access control integrated
 
 ### 12. Technical Features
 
 #### Database:
 - ✅ Foreign key constraints with cascade delete
-- ✅ Optimized indexes for common queries
+- ✅ Optimized indexes for common queries (status, priority, reported_at, equipment_id)
 - ✅ JSON column for flexible attachments storage
 - ✅ ENUM types for status and priority validation
+- ✅ **Pivot table for many-to-many technician assignment**
+- ✅ Composite primary key on pivot table
 
 #### Model:
-- ✅ Automatic activity logging
-- ✅ Query scopes for filtering
+- ✅ Automatic activity logging via LogsActivity trait
+- ✅ Query scopes for filtering (open, critical, high)
+- ✅ **BelongsToMany relationship** for multiple technician assignment
+- ✅ Computed attributes (is_open, response_time, resolution_time)
+- ✅ DateTime casting for all timestamp fields
+- ✅ Array casting for attachments JSON
+
+#### Resource:
+- ✅ **Eager loading** with technicians relationship
+- ✅ Dynamic navigation badge (shows open trouble count)
+- ✅ Conditional query filtering removed (all can see all)
+- ✅ Role-based page access via policies
+
+#### Form:
+- ✅ Multi-select technician field with maxItems(2)
+- ✅ **afterCreate/afterSave hooks** to sync pivot table
+- ✅ Field-level authorization (disabled for technicians)
+- ✅ Dehydrated fields for proper data persistence
+- ✅ Conditional field visibility based on status
+- ✅ Rich text editor for resolution notes
+
+#### Table:
+- ✅ **4 workflow action buttons** with role-based visibility:
+  - Investigate: Open → Investigating (assigned technicians only)
+  - Start Work: Investigating → In Progress (assigned technicians only)
+  - Resolve: In Progress → Resolved (assigned technicians only, auto-downtime)
+  - Close: Resolved → Closed (manager/asisten_manager only)
+- ✅ **Visibility logic:** Check if user in technicians collection
+- ✅ Edit/Delete hidden from technicians in table
+- ✅ Bulk actions restricted to manager roles
+- ✅ 11 columns with toggleable visibility
+- ✅ Color-coded priority and status badges
+- ✅ Filters: Status (default: open), Priority, Equipment
+- ✅ **Eager loading** technicians for action visibility checks
+
+#### Infolist:
+- ✅ 3 collapsible sections (Trouble Details, Timeline, Resolution)
+- ✅ **Technicians badge display** with comma separator
+- ✅ Custom image display view component
+- ✅ Conditional section visibility
+- ✅ Formatted datetime fields
+- ✅ Computed time metrics display
+
+#### Policy:
+- ✅ **viewAny:** All authenticated users
+- ✅ **view:** All users (technicians can view for reporting)
+- ✅ **create:** All users
+- ✅ **update:** Checks technicians relationship membership
+- ✅ **delete:** Manager/Assistant Manager only
+- ✅ Separate permissions for restore and forceDelete
+
+#### Pages:
+- ✅ **CreateEquipmentTrouble:** afterCreate hook syncs technicians
+- ✅ **EditEquipmentTrouble:** afterSave hook syncs technicians
+- ✅ **ViewEquipmentTrouble:** Edit button hidden from technicians via visible()
+- ✅ ListEquipmentTroubles: Standard resource listing
 - ✅ Computed attributes (response_time, resolution_time, is_open)
 - ✅ Type casting for dates and JSON
 
@@ -5652,13 +5782,124 @@ class EquipmentTrouble extends Model
 - ✅ User workflow clearly outlined
 - ✅ Benefits and integration points listed
 
+## Phase 29: Excel Import Monitoring System (Users)
+
+**Completion Date:** 2025-12-21  
+**Status:** 100% COMPLETE
+
+### Overview:
+Batch Excel import for users with queue batches, chunked processing, and real-time monitoring.
+
+### 1. Database Schema
+
+**Migration:** `database/migrations/2025_12_22_000001_create_excel_imports_table.php`
+
+#### Table Features:
+- Tracks file metadata, totals, processed, failed, batch_id, status, and errors.
+- Errors stored as JSON for monitoring and troubleshooting.
+
+### 2. Background Processing (Queue Batches)
+- Uses Laravel Bus batches with chunked jobs for large files.
+- Per-chunk job: `app/Jobs/ImportExcelJob.php`.
+- Read filter: `app/Imports/RowRangeReadFilter.php` for row-range + column limits.
+
+### 3. Import Workflow (Users Resource)
+- Header action: "Import Users (Batch)" on Users list.
+- Stores upload to `storage/app/private/imports/users`.
+- Creates `ExcelImport` record, dispatches batch, redirects to monitor.
+
+### 4. Monitoring Page (Filament v4)
+- Page: `app/Filament/Pages/ImportMonitor.php`
+- View: `resources/views/filament/pages/import-monitor.blade.php`
+- Auto-refresh every 1 second (Livewire polling).
+- Shows progress bar, totals, processed, failed, and recent errors.
+
+### 5. Validation & Column Mapping (Users)
+- Column A -> gpid
+- Column B -> name
+- Column D -> role
+- Column E -> department
+- Role aliases + department normalization via `config/excel_imports.php`.
+
+### 6. Notifications & Error Handling
+- Batch completion/failure notifications stored in Filament database notifications.
+- Errors appended to `excel_imports.errors` with logging context.
+- Failed batches mark status as failed and set finished_at.
+
+### 7. Files Created/Updated
+- `app/Models/ExcelImport.php`
+- `app/Jobs/ImportExcelJob.php`
+- `app/Imports/RowRangeReadFilter.php`
+- `app/Filament/Pages/ImportMonitor.php`
+- `resources/views/filament/pages/import-monitor.blade.php`
+- `app/Filament/Resources/Users/Pages/ListUsers.php`
+- `config/excel_imports.php`
+- `database/migrations/2025_12_22_000001_create_excel_imports_table.php`
+
+### 8. Benefits
+- Handles large Excel files safely with chunking.
+- Real-time visibility for progress and errors.
+- Clear user feedback via notifications.
+
+---
+
+## Phase 30: AI Chat (GPT-4 Turbo)
+
+**Completion Date:** 2025-12-21  
+**Status:** 100% COMPLETE
+
+### Overview:
+Multi-conversation AI chat interface with Livewire updates, Markdown rendering, and role-based access controls.
+
+### 1. Database Schema
+- `chat_conversations` (user-owned conversations)
+- `chat_messages` (role, content, metadata, timestamps)
+
+### 2. Service Layer
+- `app/Services/ChatAIService.php`
+- Methods: createConversation, sendMessage, streamMessage (optional), generateTitle
+- Model: `gpt-4-turbo-preview`, temperature 0.7, max tokens 1000
+- Centralized error logging for API failures
+
+### 3. Filament Page
+- Page: `app/Filament/Pages/ChatAI.php`
+- View: `resources/views/filament/pages/chat-ai.blade.php`
+- Properties: activeConversationId, message, conversations, messages, isLoading
+- Livewire polling for real-time updates
+
+### 4. UI/UX Features
+- Two-column layout with sidebar conversation list
+- Message bubbles with avatars, timestamps, and Markdown rendering
+- Auto-scroll to bottom on new messages
+- Dark mode-ready styling and mobile responsive layout
+- Keyboard shortcut: Ctrl+Enter to send
+- Syntax highlighting via highlight.js (client-side)
+
+### 5. Security & Limits
+- Policies: ChatConversationPolicy, ChatMessagePolicy
+- Rate limiting: 20 requests per minute per user
+- Markdown rendering configured to strip raw HTML
+
+### 6. Files Created/Updated
+- `app/Models/ChatConversation.php`
+- `app/Models/ChatMessage.php`
+- `app/Policies/ChatConversationPolicy.php`
+- `app/Policies/ChatMessagePolicy.php`
+- `app/Services/ChatAIService.php`
+- `app/Filament/Pages/ChatAI.php`
+- `resources/views/filament/pages/chat-ai.blade.php`
+- `database/migrations/2025_12_22_000002_create_chat_conversations_table.php`
+- `database/migrations/2025_12_22_000003_create_chat_messages_table.php`
+
 ---
 
 **Last Updated:** 2025-12-21  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 28 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 30 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 30: AI Chat (GPT-4 Turbo) - Multi-conversation AI assistant with Livewire UI (Dec 21, 2025)
+- Phase 29: Excel Import Monitoring System (Users) - Batch queue import with real-time progress (Dec 21, 2025)
 - Phase 28: Equipment Trouble Tracking System - Complete lifecycle tracking with dashboard widget (Dec 21, 2025)
 - Phase 27: AHU Filter Monitoring Enhancement - Individual field checking + warning/danger thresholds + color-coded display (Dec 17, 2025)
 - Phase 26: PM Manual Book + Enhanced Photo Display + Complete PM fix + Execute PM workflow (Dec 10, 2025)

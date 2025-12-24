@@ -73,24 +73,24 @@ class PmExecutionForm
                             ->label('Scheduled Date')
                             ->required()
                             ->native(false)
-                            ->default(function ($get) {
-                                $pmScheduleId = $get('pm_schedule_id');
-                                if ($pmScheduleId) {
-                                    $pmSchedule = PmSchedule::find($pmScheduleId);
-                                    return $pmSchedule?->next_due_date ?? now();
-                                }
-                                return now();
-                            })
-                            ->dehydrated(),
+                            ->default(now())
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Auto-filled when PM execution is created'),
                         DateTimePicker::make('actual_start')
                             ->label('Actual Start')
                             ->default(now())
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Auto-filled when "Start Execution" is confirmed'),
                         DateTimePicker::make('actual_end')
                             ->label('Actual End')
                             ->native(false)
-                            ->afterOrEqual('actual_start'),
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Auto-filled when "Complete PM" is confirmed'),
                     ])->columns(3),
                     
                 Section::make('Checklist Items')

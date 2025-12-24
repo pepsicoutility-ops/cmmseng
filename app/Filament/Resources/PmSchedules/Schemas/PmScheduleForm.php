@@ -116,18 +116,26 @@ class PmScheduleForm
                             ->required()
                             ->numeric()
                             ->default(1)
-                            ->minValue(1),
+                            ->minValue(1)
+                            ->maxValue(fn (Get $get) => $get('schedule_type') === 'weekly' ? 52 : null)
+                            ->helperText(fn (Get $get) => $get('schedule_type') === 'weekly' 
+                                ? 'Max 52 weeks (1 year)' 
+                                : ($get('schedule_type') === 'running_hours' 
+                                    ? 'Enter running hours threshold (e.g., 500 for every 500 hours)' 
+                                    : 'Enter cycle count threshold (e.g., 1000 for every 1000 cycles)')),
                         Select::make('week_day')
-                            ->label('Day')
+                            ->label('Day (Optional)')
                             ->options([
                                 'monday' => 'Monday',
                                 'tuesday' => 'Tuesday',
                                 'wednesday' => 'Wednesday',
                                 'thursday' => 'Thursday',
                                 'friday' => 'Friday',
+                                'saturday' => 'Saturday',
+                                'sunday' => 'Sunday',
                             ])
-                            ->required(fn (Get $get) => $get('schedule_type') === 'weekly')
                             ->visible(fn (Get $get) => $get('schedule_type') === 'weekly')
+                            ->helperText('Can be set later according to production planning')
                             ->native(false),
                         TextInput::make('estimated_duration')
                             ->label('Duration (min)')
@@ -135,9 +143,6 @@ class PmScheduleForm
                             ->numeric()
                             ->default(60)
                             ->minValue(1),
-                        DatePicker::make('next_due_date')
-                            ->label('Next Due')
-                            ->native(false),
                     ])->columns(3),
                     
                 Section::make('Assignment')

@@ -35,25 +35,14 @@ class CreatePmExecution extends CreateRecord
         // Set initial status
         $data['status'] = 'in_progress';
         
-        // Set actual_start if not provided
-        if (!isset($data['actual_start'])) {
-            $data['actual_start'] = now();
-        }
+        // AUTO: Set scheduled_date to creation time (when PM execution is created)
+        $data['scheduled_date'] = now();
         
-        // Ensure scheduled_date has a value
-        if (!isset($data['scheduled_date']) || !$data['scheduled_date']) {
-            // Try to get from PM Schedule
-            if (isset($data['pm_schedule_id'])) {
-                $pmSchedule = \App\Models\PmSchedule::find($data['pm_schedule_id']);
-                if ($pmSchedule && $pmSchedule->next_due_date) {
-                    $data['scheduled_date'] = $pmSchedule->next_due_date;
-                } else {
-                    $data['scheduled_date'] = now();
-                }
-            } else {
-                $data['scheduled_date'] = now();
-            }
-        }
+        // AUTO: Set actual_start to now (when "Start Execution" is confirmed by creating this record)
+        $data['actual_start'] = now();
+        
+        // Ensure actual_end is null (will be set by Complete button)
+        $data['actual_end'] = null;
         
         return $data;
     }

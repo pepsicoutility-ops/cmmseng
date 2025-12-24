@@ -34,11 +34,25 @@ class PmScheduleResource extends Resource
      * - Technician: See ONLY their own PM schedules (excluding those with in-progress execution)
      * - Asisten Manager: See PM schedules in their department
      * - Manager/Super Admin: See all PM schedules
+     * 
+     * FILTERING BY FREQUENCY:
+     * For weekly schedules, only show PM when current week matches the frequency interval
+     * Example: frequency=4 means PM appears every 4 weeks (week 4, 8, 12, 16, etc)
      */
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with(['asset', 'subAsset', 'assignedTo']);
         $user = Auth::user();
+        
+        // Get current week number (1-52)
+        $currentWeek = (int) now()->format('W');
+        
+        // Filter weekly schedules by frequency
+        // Only show PM if current_week is divisible by frequency OR if it's not a weekly schedule
+        $query->where(function($q) use ($currentWeek) {
+            $q->where('schedule_type', '!=', 'weekly')  // Show all non-weekly schedules
+              ->orWhereRaw("? % frequency = 0", [$currentWeek]);  // Show weekly if week matches frequency
+        });
         
         return match($user->role) {
             'technician' => $query->where('assigned_to_gpid', $user->gpid)

@@ -68,12 +68,12 @@
                         <input type="text" name="ahu_mb_1_1_hf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">AHU MB-1.1: PF</label>
-                        <input type="text" name="ahu_mb_1_1_pf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                    </div>
-                    <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">AHU MB-1.1: MF</label>
                         <input type="text" name="ahu_mb_1_1_mf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">AHU MB-1.1: PF</label>
+                        <input type="text" name="ahu_mb_1_1_pf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">AHU MB-1.2: HF</label>
@@ -136,12 +136,12 @@
                         <input type="text" name="pau_mb_pr_1c_hf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">PAU MB PR-1C PF</label>
-                        <input type="text" name="pau_mb_pr_1c_pf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                    </div>
-                    <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">PAU MB PR-1C MF</label>
                         <input type="text" name="pau_mb_pr_1c_mf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">PAU MB PR-1C PF</label>
+                        <input type="text" name="pau_mb_pr_1c_pf" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                 </div>
             </div>

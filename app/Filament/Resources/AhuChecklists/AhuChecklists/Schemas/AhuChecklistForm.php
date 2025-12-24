@@ -53,9 +53,10 @@ class AhuChecklistForm
                     ->description('Air Handling Unit MB-1 filter measurements')
                     ->columns(3)
                     ->schema([
+                        TextInput::make('pau_mb_1_pf')->label('PAU MB-1: PF')->columnSpan(3),
                         TextInput::make('ahu_mb_1_1_hf')->label('AHU MB-1.1: HF'),
-                        TextInput::make('ahu_mb_1_1_pf')->label('AHU MB-1.1: PF'),
                         TextInput::make('ahu_mb_1_1_mf')->label('AHU MB-1.1: MF'),
+                        TextInput::make('ahu_mb_1_1_pf')->label('AHU MB-1.1: PF'),
                         TextInput::make('ahu_mb_1_2_hf')->label('AHU MB-1.2: HF'),
                         TextInput::make('ahu_mb_1_2_mf')->label('AHU MB-1.2: MF'),
                         TextInput::make('ahu_mb_1_2_pf')->label('AHU MB-1.2: PF'),
@@ -68,7 +69,6 @@ class AhuChecklistForm
                     ->description('Pre-cooling AHU measurements')
                     ->columns(3)
                     ->schema([
-                        TextInput::make('pau_mb_1_pf')->label('PAU MB-1: PF')->columnSpan(3),
                         TextInput::make('pau_mb_pr_1a_hf')->label('PAU MB PR-1A: HF'),
                         TextInput::make('pau_mb_pr_1a_mf')->label('PAU MB PR-1A: MF'),
                         TextInput::make('pau_mb_pr_1a_pf')->label('PAU MB PR-1A: PF'),
@@ -76,8 +76,8 @@ class AhuChecklistForm
                         TextInput::make('pau_mb_pr_1b_mf')->label('PAU MB PR-1B: MF'),
                         TextInput::make('pau_mb_pr_1b_pf')->label('PAU MB PR-1B: PF'),
                         TextInput::make('pau_mb_pr_1c_hf')->label('PAU MB PR-1C: HF'),
-                        TextInput::make('pau_mb_pr_1c_pf')->label('PAU MB PR-1C: PF'),
                         TextInput::make('pau_mb_pr_1c_mf')->label('PAU MB PR-1C: MF'),
+                        TextInput::make('pau_mb_pr_1c_pf')->label('PAU MB PR-1C: PF'),
                     ]),
                 
                 Section::make('AHU VRF MB Measurements')

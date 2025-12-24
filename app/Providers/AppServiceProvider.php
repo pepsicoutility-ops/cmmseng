@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Area;
 use App\Models\Asset;
+use App\Models\ChatConversation;
+use App\Models\ChatMessage;
 use App\Models\InventoryMovement;
 use App\Models\Part;
 use App\Models\PmSchedule;
@@ -12,6 +14,8 @@ use App\Models\SubAsset;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Policies\AreaPolicy;
+use App\Policies\ChatConversationPolicy;
+use App\Policies\ChatMessagePolicy;
 use App\Policies\PartPolicy;
 use App\Policies\PmSchedulePolicy;
 use App\Policies\UserPolicy;
@@ -38,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         PmSchedule::class => PmSchedulePolicy::class,
         WorkOrder::class => WorkOrderPolicy::class,
+        ChatConversation::class => ChatConversationPolicy::class,
+        ChatMessage::class => ChatMessagePolicy::class,
     ];
 
     /**

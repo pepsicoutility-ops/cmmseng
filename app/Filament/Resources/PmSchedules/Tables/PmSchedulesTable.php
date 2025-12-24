@@ -78,9 +78,24 @@ class PmSchedulesTable
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
                 TextColumn::make('next_due_date')
                     ->label('Next Due')
-                    ->date()
+                    ->date('d M Y')
+                    ->badge()
+                    ->color(fn ($record) => match(true) {
+                        $record->isOverdue() => 'danger',
+                        $record->isDueSoon() => 'warning',
+                        default => 'success',
+                    })
+                    ->icon(fn ($record) => match(true) {
+                        $record->isOverdue() => 'heroicon-o-exclamation-triangle',
+                        $record->isDueSoon() => 'heroicon-o-clock',
+                        default => 'heroicon-o-check-circle',
+                    })
                     ->sortable()
-                    ->toggleable(),
+                    ->tooltip(fn ($record) => match(true) {
+                        $record->isOverdue() => '🔴 Overdue! Harus dikerjakan segera',
+                        $record->isDueSoon() => '⚠️ Due soon - dalam 2 hari',
+                        default => '✅ On track',
+                    }),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -104,6 +119,8 @@ class PmSchedulesTable
                         'wednesday' => 'Wednesday',
                         'thursday' => 'Thursday',
                         'friday' => 'Friday',
+                        'saturday' => 'Saturday',
+                        'sunday' => 'Sunday',
                     ])
                     ->multiple(),
                 \Filament\Tables\Filters\SelectFilter::make('status')

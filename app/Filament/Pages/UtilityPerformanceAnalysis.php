@@ -45,30 +45,7 @@ class UtilityPerformanceAnalysis extends Page
         }
         
         return [
-            // AI Prediction & Insights Section (NEW)
-            \App\Filament\Widgets\AiPredictionStatsWidget::class,
-            \App\Filament\Widgets\AiInsightsTableWidget::class,
-            
-            // Chiller 1 Section
-            \App\Filament\Widgets\Chiller1StatsWidget::class,
-            \App\Filament\Widgets\Chiller1TableWidget::class,
-            \App\Filament\Widgets\Chiller1Trend::class,
-            
-            // Chiller 2 Section
-            \App\Filament\Widgets\Chiller2StatsWidget::class,
-            \App\Filament\Widgets\Chiller2TableWidget::class,
-            \App\Filament\Widgets\Chiller2Trend::class, 
-            
-            // Compressor 1 Section
-            \App\Filament\Widgets\Compressor1StatsWidget::class,
-            \App\Filament\Widgets\Compressor1TableWidget::class,
-            
-            // Compressor 2 Section
-            \App\Filament\Widgets\Compressor2StatsWidget::class,
-            \App\Filament\Widgets\Compressor2TableWidget::class,
-            
-            // AHU Section
-            \App\Filament\Widgets\AhuStatsWidget::class,
+            // AHU Section - Only AHU Table Widget
             \App\Filament\Widgets\AhuTableWidget::class,
         ];
     }
