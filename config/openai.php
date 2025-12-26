@@ -38,6 +38,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enable AI Tools (Function Calling)
+    |--------------------------------------------------------------------------
+    |
+    | Enable AI tools/function calling. Some custom API proxies may not support
+    | this feature. Set to true to enable, false to disable.
+    */
+    'tools_enabled' => env('OPENAI_TOOLS_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | OpenAI Model
     |--------------------------------------------------------------------------
     |

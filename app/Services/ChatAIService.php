@@ -59,9 +59,8 @@ class ChatAIService
         ]);
 
         try {
-            // Check if using custom API endpoint (may not support tools)
-            $baseUrl = config('openai.base_uri');
-            $useTools = empty($baseUrl) || str_contains($baseUrl, 'api.openai.com');
+            // Check if tools are enabled via config
+            $useTools = config('openai.tools_enabled', true);
             
             $payload = [
                 'model' => config('services.openai.model', 'gpt-4-turbo-preview'),
@@ -78,7 +77,7 @@ class ChatAIService
 
             Log::info('Sending request to AI', [
                 'model' => $payload['model'],
-                'base_url' => $baseUrl ?: 'default (api.openai.com)',
+                'base_url' => config('openai.base_uri') ?: 'default (api.openai.com)',
                 'tools_enabled' => $useTools,
                 'tools_count' => isset($payload['tools']) ? count($payload['tools']) : 0,
                 'messages_count' => count($payload['messages']),
