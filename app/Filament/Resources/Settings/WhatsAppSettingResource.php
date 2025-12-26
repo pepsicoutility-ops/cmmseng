@@ -4,18 +4,20 @@ namespace App\Filament\Resources\Settings;
 
 use App\Filament\Resources\Settings\Pages\ManageWhatsAppSetting;
 use App\Filament\Resources\Settings\Schemas\WhatsAppSettingForm;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Services\WhatsAppService;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Auth;
 
 class WhatsAppSettingResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = null;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
     
     protected static ?string $navigationLabel = 'WhatsApp Settings';
     
@@ -23,8 +25,7 @@ class WhatsAppSettingResource extends Resource
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function getNavigationGroup(): ?string

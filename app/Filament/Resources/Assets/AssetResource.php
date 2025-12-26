@@ -9,6 +9,7 @@ use App\Filament\Resources\Assets\Pages\ViewAsset;
 use App\Filament\Resources\Assets\Schemas\AssetForm;
 use App\Filament\Resources\Assets\Schemas\AssetInfolist;
 use App\Filament\Resources\Assets\Tables\AssetsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\Asset;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,9 +22,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AssetResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = Asset::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedCube;
     
     protected static ?string $navigationLabel = 'Machines';
     protected static ?string $modelLabel = 'Machines';
@@ -33,8 +36,7 @@ class AssetResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function getNavigationGroup(): ?string

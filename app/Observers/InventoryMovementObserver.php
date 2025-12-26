@@ -12,7 +12,7 @@ class InventoryMovementObserver
      * Handle the InventoryMovement "creating" event.
      * Update part stock before creating the movement record.
      *
-     * @param  \App\Models\InventoryMovement  $inventoryMovement
+     * @param InventoryMovement $inventoryMovement
      * @return void
      */
     public function creating(InventoryMovement $inventoryMovement): void
@@ -57,7 +57,7 @@ class InventoryMovementObserver
      * Handle the InventoryMovement "deleted" event.
      * Reverse the stock change when a movement is deleted.
      *
-     * @param  \App\Models\InventoryMovement  $inventoryMovement
+     * @param InventoryMovement $inventoryMovement
      * @return void
      */
     public function deleted(InventoryMovement $inventoryMovement): void

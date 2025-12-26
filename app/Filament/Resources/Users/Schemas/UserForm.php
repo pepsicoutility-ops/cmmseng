@@ -15,7 +15,7 @@ class UserForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make('User Information')
                     ->description('Basic user details and credentials')
                     ->components([

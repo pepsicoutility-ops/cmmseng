@@ -19,7 +19,7 @@ class Chiller2ChecklistResource extends Resource
 {
     protected static ?string $model = Chiller2Checklist::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBeaker;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedBeaker;
     
     protected static ?string $navigationLabel = 'Chiller 2';
     
@@ -47,6 +47,10 @@ class Chiller2ChecklistResource extends Resource
     public static function canViewAny(): bool
     {
         $user = Auth::user();
+        // Operators can only access Work Orders
+        if ($user && $user->role === 'operator') {
+            return false;
+        }
         return $user && (
             $user->role === 'super_admin' ||
             $user->department === 'utility'

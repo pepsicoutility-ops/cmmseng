@@ -8,6 +8,7 @@ use App\Models\PmCompliance;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class OverviewStatsWidget extends StatsOverviewWidget
 {
@@ -21,24 +22,23 @@ class OverviewStatsWidget extends StatsOverviewWidget
     
     protected function getStats(): array
     {
-        // Total PM this week
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
-        $pmThisWeek = PmExecution::whereBetween('scheduled_date', [$startOfWeek, $endOfWeek])->count();
+        // Cache stats for 5 minutes to reduce database load
+        $stats = Cache::remember('dashboard.overview_stats', now()->addMinutes(5), function () {
+            $startOfWeek = now()->startOfWeek();
+            $endOfWeek = now()->endOfWeek();
+            
+            return [
+                'pm_this_week' => PmExecution::whereBetween('scheduled_date', [$startOfWeek, $endOfWeek])->count(),
+                'wo_this_week' => WorkOrder::whereBetween('created_at', [$startOfWeek, $endOfWeek])->count(),
+                'avg_mttr' => WorkOrder::where('status', 'completed')->whereNotNull('mttr')->avg('mttr'),
+                'compliance' => PmCompliance::where('period', 'week')->orderBy('period_end', 'desc')->value('compliance_percentage') ?? 0,
+            ];
+        });
         
-        // Total WO this week
-        $woThisWeek = WorkOrder::whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
-        
-        // Average MTTR (completed WO only)
-        $avgMttr = WorkOrder::where('status', 'completed')
-            ->whereNotNull('mttr')
-            ->avg('mttr');
-        
-        // Latest compliance percentage
-        $compliance = PmCompliance::where('period', 'week')
-            ->orderBy('period_end', 'desc')
-            ->first();
-        $compliancePercent = $compliance ? $compliance->compliance_percentage : 0;
+        $pmThisWeek = $stats['pm_this_week'];
+        $woThisWeek = $stats['wo_this_week'];
+        $avgMttr = $stats['avg_mttr'];
+        $compliancePercent = $stats['compliance'];
         
         return [
             Stat::make('PM This Week', $pmThisWeek)

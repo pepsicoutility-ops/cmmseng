@@ -4,18 +4,20 @@ namespace App\Filament\Resources\InventoryMovements;
 
 use App\Filament\Resources\InventoryMovements\Pages\ListInventoryMovements;
 use App\Filament\Resources\InventoryMovements\Tables\InventoryMovementsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\InventoryMovement;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 
 class InventoryMovementResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = InventoryMovement::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
     protected static ?string $navigationLabel = 'Inventory Movements';
 
@@ -23,8 +25,7 @@ class InventoryMovementResource extends Resource
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'tech_store']);
+        return static::canAccessInventory();
     }
 
     public static function getNavigationGroup(): ?string

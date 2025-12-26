@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use RuntimeException;
+use Generator;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +19,7 @@ class ChatAIService
         $userId = Auth::id();
 
         if (! $userId) {
-            throw new \RuntimeException('User must be authenticated.');
+            throw new RuntimeException('User must be authenticated.');
         }
 
         return ChatConversation::create([
@@ -34,12 +36,15 @@ class ChatAIService
         $userId = Auth::id();
 
         if (! $userId) {
-            throw new \RuntimeException('User must be authenticated.');
+            throw new RuntimeException('User must be authenticated.');
         }
+
+        // Check AI usage limit before proceeding
+        AiUsageService::checkUsageLimit($userId);
 
         $apiKey = config('services.openai.api_key');
         if (! $apiKey) {
-            throw new \RuntimeException('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file.');
+            throw new RuntimeException('OpenAI API key is missing. Set OPENAI_API_KEY in your .env file.');
         }
 
         $conversation = ChatConversation::query()
@@ -86,7 +91,7 @@ class ChatAIService
 
                 $errorMessage = $exception->getMessage();
                 if (str_contains($errorMessage, 'model') || str_contains($errorMessage, 'choices')) {
-                    throw new \RuntimeException('OpenAI response was invalid. Check OPENAI_API_KEY and OPENAI_MODEL.');
+                    throw new RuntimeException('OpenAI response was invalid. Check OPENAI_API_KEY and OPENAI_MODEL.');
                 }
 
                 throw $exception;
@@ -174,15 +179,31 @@ class ChatAIService
                     Log::error('Empty response after tool call', [
                         'response' => $response->toArray(),
                     ]);
-                    throw new \RuntimeException('AI tidak memberikan response setelah mengakses data. Silakan coba lagi.');
+                    throw new RuntimeException('AI tidak memberikan response setelah mengakses data. Silakan coba lagi.');
                 }
             } else {
                 $assistantContent = trim((string) ($choice->message->content ?? ''));
             }
 
             if ($assistantContent === '') {
-                throw new \RuntimeException('OpenAI returned an empty response.');
+                throw new RuntimeException('OpenAI returned an empty response.');
             }
+
+            // Log AI usage with token counts from response
+            $totalPromptTokens = $response->usage->promptTokens ?? 0;
+            $totalCompletionTokens = $response->usage->completionTokens ?? 0;
+            
+            AiUsageService::logUsage(
+                $totalPromptTokens,
+                $totalCompletionTokens,
+                $payload['model'],
+                'chat',
+                [
+                    'conversation_id' => $conversation->id,
+                    'has_tool_calls' => $toolCalls !== null && !empty($toolCalls),
+                ],
+                $userId
+            );
 
             $assistantMessage = ChatMessage::create([
                 'conversation_id' => $conversation->id,
@@ -191,6 +212,11 @@ class ChatAIService
                 'content' => $assistantContent,
                 'metadata' => [
                     'model' => $payload['model'],
+                    'tokens' => [
+                        'prompt' => $totalPromptTokens,
+                        'completion' => $totalCompletionTokens,
+                        'total' => $totalPromptTokens + $totalCompletionTokens,
+                    ],
                 ],
             ]);
 
@@ -217,9 +243,9 @@ class ChatAIService
     }
 
     /**
-     * @return \Generator<int, string>
+     * @return Generator<int, string>
      */
-    public function streamMessage(int $conversationId, string $message): \Generator
+    public function streamMessage(int $conversationId, string $message): Generator
     {
         $result = $this->sendMessage($conversationId, $message);
         $content = (string) $result['assistantMessage']->content;

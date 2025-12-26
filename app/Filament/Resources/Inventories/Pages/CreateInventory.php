@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Inventories\Pages;
 
+use App\Models\Part;
 use App\Filament\Resources\Inventories\InventoryResource;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -18,7 +19,7 @@ class CreateInventory extends CreateRecord
 
         // Sync min_stock and location from Part
         if (isset($data['part_id'])) {
-            $part = \App\Models\Part::find($data['part_id']);
+            $part = Part::find($data['part_id']);
             if ($part) {
                 $data['min_stock'] = $part->min_stock;
                 $data['location'] = $part->location;

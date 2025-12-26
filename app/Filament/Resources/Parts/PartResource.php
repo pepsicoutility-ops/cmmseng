@@ -9,6 +9,7 @@ use App\Filament\Resources\Parts\Pages\ViewPart;
 use App\Filament\Resources\Parts\Schemas\PartForm;
 use App\Filament\Resources\Parts\Schemas\PartInfolist;
 use App\Filament\Resources\Parts\Tables\PartsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\Part;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,9 +22,11 @@ use Illuminate\Support\Facades\Auth;
 
 class PartResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = Part::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
     
     protected static ?string $navigationLabel = 'Parts';
     
@@ -31,8 +34,7 @@ class PartResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'tech_store']);
+        return static::canAccessInventory();
     }
     
     public static function getNavigationGroup(): ?string
@@ -74,7 +76,9 @@ class PartResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['inventories']);
+        return parent::getEloquentQuery()
+            ->with(['inventories'])
+            ->withCount('inventories');
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

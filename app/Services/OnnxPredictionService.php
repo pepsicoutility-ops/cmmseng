@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -108,7 +109,7 @@ class OnnxPredictionService
 
             return $this->getDefaultPrediction();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("ONNX prediction error for {$equipmentType}: " . $e->getMessage());
             return $this->getDefaultPrediction();
         }

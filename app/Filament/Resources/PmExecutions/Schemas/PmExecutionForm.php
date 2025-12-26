@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PmExecutions\Schemas;
 
+use Filament\Forms\Components\Placeholder;
 use App\Models\Pm_parts_usage;
 use App\Models\PmSchedule;
 use App\Models\Part;
@@ -24,7 +25,7 @@ class PmExecutionForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make('PM Execution Information')
                     ->components([
                         Select::make('pm_schedule_id')
@@ -99,7 +100,7 @@ class PmExecutionForm
                         
                         if (!$pmScheduleId) {
                             return [
-                                \Filament\Forms\Components\Placeholder::make('select_pm')
+                                Placeholder::make('select_pm')
                                     ->content('Please select a PM Schedule first to load checklist items.')
                             ];
                         }
@@ -108,7 +109,7 @@ class PmExecutionForm
                         
                         if (!$pmSchedule || $pmSchedule->checklistItems->isEmpty()) {
                             return [
-                                \Filament\Forms\Components\Placeholder::make('no_checklist')
+                                Placeholder::make('no_checklist')
                                     ->content('No checklist items found for this PM Schedule.')
                             ];
                         }
@@ -135,6 +136,8 @@ class PmExecutionForm
                                     $fields[] = FileUpload::make($fieldName)
                                         ->label($item->item_name)
                                         ->image()
+                                        ->maxSize(5120)
+                                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                         ->directory('pm-executions/checklist-photos')
                                         ->required($item->is_required);
                                     break;
@@ -229,6 +232,8 @@ class PmExecutionForm
                             ->image()
                             ->multiple()
                             ->maxFiles(10)
+                            ->maxSize(5120)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->directory('pm-executions/photos')
                             ->disk('public')
                             ->visibility('public')

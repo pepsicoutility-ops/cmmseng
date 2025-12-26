@@ -15,14 +15,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Traits\HasRoleBasedAccess;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 
 class EquipmentTroubleResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = EquipmentTrouble::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
     
     protected static ?string $navigationLabel = 'Equipment Troubles';
     
@@ -31,6 +33,14 @@ class EquipmentTroubleResource extends Resource
     protected static ?string $pluralModelLabel = 'Equipment Troubles';
     
     protected static ?int $navigationSort = 5;
+
+    /**
+     * Operator role can only access Work Orders
+     */
+    public static function canAccess(): bool
+    {
+        return static::canAccessExcludeOperator();
+    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -2,6 +2,12 @@
 
 namespace App\Filament\Resources\Inventories\Tables;
 
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use App\Models\InventoryMovement;
+use Filament\Notifications\Notification;
+use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -94,17 +100,17 @@ class InventoriesTable
                     ->preload(),
             ])
             ->recordActions([
-                \Filament\Actions\Action::make('addStock')
+                Action::make('addStock')
                     ->label('Add Stock')
                     ->icon('heroicon-o-plus-circle')
                     ->color('success')
-                    ->form([
-                        \Filament\Forms\Components\TextInput::make('quantity')
+                    ->schema([
+                        TextInput::make('quantity')
                             ->label('Quantity to Add')
                             ->numeric()
                             ->required()
                             ->minValue(1),
-                        \Filament\Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Notes (Optional)')
                             ->rows(2),
                     ])
@@ -117,7 +123,7 @@ class InventoriesTable
                         
                         // Create inventory movement record if notes provided
                         if (!empty($data['notes'])) {
-                            \App\Models\InventoryMovement::create([
+                            InventoryMovement::create([
                                 'part_id' => $record->part_id,
                                 'movement_type' => 'addition',
                                 'quantity' => $data['quantity'],
@@ -127,25 +133,25 @@ class InventoriesTable
                             ]);
                         }
                         
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Stock Added')
                             ->body($data['quantity'] . ' units added. Total stock at this location: ' . $record->quantity)
                             ->success()
                             ->send();
                     }),
-                \Filament\Actions\Action::make('adjustStock')
+                Action::make('adjustStock')
                     ->label('Adjust Stock')
                     ->icon('heroicon-o-arrows-right-left')
                     ->color('warning')
-                    ->form([
-                        \Filament\Forms\Components\TextInput::make('new_quantity')
+                    ->schema([
+                        TextInput::make('new_quantity')
                             ->label('Set New Quantity')
                             ->helperText('Enter the new quantity for this location')
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->default(fn ($record) => $record->quantity),
-                        \Filament\Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Reason for Adjustment')
                             ->required()
                             ->rows(2),
@@ -160,7 +166,7 @@ class InventoriesTable
                         // Model event will automatically sync Part current_stock
                         
                         // Create inventory movement record
-                        \App\Models\InventoryMovement::create([
+                        InventoryMovement::create([
                             'part_id' => $record->part_id,
                             'movement_type' => $difference > 0 ? 'addition' : 'deduction',
                             'quantity' => abs($difference),
@@ -169,17 +175,17 @@ class InventoriesTable
                             'performed_by' => Auth::id(),
                         ]);
                         
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Stock Adjusted')
                             ->body('Quantity changed from ' . $oldQuantity . ' to ' . $data['new_quantity'])
                             ->success()
                             ->send();
                     }),
-                \Filament\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->toolbarActions([
-                \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make()
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->visible(fn () => Auth::user()->role === 'super_admin'),
                 ]),
             ]);

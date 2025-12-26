@@ -12,7 +12,7 @@ class SubAreaInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('area.name')
                     ->label('Area'),
                 TextEntry::make('name'),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PmSchedules\Schemas;
 
+use App\Models\PmSchedule;
 use App\Models\Area;
 use App\Models\Asset;
 use App\Models\SubArea;
@@ -198,7 +199,7 @@ class PmScheduleForm
     private static function generatePmCode(): string
     {
         $date = now()->format('Ym');
-        $count = \App\Models\PmSchedule::whereYear('created_at', now()->year)
+        $count = PmSchedule::whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count() + 1;
             

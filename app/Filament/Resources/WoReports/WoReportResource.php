@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\WoReports;
 
+use Filament\Forms\Components\DatePicker;
+use Maatwebsite\Excel\Excel;
 use App\Filament\Resources\WoReports\Pages\ManageWoReports;
 use App\Models\WorkOrder;
 use BackedEnum;
@@ -15,25 +17,26 @@ use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use Illuminate\Support\Facades\Auth;
+use App\Filament\Traits\HasRoleBasedAccess;
 use Illuminate\Support\Facades\DB;
 
 class WoReportResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = WorkOrder::class;
     
     protected static ?string $navigationLabel = 'WO Reports';
     
-    protected static UnitEnum|string|null $navigationGroup = 'Reports & Analytics';
+    protected static string | \UnitEnum | null $navigationGroup = 'Reports & Analytics';
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
     
     protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
+        return static::canAccessManagement();
     }
 
     public static function table(Table $table): Table
@@ -105,9 +108,9 @@ class WoReportResource extends Resource
             ])
             ->filters([
                 Filter::make('created_at')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('From Date'),
-                        \Filament\Forms\Components\DatePicker::make('until')->label('Until Date'),
+                    ->schema([
+                        DatePicker::make('from')->label('From Date'),
+                        DatePicker::make('until')->label('Until Date'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -158,16 +161,16 @@ class WoReportResource extends Resource
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('WO_Report_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 ExportBulkAction::make()
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('WO_Report_Selected_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ]);
     }

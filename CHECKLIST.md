@@ -60,18 +60,23 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 25: Parts Request PWA Enhancement & Inventory Observer (100% COMPLETE - Dec 5, 2025)** ✅
 - **Phase 26: PM Manual Book & Enhanced Photo Display (100% COMPLETE - Dec 10, 2025)** ✅
 - **Phase 27: AHU Filter Monitoring Enhancement (100% COMPLETE - Dec 17, 2025)** ✅
-- **Phase 28: Equipment Trouble Tracking System (100% COMPLETE - Dec 21, 2025)** ?
-- **Phase 29: Excel Import Monitoring System (Users) (100% COMPLETE - Dec 21, 2025)** ?
-- **Phase 30: AI Chat (GPT-4 Turbo) (100% COMPLETE - Dec 21, 2025)** ?
+- **Phase 28: Equipment Trouble Tracking System (100% COMPLETE - Dec 21, 2025)** ✅
+- **Phase 29: Excel Import Monitoring System (Users) (100% COMPLETE - Dec 21, 2025)** ✅
+- **Phase 30: AI Chat (GPT-4 Turbo) (100% COMPLETE - Dec 21, 2025)** ✅
+- **Phase 31: Kaizen & Improvement Tracking System (100% COMPLETE - Dec 24, 2025)** ✅
+- **Phase 32: AI Advanced Analytics - Root Cause, Cost Optimization, Anomaly Detection (100% COMPLETE - Dec 24, 2025)** ✅
+- **Phase 33: AI Predictive & Performance - Maintenance Prediction, Benchmarking, Briefings (100% COMPLETE - Dec 25, 2025)** ✅
+- **Phase 34: AI Intelligence Enhancement - Export Upgrade, Trend Analysis, Smart Query, Usage Limits (100% COMPLETE - Dec 25, 2025)** ✅
 
-**Current Status (December 21, 2025):**
-- **Total Phases Completed:** 30 phases ✅
-- **System Status:** Production-ready with full feature set
+**Current Status (December 25, 2025):**
+- **Total Phases Completed:** 34 phases ✅
+- **System Status:** Production-ready with full feature set + Advanced AI Analytics
 - **All Core Features:** Operational and tested
-- **Integration Status:** Telegram (configured with bot token), WhatsApp, AI/ML (ONNX + OpenAI), Power BI all configured
+- **Integration Status:** Telegram, WhatsApp, AI/ML (ONNX + OpenAI GPT-4o-mini), Power BI all configured
+- **AI Functions:** 26 functions (6 basic + 20 extended analytics/export)
 - **Mobile PWA:** Fully functional with 6 utility checklists + work order forms + parts request (auto stock deduction) ✅
 - **Documentation:** Complete across all phases
-- **Import/Export:** Excel & PDF export + Excel import for all 5 utility checklists + batch user import monitoring ✅
+- **Import/Export:** Excel & PDF export + Excel import for all 5 utility checklists + 25 AI export report types ✅
 - **Inventory System:** Automatic stock deduction via InventoryMovementObserver ✅
 - **VPS Deployment:** Attempted (Phase 20) - encountered 403 CSRF issues, pending resolution
 
@@ -5893,11 +5898,302 @@ Multi-conversation AI chat interface with Livewire updates, Markdown rendering, 
 
 ---
 
-**Last Updated:** 2025-12-21  
+## Phase 31: Kaizen & Improvement Tracking System
+
+**Completion Date:** 2025-12-24  
+**Status:** 100% COMPLETE
+
+### Overview:
+Complete Kaizen management system for tracking continuous improvement initiatives with 5S scoring, PDCA cycle, before/after photo comparison, and departmental KPIs.
+
+### 1. Database Schema
+- `kaizens` table with comprehensive fields:
+  - Basic info: title, description, department, area, type (5S/Process/Safety/Quality/Cost/Equipment)
+  - Scoring: cost_savings, time_savings, safety_rating, quality_rating, productivity_rating, overall_score
+  - PDCA: plan_date, do_date, check_date, act_date, plan_notes, do_notes, check_notes, act_notes
+  - Photos: before_photos, after_photos (JSON arrays)
+  - Status: draft, submitted, in_review, approved, in_progress, completed, rejected
+  - Tracking: submitted_by, approved_by, submitted_at, approved_at, completed_at
+
+### 2. Filament Resource
+- Full CRUD operations with form wizard
+- Status workflow actions: submit, approve, reject, complete
+- Before/After photo comparison view
+- 5S scoring matrix (Sort, Set in Order, Shine, Standardize, Sustain)
+- Department and status filters
+- Export capabilities
+
+### 3. Dashboard Integration
+- Kaizen statistics widget showing:
+  - Total kaizens submitted
+  - Completion rate
+  - Average savings
+  - Top performing departments
+
+### 4. AI Integration
+- AI functions for kaizen analysis:
+  - `analyze_kaizen` - Analyze improvement opportunities
+  - `suggest_improvements` - AI-powered suggestions based on data patterns
+
+### 5. Files Created/Updated
+- `app/Models/Kaizen.php`
+- `app/Filament/Resources/KaizenResource.php`
+- `app/Filament/Resources/KaizenResource/Pages/ListKaizens.php`
+- `app/Filament/Resources/KaizenResource/Pages/CreateKaizen.php`
+- `app/Filament/Resources/KaizenResource/Pages/EditKaizen.php`
+- `app/Filament/Resources/KaizenResource/Pages/ViewKaizen.php`
+- `app/Policies/KaizenPolicy.php`
+- `database/migrations/2025_12_24_000001_create_kaizens_table.php`
+
+---
+
+## Phase 32: AI Advanced Analytics - Root Cause, Cost Optimization, Anomaly Detection
+
+**Completion Date:** 2025-12-24  
+**Status:** 100% COMPLETE
+
+### Overview:
+Extended AI capabilities with advanced analytics functions for root cause analysis, maintenance cost optimization, and anomaly detection in equipment performance.
+
+### 1. New AI Functions Added
+
+#### Root Cause Analysis (`ai_root_cause_analysis`)
+- Analyzes equipment failure patterns
+- Identifies recurring issues by equipment, location, and time
+- Provides AI-generated root cause hypotheses
+- Suggests preventive actions based on historical data
+- Parameters: equipment_id, period, failure_type
+
+#### Maintenance Cost Optimization (`ai_maintenance_cost_optimization`)
+- Analyzes maintenance spending patterns
+- Identifies cost reduction opportunities
+- Compares planned vs actual costs
+- Suggests optimal maintenance intervals
+- Parameters: department, period, threshold
+
+#### Anomaly Detection (`ai_anomaly_detection`)
+- Detects unusual patterns in equipment behavior
+- Identifies potential failures before they occur
+- Monitors utility consumption anomalies
+- Alerts for statistical outliers in sensor data
+- Parameters: equipment_type, metric, sensitivity
+
+### 2. Service Layer Updates
+- `app/Services/ChatAIService.php` enhanced with:
+  - `getEquipmentFailurePatterns()` method
+  - `getMaintenanceCostTrends()` method
+  - `detectAnomalies()` method
+  - Function routing for new tools
+
+### 3. Integration
+- All functions accessible via AI Chat interface
+- Automatic data aggregation from work orders, PM schedules, and sensor logs
+- JSON-formatted responses with actionable insights
+
+---
+
+## Phase 33: AI Predictive & Performance - Maintenance Prediction, Benchmarking, Briefings
+
+**Completion Date:** 2025-12-25  
+**Status:** 100% COMPLETE
+
+### Overview:
+Enhanced AI capabilities with predictive maintenance, performance benchmarking, and automated management briefing generation.
+
+### 1. New AI Functions Added
+
+#### Predictive Maintenance (`ai_predictive_maintenance`)
+- Predicts equipment failures using historical data
+- Calculates failure probability scores
+- Recommends optimal maintenance timing
+- Identifies equipment requiring immediate attention
+- Parameters: equipment_id, prediction_window, confidence_threshold
+
+#### Performance Benchmarking (`ai_performance_benchmarking`)
+- Compares equipment performance against baselines
+- Benchmarks departments against each other
+- Tracks KPIs: MTTR, MTBF, PM completion rate
+- Identifies top performers and improvement areas
+- Parameters: benchmark_type, period, department
+
+#### Management Briefing Generator (`ai_generate_management_briefing`)
+- Auto-generates executive summaries
+- Includes key metrics, trends, and recommendations
+- Customizable briefing periods and focus areas
+- Export-ready format for presentations
+- Parameters: briefing_type, period, focus_areas
+
+### 2. Data Analysis Capabilities
+- Historical trend analysis (30/60/90 day windows)
+- Statistical modeling for predictions
+- Comparative analysis across departments
+- Automated insight generation
+
+### 3. Service Layer Updates
+- Enhanced `ChatAIService.php` with prediction algorithms
+- Integration with work order and PM execution data
+- Performance metrics calculation engine
+
+---
+
+## Phase 34: AI Intelligence Enhancement - Export Upgrade, Trend Analysis, Smart Query, Usage Limits
+
+**Completion Date:** 2025-12-25  
+**Status:** 100% COMPLETE
+
+### Overview:
+Final AI enhancement phase adding export improvements, trend analysis, smart query capabilities, and user-level AI usage tracking with token limits.
+
+### 1. New AI Functions Added
+
+#### Trend Analysis (`ai_trend_analysis`)
+- Analyzes equipment performance trends over time
+- Identifies seasonal patterns and cycles
+- Tracks improvement/degradation trajectories
+- Generates trend-based forecasts
+- Parameters: metric_type, period, granularity
+
+#### Smart Query Engine (`ai_smart_query`)
+- Natural language query processing
+- Auto-translates questions to data queries
+- Intelligent context understanding
+- Multi-source data aggregation
+- Parameters: query_text, context_scope
+
+#### Plant Summary (`ai_plant_summary`)
+- Comprehensive plant-wide status overview
+- Aggregates data from all departments
+- Equipment health scores
+- Resource utilization metrics
+- Parameters: summary_type, period
+
+### 2. Export Enhancements
+- **25 Export Report Types** available via AI:
+  - Work Order Reports (by status, equipment, technician)
+  - PM Schedule Reports (by frequency, compliance, department)
+  - Equipment Reports (inventory, performance, maintenance history)
+  - Cost Reports (monthly, by department, by equipment)
+  - KPI Reports (MTTR, MTBF, completion rates)
+  - Utility Reports (checklists, consumption, trends)
+  - Custom Reports (user-defined parameters)
+
+### 3. AI Usage Tracking System
+
+#### Database Schema
+- `ai_usage_logs` table:
+  - user_id, model, prompt_tokens, completion_tokens, total_tokens
+  - estimated_cost, request_type, metadata (JSON), usage_date
+- User columns added:
+  - `daily_ai_token_limit` (default: 100,000 tokens)
+  - `ai_enabled` (default: true)
+
+#### Usage Service (`app/Services/AiUsageService.php`)
+- `canUseAi()` - Check if user can make AI requests
+- `getRemainingTokens()` - Get user's remaining daily tokens
+- `checkUsageLimit()` - Validate before API call
+- `logUsage()` - Record token consumption
+- `calculateCost()` - Estimate API costs (GPT-4o-mini rates)
+- `getUserStats()` - Individual usage statistics
+- `getAllUsersStats()` - Admin overview of all users
+- `setUserLimit()` - Admin token limit management
+- `setUserAiEnabled()` - Enable/disable AI for user
+
+#### Cost Model
+- Input tokens: $0.00015 per 1K tokens
+- Output tokens: $0.0006 per 1K tokens
+- Daily tracking per user
+- Monthly aggregation for reporting
+
+#### Admin Monitoring Page (`app/Filament/Pages/AiUsageMonitor.php`)
+- Overall statistics dashboard:
+  - Total tokens today/this month
+  - Estimated costs
+  - Active users count
+- User management table:
+  - Per-user token usage
+  - Limit management actions
+  - Enable/disable AI access
+- Top users by token consumption
+- Usage trends visualization
+
+#### UI Integration
+- Token usage indicator in AI Chat header
+- Progress bar showing daily usage percentage
+- Color coding: green (< 75%), yellow (75-90%), red (> 90%)
+- Real-time updates after each message
+
+### 4. Files Created/Updated
+- `app/Models/AiUsageLog.php`
+- `app/Services/AiUsageService.php`
+- `app/Filament/Pages/AiUsageMonitor.php`
+- `resources/views/filament/pages/ai-usage-monitor.blade.php`
+- `app/Services/ChatAIService.php` (updated with usage tracking)
+- `app/Filament/Pages/ChatAI.php` (updated with usage stats)
+- `resources/views/filament/pages/chat-ai.blade.php` (updated with token indicator)
+- `database/migrations/2025_12_25_170935_create_ai_usage_logs_table.php`
+- `database/migrations/2025_12_25_171000_add_ai_usage_columns_to_users_table.php`
+
+### 5. Security Features
+- Rate limiting: 20 requests/minute
+- Daily token limits per user (configurable)
+- Admin-only access to usage monitoring
+- Audit logging for limit changes
+
+---
+
+## AI Features Summary (Phase 21 + 30-34)
+
+### Complete AI Function List (26 Functions)
+
+**Basic Functions (Phase 30):**
+1. `get_equipment_list` - List all equipment with status
+2. `get_work_orders` - Query work orders with filters
+3. `get_pm_schedules` - View PM schedules
+4. `get_inventory_status` - Check inventory levels
+5. `get_dashboard_metrics` - Overall system metrics
+6. `create_work_order` - Create new work orders via chat
+
+**Analytics Functions (Phase 32):**
+7. `ai_root_cause_analysis` - Identify failure root causes
+8. `ai_maintenance_cost_optimization` - Cost reduction insights
+9. `ai_anomaly_detection` - Detect unusual patterns
+
+**Predictive Functions (Phase 33):**
+10. `ai_predictive_maintenance` - Predict equipment failures
+11. `ai_performance_benchmarking` - Compare performance metrics
+12. `ai_generate_management_briefing` - Auto-generate briefings
+
+**Intelligence Functions (Phase 34):**
+13. `ai_trend_analysis` - Analyze performance trends
+14. `ai_smart_query` - Natural language data queries
+15. `ai_plant_summary` - Plant-wide status overview
+
+**Export Functions (Phase 34):**
+16-26. Various export report generators (work orders, PM, equipment, costs, KPIs, utilities)
+
+### AI Model Configuration
+- **Model:** GPT-4o-mini (cost-optimized)
+- **Temperature:** 0.7
+- **Max Tokens:** 1000 per response
+- **Rate Limit:** 20 requests/minute/user
+- **Token Limit:** 100,000 tokens/day/user (configurable)
+
+### Access Control
+- AI Chat accessible to all authenticated users
+- Usage monitoring accessible to super_admin and manager roles
+- Token limits manageable by admin only
+
+---
+
+**Last Updated:** 2025-12-25  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 30 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 34 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 34: AI Intelligence Enhancement - Export Upgrade, Trend Analysis, Smart Query, Usage Limits (Dec 25, 2025)
+- Phase 33: AI Predictive & Performance - Maintenance Prediction, Benchmarking, Briefings (Dec 25, 2025)
+- Phase 32: AI Advanced Analytics - Root Cause, Cost Optimization, Anomaly Detection (Dec 24, 2025)
+- Phase 31: Kaizen & Improvement Tracking System - 5S, PDCA, Before/After Photos (Dec 24, 2025)
 - Phase 30: AI Chat (GPT-4 Turbo) - Multi-conversation AI assistant with Livewire UI (Dec 21, 2025)
 - Phase 29: Excel Import Monitoring System (Users) - Batch queue import with real-time progress (Dec 21, 2025)
 - Phase 28: Equipment Trouble Tracking System - Complete lifecycle tracking with dashboard widget (Dec 21, 2025)

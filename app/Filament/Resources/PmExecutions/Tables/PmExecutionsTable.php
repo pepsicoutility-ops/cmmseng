@@ -2,6 +2,10 @@
 
 namespace App\Filament\Resources\PmExecutions\Tables;
 
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -18,7 +22,7 @@ class PmExecutionsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->poll('10s')
+            ->poll('30s')
             ->columns([
                 TextColumn::make('pmSchedule.code')
                     ->label('PM Code')
@@ -75,7 +79,7 @@ class PmExecutionsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
                         'in_progress' => 'In Progress',
@@ -83,18 +87,18 @@ class PmExecutionsTable
                         'overdue' => 'Overdue',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('compliance_status')
+                SelectFilter::make('compliance_status')
                     ->label('Compliance')
                     ->options([
                         'on_time' => 'On Time',
                         'late' => 'Late',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\Filter::make('scheduled_date')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('scheduled_from')
+                Filter::make('scheduled_date')
+                    ->schema([
+                        DatePicker::make('scheduled_from')
                             ->label('Scheduled From'),
-                        \Filament\Forms\Components\DatePicker::make('scheduled_until')
+                        DatePicker::make('scheduled_until')
                             ->label('Scheduled Until'),
                     ])
                     ->query(function ($query, array $data) {
@@ -115,7 +119,7 @@ class PmExecutionsTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ])
-                 ->visible(fn () => \Illuminate\Support\Facades\Auth::user()->role !== 'technician'),
+                 ->visible(fn () => Auth::user()->role !== 'technician'),
                 ])
             ->defaultSort('scheduled_date', 'desc');
     }

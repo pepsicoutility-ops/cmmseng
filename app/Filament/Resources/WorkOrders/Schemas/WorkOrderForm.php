@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\WorkOrders\Schemas;
 
+use App\Models\WorkOrder;
 use App\Models\Area;
 use App\Models\Asset;
 use App\Models\SubArea;
@@ -93,6 +94,8 @@ class WorkOrderForm
                             ->image()
                             ->multiple()
                             ->maxFiles(5)
+                            ->maxSize(5120) // 5MB max per file
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->directory('work-orders')
                             ->disk('public')
                             ->visibility('public')
@@ -206,7 +209,7 @@ class WorkOrderForm
     private static function generateWoNumber(): string
     {
         $date = now()->format('Ym');
-        $count = \App\Models\WorkOrder::whereYear('created_at', now()->year)
+        $count = WorkOrder::whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count() + 1;
             

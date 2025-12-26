@@ -2,6 +2,12 @@
 
 namespace App\Filament\Resources\PmSchedules\Tables;
 
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Facades\Auth;
+use Filament\Actions\Action;
+use App\Models\PmExecution;
+use Filament\Notifications\Notification;
+use App\Filament\Resources\PmExecutions\PmExecutionResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -103,7 +109,7 @@ class PmSchedulesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('department')
+                SelectFilter::make('department')
                     ->label('Department')
                     ->options([
                         'utility' => 'Utility',
@@ -111,7 +117,7 @@ class PmSchedulesTable
                         'mechanic' => 'Mechanic',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('week_day')
+                SelectFilter::make('week_day')
                     ->label('Day')
                     ->options([
                         'monday' => 'Monday',
@@ -123,29 +129,29 @@ class PmSchedulesTable
                         'sunday' => 'Sunday',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
                         'completed' => 'Completed',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('assigned_to_gpid')
+                SelectFilter::make('assigned_to_gpid')
                     ->label('Assigned To')
                     ->relationship('assignedTo', 'name')
                     ->searchable()
                     ->preload()
                     ->multiple()
-                    ->visible(fn () => in_array(\Illuminate\Support\Facades\Auth::user()->role, ['manager', 'super_admin', 'asisten_manager'])),
+                    ->visible(fn () => in_array(Auth::user()->role, ['manager', 'super_admin', 'asisten_manager'])),
                 TrashedFilter::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
                     ->visible(fn ($record) => 
-                        \Illuminate\Support\Facades\Auth::user()->role !== 'technician'
+                        Auth::user()->role !== 'technician'
                     ),
-                \Filament\Actions\Action::make('execute')
+                Action::make('execute')
                     ->label('Execute PM')
                     ->icon('heroicon-o-play')
                     ->color('success')
@@ -154,9 +160,9 @@ class PmSchedulesTable
                     ->modalDescription(fn ($record) => 'Start executing PM: ' . $record->code)
                     ->action(function ($record) {
                         // Create PM Execution record
-                        $execution = \App\Models\PmExecution::create([
+                        $execution = PmExecution::create([
                             'pm_schedule_id' => $record->id,
-                            'executed_by_gpid' => \Illuminate\Support\Facades\Auth::user()->gpid,
+                            'executed_by_gpid' => Auth::user()->gpid,
                             'scheduled_date' => now(),
                             'actual_start' => now(),
                             'status' => 'in_progress',
@@ -171,19 +177,19 @@ class PmSchedulesTable
                             })->toArray(),
                         ]);
                         
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('PM Execution Started')
                             ->body('PM Execution has been created. You can edit it from PM Executions list.')
                             ->success()
                             ->send();
                         
                         // Redirect to PM Executions table
-                        return redirect(\App\Filament\Resources\PmExecutions\PmExecutionResource::getUrl('index'));
+                        return redirect(PmExecutionResource::getUrl('index'));
                     })
                     ->visible(fn ($record) => 
                         $record->status === 'active' && 
-                        \Illuminate\Support\Facades\Auth::user()->role === 'technician' &&
-                        $record->assigned_to_gpid === \Illuminate\Support\Facades\Auth::user()->gpid
+                        Auth::user()->role === 'technician' &&
+                        $record->assigned_to_gpid === Auth::user()->gpid
                     ),
             ])
             ->toolbarActions([
@@ -192,7 +198,7 @@ class PmSchedulesTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ])
-                ->visible(fn () => \Illuminate\Support\Facades\Auth::user()->role !== 'technician'),
+                ->visible(fn () => Auth::user()->role !== 'technician'),
             ]);
     }
 }

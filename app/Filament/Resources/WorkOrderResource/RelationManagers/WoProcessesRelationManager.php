@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\WorkOrderResource\RelationManagers;
 
+use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -26,7 +27,7 @@ class WoProcessesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('action')
             ->columns([
-                Tables\Columns\TextColumn::make('action')
+                TextColumn::make('action')
                     ->label('Action')
                     ->badge()
                     ->colors([
@@ -38,15 +39,15 @@ class WoProcessesRelationManager extends RelationManager
                         'gray' => 'close',
                     ])
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
-                Tables\Columns\TextColumn::make('performedBy.name')
+                TextColumn::make('performedBy.name')
                     ->label('Performed By')
                     ->formatStateUsing(fn ($record) => $record->performedBy ? "{$record->performedBy->name} ({$record->performed_by_gpid})" : $record->performed_by_gpid)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('timestamp')
+                TextColumn::make('timestamp')
                     ->label('Date & Time')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('notes')
+                TextColumn::make('notes')
                     ->label('Notes')
                     ->limit(50)
                     ->searchable()
@@ -59,10 +60,10 @@ class WoProcessesRelationManager extends RelationManager
             ->headerActions([
                 // No create action - processes are automatic
             ])
-            ->actions([
+            ->recordActions([
                 // No edit/delete actions
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // No bulk actions
             ])
             ->emptyStateHeading('No process history yet')

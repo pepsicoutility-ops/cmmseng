@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class FilaforgeSystemMonitor extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedServerStack;
 
     protected static ?string $navigationLabel = 'Filaforge System Monitor';
 

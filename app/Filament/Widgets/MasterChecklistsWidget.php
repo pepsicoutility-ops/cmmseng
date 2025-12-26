@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Chiller1Checklist;
 use App\Models\Chiller2Checklist;
 use App\Models\Compressor1Checklist;
@@ -35,42 +36,42 @@ class MasterChecklistsWidget extends BaseWidget
                     ->latest('created_at')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->formatStateUsing(fn ($state) => 'C1-' . $state)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('equipment')
+                TextColumn::make('equipment')
                     ->label('Equipment')
                     ->default('Chiller 1')
                     ->badge()
                     ->color('info'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date/Time')
                     ->dateTime('M d, Y H:i')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('shift')
+                TextColumn::make('shift')
                     ->label('Shift')
                     ->badge()
                     ->default('N/A'),
-                Tables\Columns\TextColumn::make('sat_evap_t')
+                TextColumn::make('sat_evap_t')
                     ->label('Evap Temp')
                     ->suffix('°C')
                     ->default('-'),
-                Tables\Columns\TextColumn::make('sat_dis_t')
+                TextColumn::make('sat_dis_t')
                     ->label('Discharge Temp')
                     ->suffix('°C')
                     ->default('-'),
-                Tables\Columns\TextColumn::make('oil_p')
+                TextColumn::make('oil_p')
                     ->label('Oil Pressure')
                     ->suffix(' Bar')
                     ->default('-'),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
                     ->default('Normal')
                     ->badge()
                     ->color('success'),
-                Tables\Columns\TextColumn::make('gpid')
+                TextColumn::make('gpid')
                     ->label('Created By')
                     ->default('N/A'),
             ])

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Models\PmExecution;
 use App\Services\PmService;
@@ -64,7 +65,7 @@ class RecalculatePmCosts extends Command
                 // Calculate cost
                 $pmService->calculateCost($execution);
                 $calculated++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("\nFailed to calculate cost for PM Execution ID {$execution->id}: {$e->getMessage()}");
                 $failed++;
             }

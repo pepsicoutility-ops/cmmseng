@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    $token = '765b55ac-4658-4fc9-8779-5b0e214f737c';
-
-    return redirect()->route('barcode.form-selector', ['token' => $token]);
+    // Security: Redirect to admin panel login instead of hardcoded token
+    return redirect('/admin');
 });
 
 // WhatsApp Test Routes (Super Admin only)
@@ -455,27 +454,32 @@ Route::get('/api/parts', function() {
         ->get();
 });
 
-Route::get('/api/validate-gpid', function(\Illuminate\Http\Request $request) {
-    $gpid = $request->query('gpid');
-    $user = \App\Models\User::where('gpid', $gpid)->first();
-    if ($user) {
-        return response()->json([
-            'valid' => true,
-            'name' => $user->name
-        ]);
-    }
-    return response()->json(['valid' => false]);
-});
+// Security: Rate limited and minimal response to prevent user enumeration
+Route::middleware(['throttle:30,1'])->group(function() {
+    Route::get('/api/validate-gpid', function(\Illuminate\Http\Request $request) {
+        $gpid = $request->query('gpid');
+        if (!$gpid || strlen($gpid) > 20) {
+            return response()->json(['valid' => false]);
+        }
+        $user = \App\Models\User::where('gpid', $gpid)->first();
+        // Security: Only return validity status, not user details
+        return response()->json(['valid' => $user !== null]);
+    });
 
-Route::get('/api/user-by-gpid/{gpid}', function($gpid) {
-    $user = \App\Models\User::where('gpid', $gpid)->first();
-    if ($user) {
-        return response()->json([
-            'gpid' => $user->gpid,
-            'name' => $user->name
-        ]);
-    }
-    return response()->json(['error' => 'User not found'], 404);
+    Route::get('/api/user-by-gpid/{gpid}', function($gpid) {
+        if (!$gpid || strlen($gpid) > 20) {
+            return response()->json(['error' => 'Invalid request'], 400);
+        }
+        $user = \App\Models\User::where('gpid', $gpid)->first();
+        if ($user) {
+            // Security: Only return minimal info needed for form display
+            return response()->json([
+                'valid' => true,
+                'name' => $user->name
+            ]);
+        }
+        return response()->json(['valid' => false], 404);
+    });
 });
 
 // Compressor 1 Routes

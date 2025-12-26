@@ -2,7 +2,7 @@
 
 use App\Models\User;
 use App\Models\Part;
-use App\Models\Inventorie;
+use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\StockAlert;
 use App\Services\InventoryService;
@@ -30,7 +30,7 @@ beforeEach(function () {
 test('tech store can create inventory record', function () {
     $this->actingAs($this->techStore);
     
-    $inventory = Inventorie::create([
+    $inventory = Inventory::create([
         'part_id' => $this->part->id,
         'quantity' => 20,
         'min_stock' => 10,
@@ -43,7 +43,7 @@ test('tech store can create inventory record', function () {
 });
 
 test('inventory belongs to part', function () {
-    $inventory = Inventorie::factory()->create([
+    $inventory = Inventory::factory()->create([
         'part_id' => $this->part->id,
     ]);
     
@@ -221,28 +221,28 @@ test('inventory can be adjusted to specific quantity', function () {
 });
 
 test('multiple inventories for same part sum correctly', function () {
-    $inventory1 = Inventorie::factory()->create([
+    $inventory1 = Inventory::factory()->create([
         'part_id' => $this->part->id,
         'quantity' => 20,
     ]);
     
-    $inventory2 = Inventorie::factory()->create([
+    $inventory2 = Inventory::factory()->create([
         'part_id' => $this->part->id,
         'quantity' => 15,
     ]);
     
-    $inventory3 = Inventorie::factory()->create([
+    $inventory3 = Inventory::factory()->create([
         'part_id' => $this->part->id,
         'quantity' => 10,
     ]);
     
-    $totalQuantity = Inventorie::where('part_id', $this->part->id)->sum('quantity');
+    $totalQuantity = Inventory::where('part_id', $this->part->id)->sum('quantity');
     
     expect($totalQuantity)->toBe('45');
 });
 
 test('inventory location can be updated', function () {
-    $inventory = Inventorie::factory()->create([
+    $inventory = Inventory::factory()->create([
         'part_id' => $this->part->id,
         'location' => 'Rack-A-01',
     ]);

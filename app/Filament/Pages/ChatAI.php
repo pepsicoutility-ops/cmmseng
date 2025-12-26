@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
 use App\Services\ChatAIService;
+use App\Services\AiUsageService;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,16 @@ class ChatAI extends Page
         return 'full';
     }
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    /**
+     * Operator role can only access Work Orders
+     */
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+        return $user && $user->role !== 'operator';
+    }
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     protected static ?string $navigationLabel = 'AI Chat';
     protected static ?string $title = 'AI Chat';
 
@@ -32,10 +42,12 @@ class ChatAI extends Page
     public array $conversations = [];
     public array $messages = [];
     public bool $isLoading = false;
+    public array $usageStats = [];
 
     public function mount(): void
     {
         $this->loadConversations();
+        $this->loadUsageStats();
 
         // Otomatis pilih chat terakhir jika ada
         if ($this->activeConversationId === null && !empty($this->conversations)) {
@@ -43,6 +55,11 @@ class ChatAI extends Page
         }
 
         $this->loadMessages();
+    }
+
+    public function loadUsageStats(): void
+    {
+        $this->usageStats = AiUsageService::getUserStats();
     }
 
     public function loadConversations(): void
@@ -136,6 +153,7 @@ class ChatAI extends Page
             app(ChatAIService::class)->sendMessage($this->activeConversationId, $content);
             $this->loadMessages();
             $this->loadConversations();
+            $this->loadUsageStats(); // Refresh usage stats after sending
             
             // Event untuk men-trigger scroll ke bawah dan highlight code
             $this->dispatch('message-sent'); 

@@ -9,6 +9,7 @@ use App\Filament\Resources\SubAreas\Pages\ViewSubArea;
 use App\Filament\Resources\SubAreas\Schemas\SubAreaForm;
 use App\Filament\Resources\SubAreas\Schemas\SubAreaInfolist;
 use App\Filament\Resources\SubAreas\Tables\SubAreasTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\SubArea;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -17,13 +18,14 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 
 class SubAreaResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = SubArea::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
     
     protected static ?string $navigationLabel = 'Lines';
     protected static ?string $modelLabel = 'Lines';
@@ -34,8 +36,7 @@ class SubAreaResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function getNavigationGroup(): ?string

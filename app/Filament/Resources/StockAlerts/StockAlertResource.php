@@ -4,18 +4,20 @@ namespace App\Filament\Resources\StockAlerts;
 
 use App\Filament\Resources\StockAlerts\Pages\ListStockAlerts;
 use App\Filament\Resources\StockAlerts\Tables\StockAlertsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\StockAlert;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 
 class StockAlertResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = StockAlert::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
 
     protected static ?string $navigationLabel = 'Stock Alerts';
 
@@ -23,8 +25,7 @@ class StockAlertResource extends Resource
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'tech_store']);
+        return static::canAccessInventory();
     }
 
     public static function getNavigationGroup(): ?string

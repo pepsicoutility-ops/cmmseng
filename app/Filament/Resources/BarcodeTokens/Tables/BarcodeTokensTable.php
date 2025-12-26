@@ -2,6 +2,10 @@
 
 namespace App\Filament\Resources\BarcodeTokens\Tables;
 
+use BaconQrCode\Writer;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -60,7 +64,7 @@ class BarcodeTokensTable
                     ->query(fn ($query) => $query->where('is_active', true))
                     ->label('Active Only'),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('generateQrCode')
                     ->label('Download QR')
                     ->icon('heroicon-o-qr-code')
@@ -69,10 +73,10 @@ class BarcodeTokensTable
                         $url = route('barcode.form-selector', ['token' => $record->token]);
                         
                         // Generate QR code using BaconQrCode directly with SVG renderer
-                        $writer = new \BaconQrCode\Writer(
-                            new \BaconQrCode\Renderer\ImageRenderer(
-                                new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
-                                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+                        $writer = new Writer(
+                            new ImageRenderer(
+                                new RendererStyle(300),
+                                new SvgImageBackEnd()
                             )
                         );
                         
@@ -109,7 +113,7 @@ class BarcodeTokensTable
                     }),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

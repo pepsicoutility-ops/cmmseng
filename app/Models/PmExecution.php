@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,15 +15,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * PM Execution Model
- * 
+ *
  * Represents a single execution instance of a preventive maintenance schedule.
  * Tracks compliance (on-time vs late), duration, and checklist completion.
- * 
+ *
  * @property int $id Primary key
  * @property int $pm_schedule_id Foreign key to pm_schedules table
- * @property \Illuminate\Support\Carbon $scheduled_date When PM was scheduled
- * @property \Illuminate\Support\Carbon|null $actual_start When PM execution started
- * @property \Illuminate\Support\Carbon|null $actual_end When PM execution completed
+ * @property Carbon $scheduled_date When PM was scheduled
+ * @property Carbon|null $actual_start When PM execution started
+ * @property Carbon|null $actual_end When PM execution completed
  * @property int|null $duration Duration in minutes (auto-calculated)
  * @property array|null $checklist_data Checklist items with responses (JSON)
  * @property string|null $notes Technician notes
@@ -28,28 +32,28 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $compliance_status Compliance status (on_time/late)
  * @property bool $is_on_time Whether PM was completed within grace period
  * @property string|null $executed_by_gpid GPID of technician who executed
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at Soft delete timestamp
- * 
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at Soft delete timestamp
+ *
  * @property-read PmSchedule $pmSchedule
  * @property-read User|null $executedBy Technician who performed the PM
  * @property-read PmCost|null $pmCost
  * @property-read PmCompliance|null $pmCompliance
- * @property-read \Illuminate\Database\Eloquent\Collection|PmPartsUsage[] $pmPartsUsages
- * 
- * @method static \Illuminate\Database\Eloquent\Builder|PmExecution newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PmExecution newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PmExecution query()
- * @method static \Illuminate\Database\Eloquent\Builder|PmExecution whereIsOnTime(bool $isOnTime)
- * @method static \Illuminate\Database\Eloquent\Builder|PmExecution whereStatus(string $status)
- * 
+ * @property-read Collection|PmPartsUsage[] $pmPartsUsages
+ *
+ * @method static Builder|PmExecution newModelQuery()
+ * @method static Builder|PmExecution newQuery()
+ * @method static Builder|PmExecution query()
+ * @method static Builder|PmExecution whereIsOnTime(bool $isOnTime)
+ * @method static Builder|PmExecution whereStatus(string $status)
+ *
  * @package App\Models
- * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin Builder
  */
 class PmExecution extends Model
 {
-    use HasFactory, SoftDeletes, \App\Traits\LogsActivity;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'pm_schedule_id',

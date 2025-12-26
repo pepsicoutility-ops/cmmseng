@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Settings\Schemas;
 
+use Exception;
 use App\Services\WhatsAppService;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
@@ -91,7 +92,7 @@ class WhatsAppSettingForm
                                     } else {
                                         return '❌ Connection failed: ' . ($result['message'] ?? 'Unknown error');
                                     }
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     return '❌ Error: ' . $e->getMessage();
                                 }
                             })

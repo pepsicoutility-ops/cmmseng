@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Inventories\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\Inventories\InventoryResource;
 use Filament\Resources\Pages\ListRecords;
 
@@ -12,7 +13,7 @@ class ListInventories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use App\Models\PmExecution;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -34,36 +36,36 @@ class MyPmScheduleWidget extends TableWidget
             )
             ->heading('My Upcoming PM Tasks')
             ->columns([
-                Tables\Columns\TextColumn::make('scheduled_date')
+                TextColumn::make('scheduled_date')
                     ->label('Date')
                     ->date('d M Y')
                     ->sortable()
                     ->badge()
                     ->color(fn ($record) => $record->scheduled_date->isPast() ? 'danger' : 'success'),
-                Tables\Columns\TextColumn::make('pmSchedule.code')
+                TextColumn::make('pmSchedule.code')
                     ->label('PM Code')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pmSchedule.title')
+                TextColumn::make('pmSchedule.title')
                     ->label('PM Title')
                     ->searchable()
                     ->limit(30),
-                Tables\Columns\TextColumn::make('pmSchedule.asset.asset_name')
+                TextColumn::make('pmSchedule.asset.asset_name')
                     ->label('Asset')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pmSchedule.asset.asset_tag')
+                TextColumn::make('pmSchedule.asset.asset_tag')
                     ->label('Asset Tag')
                     ->badge()
                     ->color('gray'),
-                Tables\Columns\BadgeColumn::make('status')
+                BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
                         'warning' => 'pending',
                         'primary' => 'in_progress',
                         'success' => 'completed',
                     ]),
-                Tables\Columns\BadgeColumn::make('compliance_status')
+                BadgeColumn::make('compliance_status')
                     ->label('Compliance')
                     ->colors([
                         'success' => 'on_time',

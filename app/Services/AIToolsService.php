@@ -2,6 +2,12 @@
 
 namespace App\Services;
 
+use Exception;
+use App\Models\Compressor1Checklist;
+use App\Models\Compressor2Checklist;
+use App\Models\Chiller1Checklist;
+use App\Models\Chiller2Checklist;
+use App\Models\AhuChecklist;
 use App\Models\Asset;
 use App\Models\WorkOrder;
 use App\Models\PmExecution;
@@ -159,7 +165,10 @@ class AIToolsService
             'get_pm_schedules', 'get_pm_compliance', 'get_wo_statistics', 
             'get_maintenance_costs', 'get_technician_workload', 'get_equipment_downtime',
             'get_top_issues', 'get_equipment_reliability', 'query_database', 'generate_excel_report',
-            'analyze_root_cause', 'analyze_cost_optimization', 'detect_anomalies'
+            'analyze_root_cause', 'analyze_cost_optimization', 'detect_anomalies',
+            'predict_maintenance_needs', 'benchmark_performance', 'generate_maintenance_briefing',
+            'get_proactive_recommendations', 'simulate_scenario', 'send_whatsapp_briefing',
+            'analyze_parameter_trends', 'smart_query', 'get_plant_summary'
         ];
         
         if (in_array($functionName, $extendedTools)) {
@@ -187,13 +196,15 @@ class AIToolsService
                 ),
                 default => ['error' => 'Function not found'],
             };
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('AI Tool execution failed', [
                 'function' => $functionName,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
-
-            return ['error' => $e->getMessage()];
+            // Security: Return generic error message instead of exception details
+            return ['error' => 'Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.'];
         }
     }
 
@@ -390,11 +401,11 @@ class AIToolsService
     protected static function getChecklistData(string $equipmentType, int $limit, ?int $shift): array
     {
         $modelMap = [
-            'compressor1' => \App\Models\Compressor1Checklist::class,
-            'compressor2' => \App\Models\Compressor2Checklist::class,
-            'chiller1' => \App\Models\Chiller1Checklist::class,
-            'chiller2' => \App\Models\Chiller2Checklist::class,
-            'ahu' => \App\Models\AhuChecklist::class,
+            'compressor1' => Compressor1Checklist::class,
+            'compressor2' => Compressor2Checklist::class,
+            'chiller1' => Chiller1Checklist::class,
+            'chiller2' => Chiller2Checklist::class,
+            'ahu' => AhuChecklist::class,
         ];
 
         if (!isset($modelMap[$equipmentType])) {

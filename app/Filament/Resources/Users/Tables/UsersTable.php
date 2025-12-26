@@ -126,7 +126,7 @@ class UsersTable
                     ->icon('heroicon-o-key')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->form([
+                    ->schema([
                         TextInput::make('new_password')
                             ->label('New Password')
                             ->password()

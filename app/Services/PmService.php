@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\PmExecution;
 use App\Models\PmCost;
 
@@ -23,15 +24,15 @@ class PmService
 {
     /**
      * Calculate and store PM execution cost
-     * 
+     *
      * Calculates labor cost based on duration and hourly rate,
      * sums parts cost from parts usage records, adds 10% overhead,
      * and stores the breakdown in pm_costs table.
-     * 
+     *
      * @param PmExecution $execution PM execution instance with duration and parts usage
      * @return void
-     * 
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If execution not found
+     *
+     * @throws ModelNotFoundException If execution not found
      */
     public function calculateCost(PmExecution $execution): void
     {

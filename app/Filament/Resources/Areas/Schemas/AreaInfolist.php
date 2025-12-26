@@ -12,7 +12,7 @@ class AreaInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('name'),
                 TextEntry::make('code'),
                 TextEntry::make('description')

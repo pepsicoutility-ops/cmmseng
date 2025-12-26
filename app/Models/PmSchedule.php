@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,11 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Preventive Maintenance Schedule Model
- * 
+ *
  * Defines recurring preventive maintenance schedules for equipment.
- * Schedules can be time-based (daily, weekly, monthly) or condition-based 
+ * Schedules can be time-based (daily, weekly, monthly) or condition-based
  * (running hours, cycles).
- * 
+ *
  * @property int $id Primary key
  * @property string $code Auto-generated PM schedule code (PM-YYYYMM-XXX)
  * @property string $title PM schedule title
@@ -32,31 +36,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $department Department responsible (Mechanic/Electric/Utility)
  * @property string $status Schedule status (active/inactive/suspended)
  * @property bool $is_active Whether schedule is currently active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at Soft delete timestamp
- * 
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at Soft delete timestamp
+ *
  * @property-read Area|null $area
  * @property-read SubArea|null $subArea
  * @property-read Asset|null $asset
  * @property-read SubAsset|null $subAsset
  * @property-read User|null $assignedTo Technician assigned to this schedule
  * @property-read User|null $assignedBy Manager who created the assignment
- * @property-read \Illuminate\Database\Eloquent\Collection|PmChecklistItem[] $checklistItems
- * @property-read \Illuminate\Database\Eloquent\Collection|PmExecution[] $pmExecutions
- * 
- * @method static \Illuminate\Database\Eloquent\Builder|PmSchedule newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PmSchedule newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PmSchedule query()
- * @method static \Illuminate\Database\Eloquent\Builder|PmSchedule whereIsActive(bool $isActive)
- * @method static \Illuminate\Database\Eloquent\Builder|PmSchedule whereDepartment(string $department)
- * 
+ * @property-read Collection|PmChecklistItem[] $checklistItems
+ * @property-read Collection|PmExecution[] $pmExecutions
+ *
+ * @method static Builder|PmSchedule newModelQuery()
+ * @method static Builder|PmSchedule newQuery()
+ * @method static Builder|PmSchedule query()
+ * @method static Builder|PmSchedule whereIsActive(bool $isActive)
+ * @method static Builder|PmSchedule whereDepartment(string $department)
+ *
  * @package App\Models
- * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin Builder
  */
 class PmSchedule extends Model
 {
-    use HasFactory, SoftDeletes, \App\Traits\LogsActivity;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'code',
@@ -85,12 +89,11 @@ class PmSchedule extends Model
     ];
 
     // Accessors
-    
     /**
      * Auto-calculate Next Due Date based on frequency
      * For weekly schedules: PM must be completed by end of current week (Sunday)
-     * 
-     * @return \Illuminate\Support\Carbon|null
+     *
+     * @return Carbon|null
      */
     public function getNextDueDateAttribute()
     {

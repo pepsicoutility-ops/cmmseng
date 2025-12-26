@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InventoryReports;
 
+use Maatwebsite\Excel\Excel;
 use App\Filament\Resources\InventoryReports\Pages\ManageInventoryReports;
 use App\Models\Part;
 use UnitEnum;
@@ -13,21 +14,33 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use App\Filament\Traits\HasRoleBasedAccess;
 
 class InventoryReportResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = Part::class;
     
     protected static ?string $navigationLabel = 'Inventory Reports';
     
-    protected static UnitEnum|string|null $navigationGroup = 'Reports & Analytics';
+    protected static string | \UnitEnum | null $navigationGroup = 'Reports & Analytics';
 
-    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedCubeTransparent;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedCubeTransparent;
     
     protected static ?int $navigationSort = 3;
+
+    /**
+     * Operator role can only access Work Orders
+     */
+    public static function canAccess(): bool
+    {
+        return static::canAccessExcludeOperator();
+    }
 
     public static function table(Table $table): Table
     {
@@ -107,16 +120,16 @@ class InventoryReportResource extends Resource
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('Inventory_Report_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 ExportBulkAction::make()
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('Inventory_Report_Selected_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ]);
     }

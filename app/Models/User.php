@@ -3,6 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\LogsActivity;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Notifications\DatabaseNotificationCollection;
+use Illuminate\Notifications\DatabaseNotification;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,11 +18,11 @@ use Filament\Panel;
 
 /**
  * User Model
- * 
+ *
  * Represents a system user with role-based access control.
  * Supports 6 roles: super_admin, manager, asisten_manager, technician, tech_store, operator.
  * Uses GPID (Global Person ID) for authentication instead of traditional email.
- * 
+ *
  * @property int $id Primary key
  * @property string $gpid Global Person ID (unique identifier, used for login)
  * @property string $name Full name
@@ -26,32 +33,32 @@ use Filament\Panel;
  * @property string|null $phone Phone number
  * @property bool $is_active Whether user account is active
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $email_verified_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * 
- * @property-read \Illuminate\Database\Eloquent\Collection|PmSchedule[] $pmSchedulesAssigned PM schedules assigned to this user
- * @property-read \Illuminate\Database\Eloquent\Collection|PmSchedule[] $pmSchedulesCreated PM schedules created by this user
- * @property-read \Illuminate\Database\Eloquent\Collection|PmExecution[] $pmExecutions PM executions performed by this user
- * @property-read \Illuminate\Database\Eloquent\Collection|WorkOrder[] $workOrdersCreated Work orders created by this user
- * @property-read \Illuminate\Database\Eloquent\Collection|ActivityLog[] $activityLogs
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * 
- * @method static \Database\Factories\UserFactory factory(int|array|null $count = null)
- * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|User query()
- * @method static \Illuminate\Database\Eloquent\Builder|User whereRole(string $role)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereDepartment(string $department)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereIsActive(bool $isActive)
- * 
+ * @property Carbon|null $email_verified_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ *
+ * @property-read Collection|PmSchedule[] $pmSchedulesAssigned PM schedules assigned to this user
+ * @property-read Collection|PmSchedule[] $pmSchedulesCreated PM schedules created by this user
+ * @property-read Collection|PmExecution[] $pmExecutions PM executions performed by this user
+ * @property-read Collection|WorkOrder[] $workOrdersCreated Work orders created by this user
+ * @property-read Collection|ActivityLog[] $activityLogs
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
+ *
+ * @method static UserFactory factory((int|array|null) $count = null)
+ * @method static Builder|User newModelQuery()
+ * @method static Builder|User newQuery()
+ * @method static Builder|User query()
+ * @method static Builder|User whereRole(string $role)
+ * @method static Builder|User whereDepartment(string $department)
+ * @method static Builder|User whereIsActive(bool $isActive)
+ *
  * @package App\Models
- * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin Builder
  */
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, \App\Traits\LogsActivity;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable, LogsActivity;
 
     /**
      * The attributes that are mass assignable.

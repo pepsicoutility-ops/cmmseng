@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Part;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,29 +31,29 @@ class StockAlertWidget extends TableWidget
             )
             ->heading('Low Stock Alert')
             ->columns([
-                Tables\Columns\TextColumn::make('part_number')
+                TextColumn::make('part_number')
                     ->label('Part Number')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Part Name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('current_stock')
+                TextColumn::make('current_stock')
                     ->label('Current Stock')
                     ->badge()
                     ->color('danger')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('min_stock')
+                TextColumn::make('min_stock')
                     ->label('Min Stock')
                     ->badge()
                     ->color('warning')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('unit')
+                TextColumn::make('unit')
                     ->label('Unit')
                     ->badge()
                     ->color('gray'),
-                Tables\Columns\TextColumn::make('location')
+                TextColumn::make('location')
                     ->label('Location')
                     ->searchable()
                     ->toggleable(),

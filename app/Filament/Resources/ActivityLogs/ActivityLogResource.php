@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ActivityLogs;
 
+use Filament\Forms\Components\DatePicker;
 use App\Filament\Resources\ActivityLogs\Pages\ListActivityLogs;
 use App\Models\ActivityLog;
 use BackedEnum;
@@ -12,25 +13,27 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
+use App\Filament\Traits\HasRoleBasedAccess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class ActivityLogResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = ActivityLog::class;
     
     protected static ?string $navigationLabel = 'Activity Logs';
     
-    protected static UnitEnum|string|null $navigationGroup = 'System Management';
+    protected static string | \UnitEnum | null $navigationGroup = 'System Management';
 
-    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
     
     protected static ?int $navigationSort = 2;
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function canCreate(): bool
@@ -126,9 +129,9 @@ class ActivityLogResource extends Resource
                     ])
                     ->multiple(),
                 Filter::make('created_at')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('From Date'),
-                        \Filament\Forms\Components\DatePicker::make('until')->label('Until Date'),
+                    ->schema([
+                        DatePicker::make('from')->label('From Date'),
+                        DatePicker::make('until')->label('Until Date'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -138,7 +141,7 @@ class ActivityLogResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([])
-            ->bulkActions([])
+            ->toolbarActions([])
             ->poll('10s');
     }
     

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PmSchedules;
 
+use App\Filament\Resources\PmSchedules\RelationManagers\PmChecklistItemsRelationManager;
 use App\Filament\Resources\PmSchedules\Pages\CreatePmSchedule;
 use App\Filament\Resources\PmSchedules\Pages\EditPmSchedule;
 use App\Filament\Resources\PmSchedules\Pages\ListPmSchedules;
@@ -9,6 +10,7 @@ use App\Filament\Resources\PmSchedules\Pages\ViewPmSchedule;
 use App\Filament\Resources\PmSchedules\Schemas\PmScheduleForm;
 use App\Filament\Resources\PmSchedules\Schemas\PmScheduleInfolist;
 use App\Filament\Resources\PmSchedules\Tables\PmSchedulesTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\PmSchedule;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,9 +23,10 @@ use Illuminate\Support\Facades\Auth;
 
 class PmScheduleResource extends Resource
 {
+    use HasRoleBasedAccess;
     protected static ?string $model = PmSchedule::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendar;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedCalendar;
     
     protected static ?string $navigationLabel = 'PM Schedules';
     
@@ -70,8 +73,7 @@ class PmScheduleResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager', 'technician']);
+        return static::canAccessManagementAndTechnician();
     }
     
     public static function getNavigationGroup(): ?string
@@ -97,7 +99,7 @@ class PmScheduleResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\PmSchedules\RelationManagers\PmChecklistItemsRelationManager::class,
+            PmChecklistItemsRelationManager::class,
         ];
     }
 

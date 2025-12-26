@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -78,7 +79,7 @@ class ImportEmployees extends Command
 
                 $imported++;
                 $this->info("✓ Imported: {$data['gpid']} - {$data['name']} ({$data['role']})");
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $skipped++;
                 $error = "Failed to import {$data['gpid']} - {$data['name']}: " . $e->getMessage();
                 $errors[] = $error;

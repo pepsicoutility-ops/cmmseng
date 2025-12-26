@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Part;
 use App\Models\InventoryMovement;
 use App\Models\StockAlert;
 use App\Models\PmExecution;
 use App\Models\WorkOrder;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Inventory Service
@@ -81,21 +84,21 @@ class InventoryService
     
     /**
      * Deduct parts from inventory
-     * 
+     *
      * Core method that handles:
      * 1. Decrement parts.current_stock
      * 2. Create inventory_movements record (movement_type = 'out')
      * 3. Check if stock falls below min_stock and create alert if needed
      * 4. Two-way sync with inventories table
-     * 
+     *
      * @param int $partId ID of the part to deduct
      * @param int $quantity Quantity to deduct (must be positive)
      * @param string $referenceType Source of deduction ('work_order' or 'pm_execution')
      * @param int $referenceId ID of the work order or PM execution
      * @return void
-     * 
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If part not found
-     * 
+     *
+     * @throws ModelNotFoundException If part not found
+     *
      * @example
      * // Deduct 3 units of part #5 for work order #123
      * $service->deductPart(5, 3, 'work_order', 123);
@@ -128,7 +131,7 @@ class InventoryService
     /**
      * Add stock to inventory
      */
-    public function addStock(int $partId, int $quantity, string $notes = null): void
+    public function addStock(int $partId, int $quantity, ?string $notes = null): void
     {
         $part = Part::findOrFail($partId);
 
@@ -159,7 +162,7 @@ class InventoryService
     /**
      * Adjust stock to a specific quantity
      */
-    public function adjustStock(int $partId, int $quantity, string $notes = null): void
+    public function adjustStock(int $partId, int $quantity, ?string $notes = null): void
     {
         $part = Part::findOrFail($partId);
 
@@ -217,8 +220,48 @@ class InventoryService
                 'is_resolved' => false
             ]);
             
-            // TODO: Send notification to tech_store
-            // Notification::send(...);
+            // Send WhatsApp notification to tech_store users
+            $this->sendStockAlertNotification($part, $alertType);
+        }
+    }
+    
+    /**
+     * Send WhatsApp notification to tech_store users about stock alert
+     */
+    private function sendStockAlertNotification(Part $part, string $alertType): void
+    {
+        try {
+            $emoji = $alertType === 'out_of_stock' ? '🚨' : '⚠️';
+            $severity = $alertType === 'out_of_stock' ? 'CRITICAL' : 'WARNING';
+            
+            $message = "{$emoji} *STOCK ALERT - {$severity}*\n\n";
+            $message .= "📦 *Part:* {$part->name}\n";
+            $message .= "🔢 *Part Number:* {$part->part_number}\n";
+            $message .= "📊 *Current Stock:* {$part->current_stock}\n";
+            $message .= "📉 *Minimum Stock:* {$part->min_stock}\n";
+            $message .= "📍 *Location:* " . ($part->location ?? 'N/A') . "\n";
+            $message .= "⏰ *Time:* " . now()->format('d/m/Y H:i') . "\n\n";
+            
+            if ($alertType === 'out_of_stock') {
+                $message .= "❌ *Status:* OUT OF STOCK - Immediate restock required!";
+            } else {
+                $deficit = $part->min_stock - $part->current_stock;
+                $message .= "⚡ *Status:* LOW STOCK - Restock {$deficit} units recommended.";
+            }
+            
+            // Send via WhatsApp service
+            $whatsAppService = app(WhatsAppService::class);
+            $whatsAppService->sendMessage($message);
+            
+            Log::info('Stock alert notification sent', [
+                'part_id' => $part->id,
+                'alert_type' => $alertType,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send stock alert notification', [
+                'part_id' => $part->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

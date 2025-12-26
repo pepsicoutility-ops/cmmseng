@@ -52,8 +52,8 @@ class PartsTable
                         $record->current_stock == 0 ? 'danger' :
                         ($record->current_stock <= $record->min_stock ? 'warning' : 'success')
                     )
-                    ->description(fn ($record) => $record->inventories()->count() > 0 
-                        ? 'Stored in ' . $record->inventories()->count() . ' location(s)'
+                    ->description(fn ($record) => $record->inventories_count > 0 
+                        ? "Stored in {$record->inventories_count} location(s)"
                         : null
                     ),
                 TextColumn::make('min_stock')

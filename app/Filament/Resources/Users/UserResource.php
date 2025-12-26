@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\User;
 use BackedEnum;
 use Filament\Schemas\Schema;
@@ -18,9 +19,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = User::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
     
     protected static ?string $navigationLabel = 'Users';
     
@@ -28,8 +31,7 @@ class UserResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function getNavigationGroup(): ?string

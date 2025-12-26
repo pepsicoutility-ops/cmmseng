@@ -11,7 +11,7 @@ class UserInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('gpid'),
                 TextEntry::make('name'),
                 TextEntry::make('email')

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\WorkOrders;
 
+use App\Filament\Resources\WorkOrderResource\RelationManagers\WoProcessesRelationManager;
+use App\Filament\Resources\WorkOrderResource\RelationManagers\ImprovementsRelationManager;
 use App\Filament\Resources\WorkOrders\Pages\CreateWorkOrder;
 use App\Filament\Resources\WorkOrders\Pages\EditWorkOrder;
 use App\Filament\Resources\WorkOrders\Pages\ListWorkOrders;
@@ -9,6 +11,7 @@ use App\Filament\Resources\WorkOrders\Pages\ViewWorkOrder;
 use App\Filament\Resources\WorkOrders\Schemas\WorkOrderForm;
 use App\Filament\Resources\WorkOrders\Schemas\WorkOrderInfolist;
 use App\Filament\Resources\WorkOrders\Tables\WorkOrdersTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\WorkOrder;
 use BackedEnum;
 use Filament\Schemas\Schema;
@@ -20,9 +23,11 @@ use Illuminate\Support\Facades\Auth;
 
 class WorkOrderResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = WorkOrder::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-wrench';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench';
     
     protected static ?string $navigationLabel = 'Work Orders';
     
@@ -47,8 +52,7 @@ class WorkOrderResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager', 'technician', 'operator']);
+        return static::canAccessAllRoles();
     }
     
     public static function getNavigationGroup(): ?string
@@ -74,7 +78,8 @@ class WorkOrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\WorkOrderResource\RelationManagers\WoProcessesRelationManager::class,
+            WoProcessesRelationManager::class,
+            ImprovementsRelationManager::class,
         ];
     }
 

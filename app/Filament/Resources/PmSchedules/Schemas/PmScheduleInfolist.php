@@ -12,7 +12,7 @@ class PmScheduleInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('code'),
                 TextEntry::make('title'),
                 TextEntry::make('description')

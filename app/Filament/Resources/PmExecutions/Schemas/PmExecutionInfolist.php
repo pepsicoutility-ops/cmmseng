@@ -14,7 +14,7 @@ class PmExecutionInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('pmSchedule.code')
                     ->label('PM Code'),
                 TextEntry::make('pmSchedule.title')

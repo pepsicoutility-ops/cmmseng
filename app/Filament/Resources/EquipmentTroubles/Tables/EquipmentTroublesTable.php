@@ -226,7 +226,7 @@ class EquipmentTroublesTable
                         
                         return false;
                     })
-                    ->form([
+                    ->schema([
                         RichEditor::make('resolution_notes')
                             ->label('Resolution Notes')
                             ->required()

@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\PmCompliances\Tables;
 
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -63,16 +66,16 @@ class PmCompliancesTable
             ])
             ->defaultSort('period_end', 'desc')
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('period')
+                SelectFilter::make('period')
                     ->options([
                         'week' => 'Weekly',
                         'month' => 'Monthly',
                     ]),
-                \Filament\Tables\Filters\Filter::make('period_range')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')
+                Filter::make('period_range')
+                    ->schema([
+                        DatePicker::make('from')
                             ->label('From'),
-                        \Filament\Forms\Components\DatePicker::make('until')
+                        DatePicker::make('until')
                             ->label('Until'),
                     ])
                     ->query(function ($query, array $data) {

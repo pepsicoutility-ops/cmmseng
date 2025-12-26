@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,11 +15,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Work Order Model
- * 
+ *
  * Represents a corrective maintenance request in the CMMS system.
- * Work orders follow a 7-stage lifecycle: submitted → reviewed → approved → 
+ * Work orders follow a 7-stage lifecycle: submitted → reviewed → approved →
  * in_progress → completed → closed.
- * 
+ *
  * @property int $id Primary key
  * @property string $wo_number Auto-generated work order number (WO-YYYYMM-XXX)
  * @property string $created_by_gpid GPID of user who created the WO
@@ -31,43 +35,43 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property array|null $photos Problem photos (JSON array of file paths)
  * @property string $priority Priority level (low/medium/high/critical)
  * @property string $status Current status (submitted/reviewed/approved/in_progress/completed/closed)
- * @property \Illuminate\Support\Carbon|null $reviewed_at Timestamp when reviewed
- * @property \Illuminate\Support\Carbon|null $approved_at Timestamp when approved
- * @property \Illuminate\Support\Carbon|null $started_at Timestamp when work started
- * @property \Illuminate\Support\Carbon|null $completed_at Timestamp when work completed
- * @property \Illuminate\Support\Carbon|null $closed_at Timestamp when WO closed
- * @property \Illuminate\Support\Carbon|null $downtime_start Equipment downtime start
- * @property \Illuminate\Support\Carbon|null $downtime_end Equipment downtime end
+ * @property Carbon|null $reviewed_at Timestamp when reviewed
+ * @property Carbon|null $approved_at Timestamp when approved
+ * @property Carbon|null $started_at Timestamp when work started
+ * @property Carbon|null $completed_at Timestamp when work completed
+ * @property Carbon|null $closed_at Timestamp when WO closed
+ * @property Carbon|null $downtime_start Equipment downtime start
+ * @property Carbon|null $downtime_end Equipment downtime end
  * @property int|null $total_downtime Total downtime in minutes
  * @property int|null $mttr Mean Time To Repair in minutes (auto-calculated)
  * @property string|null $solution Solution description
  * @property array|null $result_photos Result photos (JSON array of file paths)
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at Soft delete timestamp
- * 
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at Soft delete timestamp
+ *
  * @property-read Area|null $area
  * @property-read SubArea|null $subArea
  * @property-read Asset|null $asset
  * @property-read SubAsset|null $subAsset
  * @property-read User $createdBy
  * @property-read WoCost|null $woCost
- * @property-read \Illuminate\Database\Eloquent\Collection|WoProcess[] $woProcesses
- * @property-read \Illuminate\Database\Eloquent\Collection|WoPartsUsage[] $woPartsUsages
- * @property-read \Illuminate\Database\Eloquent\Collection|WoImage[] $woImages
- * 
- * @method static \Illuminate\Database\Eloquent\Builder|WorkOrder newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|WorkOrder newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|WorkOrder query()
- * @method static \Illuminate\Database\Eloquent\Builder|WorkOrder whereStatus(string $status)
- * @method static \Illuminate\Database\Eloquent\Builder|WorkOrder wherePriority(string $priority)
- * 
+ * @property-read Collection|WoProcess[] $woProcesses
+ * @property-read Collection|WoPartsUsage[] $woPartsUsages
+ * @property-read Collection|WoImage[] $woImages
+ *
+ * @method static Builder|WorkOrder newModelQuery()
+ * @method static Builder|WorkOrder newQuery()
+ * @method static Builder|WorkOrder query()
+ * @method static Builder|WorkOrder whereStatus(string $status)
+ * @method static Builder|WorkOrder wherePriority(string $priority)
+ *
  * @package App\Models
- * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin Builder
  */
 class WorkOrder extends Model
 {
-    use HasFactory, SoftDeletes, \App\Traits\LogsActivity;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'wo_number',
@@ -93,6 +97,8 @@ class WorkOrder extends Model
         'downtime_end',
         'total_downtime',
         'mttr',
+        'rca_required',
+        'rca_status',
         'solution',
         'result_photos',
     ];
@@ -109,6 +115,7 @@ class WorkOrder extends Model
         'downtime_end' => 'datetime',
         'total_downtime' => 'integer',
         'mttr' => 'integer',
+        'rca_required' => 'boolean',
     ];
 
     // Relationships
@@ -191,5 +198,80 @@ class WorkOrder extends Model
     public function woCost(): HasOne
     {
         return $this->cost();
+    }
+
+    public function improvements(): HasMany
+    {
+        return $this->hasMany(WoImprovement::class);
+    }
+
+    public function woImprovements(): HasMany
+    {
+        return $this->improvements();
+    }
+
+    /**
+     * Get the Root Cause Analysis for this work order
+     * 
+     * @return HasOne<RootCauseAnalysis, WorkOrder>
+     */
+    public function rootCauseAnalysis(): HasOne
+    {
+        return $this->hasOne(RootCauseAnalysis::class);
+    }
+
+    public function rca(): HasOne
+    {
+        return $this->rootCauseAnalysis();
+    }
+
+    // ==================== RCA HELPER METHODS ====================
+
+    /**
+     * Check if RCA is required based on downtime
+     * Threshold: >10 minutes
+     */
+    public function checkRcaRequired(): bool
+    {
+        $downtimeThreshold = 10; // minutes
+        return ($this->total_downtime ?? 0) > $downtimeThreshold;
+    }
+
+    /**
+     * Auto-flag RCA requirement based on downtime
+     */
+    public function flagRcaIfRequired(): void
+    {
+        if ($this->checkRcaRequired() && !$this->rca_required) {
+            $this->update([
+                'rca_required' => true,
+                'rca_status' => 'pending',
+            ]);
+        }
+    }
+
+    /**
+     * Check if WO can be closed (RCA must be completed if required)
+     */
+    public function canBeClosed(): bool
+    {
+        if ($this->rca_required && $this->rca_status !== 'completed') {
+            return false;
+        }
+        return $this->status === 'completed';
+    }
+
+    /**
+     * Get RCA status badge color
+     */
+    public function getRcaStatusColor(): string
+    {
+        return match ($this->rca_status) {
+            'not_required' => 'gray',
+            'pending' => 'danger',
+            'in_progress' => 'warning',
+            'completed' => 'success',
+            default => 'gray',
+        };
     }
 }

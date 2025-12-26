@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Settings\Pages;
 
+use Exception;
 use App\Filament\Resources\Settings\WhatsAppSettingResource;
 use App\Services\WhatsAppService;
 use Filament\Actions\Action;
@@ -37,7 +38,7 @@ class ManageWhatsAppSetting extends ManageRecords
                                 ->danger()
                                 ->send();
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Notification::make()
                             ->title('Error')
                             ->body($e->getMessage())
@@ -73,7 +74,7 @@ class ManageWhatsAppSetting extends ManageRecords
                                 ->danger()
                                 ->send();
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Notification::make()
                             ->title('Error')
                             ->body($e->getMessage())

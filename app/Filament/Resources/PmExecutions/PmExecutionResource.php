@@ -9,6 +9,7 @@ use App\Filament\Resources\PmExecutions\Pages\ViewPmExecution;
 use App\Filament\Resources\PmExecutions\Schemas\PmExecutionForm;
 use App\Filament\Resources\PmExecutions\Schemas\PmExecutionInfolist;
 use App\Filament\Resources\PmExecutions\Tables\PmExecutionsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\PmExecution;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,9 +22,10 @@ use Illuminate\Support\Facades\Auth;
 
 class PmExecutionResource extends Resource
 {
+    use HasRoleBasedAccess;
     protected static ?string $model = PmExecution::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
     
     protected static ?string $navigationLabel = 'PM Executions';
     
@@ -37,7 +39,7 @@ class PmExecutionResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['pmSchedule', 'executedBy']);
         $user = Auth::user();
         
         return match($user->role) {
@@ -51,8 +53,7 @@ class PmExecutionResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager', 'technician']);
+        return static::canAccessManagementAndTechnician();
     }
     
     public static function getNavigationGroup(): ?string

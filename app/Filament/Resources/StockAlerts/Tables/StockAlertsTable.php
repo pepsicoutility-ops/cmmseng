@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\StockAlerts\Tables;
 
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
@@ -66,7 +68,7 @@ class StockAlertsTable
                     ->falseLabel('Unresolved only'),
             ])
             ->recordActions([
-                \Filament\Actions\Action::make('resolve')
+                Action::make('resolve')
                     ->label('Resolve')
                     ->icon('heroicon-o-check')
                     ->color('success')
@@ -74,13 +76,13 @@ class StockAlertsTable
                     ->action(function ($record) {
                         $record->update(['is_resolved' => true]);
                         
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Alert Resolved')
                             ->success()
                             ->send();
                     })
                     ->visible(fn ($record) => !$record->is_resolved),
-                \Filament\Actions\Action::make('restock')
+                Action::make('restock')
                     ->label('Restock')
                     ->icon('heroicon-o-plus-circle')
                     ->color('primary')

@@ -11,7 +11,7 @@ class PartInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('part_number'),
                 TextEntry::make('name'),
                 TextEntry::make('description')

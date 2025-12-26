@@ -2,6 +2,19 @@
 
 namespace App\Filament\Resources\WorkOrders\Tables;
 
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use App\Models\Part;
+use App\Models\RootCauseAnalysis;
+use Filament\Forms\Components\TextInput;
+use App\Services\WoService;
+use Filament\Notifications\Notification;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,7 +32,7 @@ class WorkOrdersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->poll('5s')
+            ->poll('30s')
             ->columns([
                 TextColumn::make('wo_number')
                     ->label('WO Number')
@@ -92,6 +105,31 @@ class WorkOrdersTable
                     ->formatStateUsing(fn (?int $state): string => $state ? "{$state} min" : '—')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('rca_status')
+                    ->label('RCA')
+                    ->badge()
+                    ->colors([
+                        'gray' => 'not_required',
+                        'danger' => 'pending',
+                        'warning' => 'in_progress',
+                        'success' => 'completed',
+                    ])
+                    ->formatStateUsing(function (?string $state): string {
+                        return match ($state) {
+                            'not_required' => '—',
+                            'pending' => 'Required',
+                            'in_progress' => 'In Progress',
+                            'completed' => 'Completed',
+                            default => '—',
+                        };
+                    })
+                    ->tooltip(function ($record): ?string {
+                        if ($record->rca_required && $record->rca_status === 'pending') {
+                            return 'RCA is required for this work order (downtime > 10 min)';
+                        }
+                        return null;
+                    })
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('Submitted')
                     ->dateTime()
@@ -104,7 +142,7 @@ class WorkOrdersTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'submitted' => 'Submitted',
                         'reviewed' => 'Reviewed',
@@ -115,7 +153,7 @@ class WorkOrdersTable
                         'closed' => 'Closed',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('priority')
+                SelectFilter::make('priority')
                     ->options([
                         'low' => 'Low',
                         'medium' => 'Medium',
@@ -123,7 +161,7 @@ class WorkOrdersTable
                         'critical' => 'Critical',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('assign_to')
+                SelectFilter::make('assign_to')
                     ->label('Assigned To')
                     ->options([
                         'utility' => 'Utility',
@@ -131,7 +169,7 @@ class WorkOrdersTable
                         'electric' => 'Electric',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\SelectFilter::make('problem_type')
+                SelectFilter::make('problem_type')
                     ->label('Problem Type')
                     ->options([
                         'abnormality' => 'Abnormality',
@@ -141,11 +179,11 @@ class WorkOrdersTable
                         'inspection' => 'Inspection',
                     ])
                     ->multiple(),
-                \Filament\Tables\Filters\Filter::make('created_at')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('created_from')
+                Filter::make('created_at')
+                    ->schema([
+                        DatePicker::make('created_from')
                             ->label('From'),
-                        \Filament\Forms\Components\DatePicker::make('created_until')
+                        DatePicker::make('created_until')
                             ->label('Until'),
                     ])
                     ->query(function ($query, array $data) {
@@ -159,7 +197,7 @@ class WorkOrdersTable
                 ViewAction::make(),
                 EditAction::make()
                     ->visible(fn ($record) => in_array($record->status, ['submitted', 'reviewed'])),
-                \Filament\Actions\Action::make('review')
+                Action::make('review')
                     ->label('Review')
                     ->icon('heroicon-o-eye')
                     ->color('info')
@@ -178,7 +216,7 @@ class WorkOrdersTable
                         ]);
                     })
                     ->visible(fn ($record) => $record->status === 'submitted' && in_array(Auth::user()->role, ['technician', 'asisten_manager'])),
-                \Filament\Actions\Action::make('approve')
+                Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -197,7 +235,7 @@ class WorkOrdersTable
                         ]);
                     })
                     ->visible(fn ($record) => $record->status === 'reviewed' && in_array(Auth::user()->role, ['technician', 'asisten_manager', 'manager'])),
-                \Filament\Actions\Action::make('start')
+                Action::make('start')
                     ->label('Start Work')
                     ->icon('heroicon-o-play')
                     ->color('warning')
@@ -216,41 +254,43 @@ class WorkOrdersTable
                         ]);
                     })
                     ->visible(fn ($record) => $record->status === 'approved' && Auth::user()->role === 'technician'),
-                \Filament\Actions\Action::make('complete')
+                Action::make('complete')
                     ->label('Complete')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
-                    ->form([
-                        \Filament\Forms\Components\Textarea::make('completion_notes')
+                    ->schema([
+                        Textarea::make('completion_notes')
                             ->label('Solution/Notes')
                             ->required()
                             ->rows(3),
-                        \Filament\Forms\Components\FileUpload::make('completion_photos')
+                        FileUpload::make('completion_photos')
                             ->label('Result Photos')
                             ->image()
                             ->multiple()
                             ->maxFiles(5)
+                            ->maxSize(5120)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->directory('work-orders')
                             ->disk('public')
                             ->visibility('public'),
-                        \Filament\Forms\Components\Repeater::make('parts_usage')
+                        Repeater::make('parts_usage')
                             ->label('Parts Used')
                             ->schema([
-                                \Filament\Forms\Components\Select::make('part_id')
+                                Select::make('part_id')
                                     ->label('Part')
-                                    ->options(\App\Models\Part::pluck('name', 'id'))
+                                    ->options(Part::pluck('name', 'id'))
                                     ->searchable()
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
-                                            $part = \App\Models\Part::find($state);
+                                            $part = Part::find($state);
                                             if ($part) {
                                                 $set('unit_price', $part->unit_price);
                                             }
                                         }
                                     }),
-                                \Filament\Forms\Components\TextInput::make('quantity')
+                                TextInput::make('quantity')
                                     ->label('Quantity')
                                     ->numeric()
                                     ->required()
@@ -262,13 +302,13 @@ class WorkOrdersTable
                                         $unitPrice = (float) $get('unit_price') ?? 0;
                                         $set('cost', $quantity * $unitPrice);
                                     }),
-                                \Filament\Forms\Components\TextInput::make('unit_price')
+                                TextInput::make('unit_price')
                                     ->label('Unit Price')
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->disabled()
                                     ->dehydrated(false),
-                                \Filament\Forms\Components\TextInput::make('cost')
+                                TextInput::make('cost')
                                     ->label('Total Cost')
                                     ->numeric()
                                     ->prefix('Rp')
@@ -283,7 +323,7 @@ class WorkOrdersTable
                     ])
                     ->action(function ($record, array $data) {
                         // Use WoService to handle completion
-                        $woService = app(\App\Services\WoService::class);
+                        $woService = app(WoService::class);
                         
                         // Set completed_at before calling service
                         $record->completed_at = now();
@@ -307,18 +347,34 @@ class WorkOrdersTable
                         // Complete work order with parts and calculations
                         $woService->completeWorkOrder($record, $data);
                         
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Work Order Completed')
                             ->success()
                             ->send();
                     })
                     ->visible(fn ($record) => $record->status === 'in_progress' && Auth::user()->role === 'technician'),
-                \Filament\Actions\Action::make('close')
+                Action::make('close')
                     ->label('Close')
                     ->icon('heroicon-o-x-circle')
                     ->color('gray')
                     ->requiresConfirmation()
+                    ->modalDescription(function ($record) {
+                        if ($record->rca_required && $record->rca_status !== 'completed') {
+                            return 'Warning: This work order requires RCA completion before closing. RCA Status: ' . ucfirst(str_replace('_', ' ', $record->rca_status));
+                        }
+                        return 'Are you sure you want to close this work order?';
+                    })
                     ->action(function ($record) {
+                        // Check if RCA is required and not completed
+                        if ($record->rca_required && $record->rca_status !== 'completed') {
+                            Notification::make()
+                                ->title('Cannot Close Work Order')
+                                ->body('RCA must be completed before closing this work order. Downtime exceeded 10 minutes.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                        
                         $record->update([
                             'status' => 'closed',
                             'closed_at' => now(),
@@ -330,10 +386,30 @@ class WorkOrdersTable
                             'timestamp' => now(),
                             'notes' => 'Work order closed',
                         ]);
+                        
+                        Notification::make()
+                            ->title('Work Order Closed')
+                            ->success()
+                            ->send();
                     })
                     ->visible(fn ($record) => $record->status === 'completed' && in_array(Auth::user()->role, ['asisten_manager', 'manager', 'super_admin'])),
+                Action::make('create_rca')
+                    ->label('Create RCA')
+                    ->icon('heroicon-o-document-magnifying-glass')
+                    ->color('danger')
+                    ->url(fn ($record) => '/pep/root-cause-analyses/create?work_order_id=' . $record->id)
+                    ->visible(fn ($record) => $record->rca_required && in_array($record->rca_status, ['pending', 'in_progress']) && in_array(Auth::user()->role, ['technician', 'asisten_manager', 'manager', 'super_admin'])),
+                Action::make('view_rca')
+                    ->label('View RCA')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->url(function ($record) {
+                        $rca = RootCauseAnalysis::where('work_order_id', $record->id)->first();
+                        return $rca ? '/pep/root-cause-analyses/' . $rca->id : null;
+                    })
+                    ->visible(fn ($record) => $record->rca_status === 'completed' || ($record->rca_required && RootCauseAnalysis::where('work_order_id', $record->id)->exists())),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->visible(fn () => Auth::user()->role !== 'operator'),

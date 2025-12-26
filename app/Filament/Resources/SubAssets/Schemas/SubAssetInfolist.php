@@ -12,7 +12,7 @@ class SubAssetInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 TextEntry::make('asset.name')
                     ->label('Equipments'),
                 TextEntry::make('name'),

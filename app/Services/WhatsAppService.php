@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -53,7 +54,7 @@ class WhatsAppService
             ]);
             return false;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('WhatsApp send failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -208,7 +209,7 @@ class WhatsAppService
                 'status' => $response->status()
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => $e->getMessage()

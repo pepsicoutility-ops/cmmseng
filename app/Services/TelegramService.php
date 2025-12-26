@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Telegram\Bot\Api;
 use Illuminate\Support\Facades\Log;
 
@@ -25,7 +26,7 @@ class TelegramService
             } else {
                 Log::info('Telegram service disabled: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Telegram initialization failed: ' . $e->getMessage());
             $this->enabled = false;
         }
@@ -48,7 +49,7 @@ class TelegramService
             ]);
             
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Telegram send message failed: ' . $e->getMessage());
             return false;
         }

@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\PmCompliances;
 
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\PmCompliances\Pages\CreatePmCompliance;
 use App\Filament\Resources\PmCompliances\Pages\EditPmCompliance;
 use App\Filament\Resources\PmCompliances\Pages\ListPmCompliances;
 use App\Filament\Resources\PmCompliances\Schemas\PmComplianceForm;
 use App\Filament\Resources\PmCompliances\Tables\PmCompliancesTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\PmCompliance;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -16,9 +18,10 @@ use Filament\Tables\Table;
 
 class PmComplianceResource extends Resource
 {
+    use HasRoleBasedAccess;
     protected static ?string $model = PmCompliance::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedChartBar;
     
     protected static ?string $navigationLabel = 'PM Compliance';
     
@@ -41,8 +44,7 @@ class PmComplianceResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
+        return static::canAccessManagement();
     }
     
     public static function getNavigationGroup(): ?string

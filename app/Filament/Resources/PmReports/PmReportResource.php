@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PmReports;
 
+use Filament\Forms\Components\DatePicker;
+use Maatwebsite\Excel\Excel;
 use App\Filament\Resources\PmReports\Pages\ManagePmReports;
 use App\Models\PmExecution;
 use BackedEnum;
@@ -16,25 +18,25 @@ use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use Illuminate\Support\Facades\Auth;
+use App\Filament\Traits\HasRoleBasedAccess;
 use Illuminate\Support\Facades\DB;
 
 class PmReportResource extends Resource
 {
+    use HasRoleBasedAccess;
     protected static ?string $model = PmExecution::class;
     
     protected static ?string $navigationLabel = 'PM Reports';
     
-    protected static UnitEnum|string|null $navigationGroup = 'Reports & Analytics';
+    protected static string | \UnitEnum | null $navigationGroup = 'Reports & Analytics';
 
-    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
     
     protected static ?int $navigationSort = 1;
 
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager', 'asisten_manager']);
+        return static::canAccessManagement();
     }
 
     public static function table(Table $table): Table
@@ -92,9 +94,9 @@ class PmReportResource extends Resource
             ])
             ->filters([
                 Filter::make('scheduled_date')
-                    ->form([
-                        \Filament\Forms\Components\DatePicker::make('from')->label('From Date'),
-                        \Filament\Forms\Components\DatePicker::make('until')->label('Until Date'),
+                    ->schema([
+                        DatePicker::make('from')->label('From Date'),
+                        DatePicker::make('until')->label('Until Date'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -134,16 +136,16 @@ class PmReportResource extends Resource
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('PM_Report_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 ExportBulkAction::make()
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('PM_Report_Selected_' . date('Y-m-d_His'))
-                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
+                            ->withWriterType(Excel::XLSX),
                     ]),
             ]);
     }

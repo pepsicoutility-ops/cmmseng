@@ -1,8 +1,9 @@
 # 🎯 Performance Development - KPI Gap Analysis & Feature Roadmap
 
 **Document Created:** December 24, 2025  
+**Last Updated:** December 25, 2025  
 **Analysis For:** Engineering Department KPIs 2026  
-**Current System:** CMMS v1.0 (30 phases completed)  
+**Current System:** CMMS v1.0 (31 phases completed)  
 **Developer:** Nandang Wijaya
 
 ---
@@ -15,14 +16,23 @@ This document analyzes the gap between current CMMS capabilities and the 2026 En
 - ❌ **Missing KPIs** (new features required)
 
 **Overall Status:**
-- **Supported:** 4 KPIs (26%)
+- **Supported:** 5 KPIs (33%) ← Updated with Kaizen
 - **Partially Supported:** 3 KPIs (20%)
-- **Missing:** 8 KPIs (54%)
+- **Missing:** 7 KPIs (47%)
 - **Total KPIs:** 15 metrics
+
+**Implementation Progress:**
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 31 | Kaizen & Improvement Tracking | ✅ COMPLETED |
+| Phase 32 | Safety & EHS Tracking | ⏳ Pending |
+| Phase 33 | Abnormality & Document Management | ⏳ Pending |
+| Phase 34 | CBM & Utility Cost Enhancement | ⏳ Pending |
+| Phase 35 | RCA Enhancement & Integration | ⏳ Pending |
 
 ---
 
-## ✅ Currently Supported KPIs (4 Metrics)
+## ✅ Currently Supported KPIs (5 Metrics)
 
 ### 1. PM Compliance: >90% ✅
 **Status:** FULLY SUPPORTED  
@@ -247,68 +257,47 @@ Cost = (Labor Hours × Hourly Rate) + Parts Cost
 
 ---
 
-## ❌ Missing KPIs (8 Metrics - New Features Required)
-
-### 8. Kaizen Tracking: Min. 4 per Year (Per Person) ❌
-**Status:** NOT SUPPORTED  
+### 8. Kaizen Tracking: Min. 4 per Year (Per Person) ✅
+**Status:** FULLY SUPPORTED (Implemented Phase 31 - December 25, 2025)  
 **Target:** Minimum 4 improvement ideas per person per year  
 **Scoring:** RECON = 5, DT reduction = 3, Safety & Quality = 1
 
-**Required Features:**
-1. **Kaizen Management System:**
+**Implemented Features:**
+1. ✅ **Kaizen Management System:**
    - Kaizen submission form (title, description, category, before/after)
    - Categories: RECON, DT Reduction, Safety & Quality
    - Score calculation based on category
    - Attachment support (photos, documents)
 
-2. **Kaizen Workflow:**
-   - Status: Submitted → Under Review → Approved/Rejected → Implemented
-   - Approval workflow (manager/AM)
-   - Implementation tracking (who, when, cost)
-   - Impact measurement (cost saved, downtime reduced)
+2. ✅ **Kaizen Workflow:**
+   - Status: Submitted → Under Review → Approved/Rejected → In Progress → Completed → Closed
+   - Review workflow by Asisten Manager
+   - Implementation tracking with timestamps
+   - Impact measurement (cost saved)
 
-3. **Kaizen Dashboard:**
-   - Display total Kaizens per person
-   - Show Kaizen status distribution
-   - Calculate total score per person
-   - Alert when below target (< 4 per year)
+3. ✅ **Kaizen Dashboard Widget:**
+   - Display total Kaizens submitted
+   - Show pending vs closed count
+   - Calculate total score (only from closed Kaizens)
 
-4. **Kaizen Reports:**
-   - Monthly/yearly Kaizen summary per department
-   - Top contributors (highest score/count)
-   - Category breakdown (RECON/DT/Safety)
-   - Export to Excel/PDF
+4. ✅ **Department Filtering:**
+   - Technicians see only their own Kaizens
+   - Asisten Managers see department Kaizens
+   - Managers/Super Admins see all
 
-**Database Schema:**
-```sql
-CREATE TABLE kaizens (
-    id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    submitted_by_gpid VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    category ENUM('RECON', 'DT_REDUCTION', 'SAFETY_QUALITY') NOT NULL,
-    score INT NOT NULL, -- RECON=5, DT=3, Safety=1
-    status ENUM('submitted', 'under_review', 'approved', 'rejected', 'implemented') DEFAULT 'submitted',
-    before_situation TEXT,
-    after_situation TEXT,
-    cost_saved DECIMAL(10,2),
-    implementation_date DATE,
-    attachments JSON, -- [{name, path}]
-    reviewed_by_gpid VARCHAR(255),
-    review_notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (submitted_by_gpid) REFERENCES users(gpid),
-    FOREIGN KEY (reviewed_by_gpid) REFERENCES users(gpid)
-);
-```
+**Database Tables:**
+- `kaizens` (main table with workflow columns)
+- `area_owners` (ownership assignment)
+- `wo_improvements` (improvements linked to WO)
 
 **Access Control:**
-- All users: Submit Kaizens
-- Managers/AM: Review and approve
-- Super Admin: Full access
+- Technicians: Submit, Start, Complete own Kaizens
+- Asisten Managers: Review, Approve, Reject, Close department Kaizens
+- Super Admin/Manager: Full access
 
 ---
+
+## ❌ Missing KPIs (7 Metrics - New Features Required)
 
 ### 9. Abnormality Finding & Fixing: Min. 5 per Month (Per Person) ❌
 **Status:** NOT SUPPORTED  
@@ -511,9 +500,9 @@ CREATE TABLE safety_incidents (
 
 ---
 
-### 12. EHS Observation Compliance: Min. 4 per Month ❌
+### 12. EHS Observation Compliance: Min. 2 per Month ❌
 **Status:** NOT SUPPORTED  
-**Target:** Minimum 4 EHS (Environment, Health, Safety) observations per month
+**Target:** Minimum 2 EHS (Environment, Health, Safety) observations per month
 
 **Required Features:**
 1. **EHS Observation System:**
@@ -738,73 +727,99 @@ CREATE TABLE kpi_achievements (
 
 **Note:** Phase 31 (KPI Foundation Dashboard) has been removed as KPI visualization will be handled by Power BI integration and existing Technician Performance page needs only data refinement.
 
-### Phase 31: Kaizen & Improvement Tracking (High Priority) - 3 Weeks
+### Phase 31: Kaizen & Improvement Tracking ✅ COMPLETED (December 25, 2025)
 **Objective:** Implement Kaizen management and WO improvement tracking
 
-**Features:**
+**Status:** ✅ **COMPLETED**
+
+**Implemented Features:**
 1. ✅ Kaizen Management System (submission, approval, implementation)
 2. ✅ Kaizen scoring (RECON=5, DT=3, Safety=1)
 3. ✅ WO Improvement Tracking (link improvements to WO)
-4. ✅ Area Ownership System (assign owners to areas)
-5. ✅ Kaizen Dashboard (count per person, alerts)
-6. ✅ WO Improvement Dashboard (count per area owner, alerts)
+4. ✅ Area Ownership System (assign owners to areas with lines/sub-areas)
+5. ✅ Kaizen Dashboard Widget (stats per person)
+6. ✅ Department-based filtering for Kaizen visibility
 
-**Estimated Effort:** 80 hours
-- Database migrations: 6 hours
-- Models and relationships: 8 hours
-- Filament resources (Kaizen + WO Improvements): 20 hours
-- Workflow implementation: 12 hours
-- Dashboard widgets: 16 hours
-- Reports: 12 hours
-- Testing: 6 hours
+**Implemented Workflow:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    KAIZEN WORKFLOW                               │
+├─────────────────────────────────────────────────────────────────┤
+│  TECHNICIAN                    ASISTEN MANAGER                   │
+│  ┌─────────┐                   ┌─────────────┐                   │
+│  │ Submit  │ ──────────────────▶│   Review    │                   │
+│  └─────────┘                   └──────┬──────┘                   │
+│                                       │                          │
+│                          ┌────────────┴────────────┐             │
+│                          ▼                         ▼             │
+│                    ┌──────────┐              ┌──────────┐        │
+│                    │ Approve  │              │  Reject  │        │
+│                    └────┬─────┘              └──────────┘        │
+│                         │                                        │
+│  ┌─────────┐            │                                        │
+│  │  Start  │ ◀──────────┘                                        │
+│  └────┬────┘                                                     │
+│       │                                                          │
+│  ┌────▼────┐                                                     │
+│  │Complete │                                                     │
+│  └────┬────┘                                                     │
+│       │                        ┌─────────┐                       │
+│       └───────────────────────▶│  Close  │ (AM only, score shown)│
+│                                └─────────┘                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Database Migrations Created:**
+- `2025_12_24_create_kaizens_table.php` - Main Kaizen table
+- `2025_12_24_create_area_owners_table.php` - Area ownership assignment
+- `2025_12_24_create_wo_improvements_table.php` - WO improvements tracking
+- `2025_12_25_004601_modify_cost_saved_column_in_kaizens_table.php` - DECIMAL(15,2) for large values
+- `2025_12_25_005418_update_kaizens_workflow_status.php` - New workflow columns
+- `2025_12_25_010848_add_lines_to_area_owners_table.php` - Lines/sub-areas selection
+
+**Key Logic Implementations:**
+
+1. **Department-Based Filtering:**
+   - Technicians see only their own submitted Kaizens
+   - Asisten Managers see Kaizens from their department only
+   - Managers/Super Admins see all Kaizens
+
+2. **Role-Based Actions:**
+   - `Submit` - Technician (auto-assigns department from user)
+   - `Review` - Asisten Manager (marks as under_review)
+   - `Approve/Reject` - Asisten Manager only
+   - `Start/Complete` - Technician (owner only)
+   - `Close` - Asisten Manager only
+
+3. **Score Display Logic:**
+   - Score shown as `-` until Kaizen is `closed`
+   - Total score in widget calculated only from `closed` Kaizens
+
+4. **Area Owner Lines:**
+   - Area owners can be assigned to specific lines (sub-areas)
+   - JSON column `line_ids` stores selected sub-area IDs
+
+5. **Operator Role Restrictions:**
+   - Operators can ONLY access Work Orders page
+   - All other pages redirect to `/pep/work-orders`
+   - Implemented via `RedirectOperatorsToDashboard` middleware
+
+**Files Created/Modified:**
+- `app/Models/Kaizen.php` - Model with workflow methods
+- `app/Models/AreaOwner.php` - Model with lines relationship
+- `app/Filament/Resources/KaizenResource.php` - Full CRUD with workflow actions
+- `app/Filament/Resources/AreaOwnerResource.php` - Area owner management
+- `app/Filament/Widgets/KaizenStatsWidget.php` - Dashboard statistics
+- `app/Http/Middleware/RedirectOperatorsToDashboard.php` - Operator restrictions
+- `POLICY_PERMISSION_GUIDE.md` - Updated with operator restrictions
+
+**Actual Effort:** ~20 hours (including debugging and refinements)
 
 ---
 
-### Phase 32: Safety & EHS Tracking (High Priority) - 3 Weeks
-**Objective:** Implement Kaizen management and WO improvement tracking
+### Phase 32: Abnormality & Document Management (High Priority) - 2 Weeks ✅ COMPLETED
+**Note:** Original Phase 32 (Safety & EHS Tracking) removed - managed by separate EHS Department
 
-**Features:**
-1. ✅ Kaizen Management System (submission, approval, implementation)
-2. ✅ Kaizen scoring (RECON=5, DT=3, Safety=1)
-3. ✅ WO Improvement Tracking (link improvements to WO)
-4. ✅ Area Ownership System (assign owners to areas)
-5. ✅ Kaizen Dashboard (count per person, alerts)
-6. ✅ WO Improvement Dashboard (count per area owner, alerts)
-
-**Estimated Effort:** 80 hours
-- Database migrations: 6 hours
-- Models and relationships: 8 hours
-- Filament resources (Kaizen + WO Improvements): 20 hours
-- Workflow implementation: 12 hours
-- Dashboard widgets: 16 hours
-- Reports: 12 hours
-- Testing: 6 hours
-
----
-
-### Phase 33: Safety & EHS Tracking (High Priority) - 3 Weeks
-**Objective:** Implement safety incident tracking and EHS observation system
-
-**Features:**
-1. ✅ Safety Incident Tracking (LTI, First Aid, Near Miss)
-2. ✅ Investigation workflow (root cause, corrective actions)
-3. ✅ EHS Observation System (safe/unsafe acts/conditions)
-4. ✅ Risk assessment and action tracking
-5. ✅ Safety Dashboard (LTI count, days lost)
-6. ✅ EHS Dashboard (observation count, resolution rate)
-
-**Estimated Effort:** 80 hours
-- Database migrations: 6 hours
-- Models and relationships: 8 hours
-- Filament resources (Safety + EHS): 20 hours
-- Workflow implementation: 12 hours
-- Dashboard widgets: 16 hours
-- Reports: 12 hours
-- Testing: 6 hours
-
----
-
-### Phase 33: Abnormality & Document Management (Medium Priority) - 2 Weeks
 **Objective:** Implement abnormality tracking and OPL/SOP document management
 
 **Features:**
@@ -815,18 +830,44 @@ CREATE TABLE kpi_achievements (
 5. ✅ Document library (searchable, filterable)
 6. ✅ Read acknowledgment tracking
 
-**Estimated Effort:** 60 hours
-- Database migrations: 6 hours
-- Models and relationships: 8 hours
-- Filament resources (Abnormality + Documents): 18 hours
-- Workflow implementation: 10 hours
-- Dashboard widgets: 10 hours
-- Reports: 6 hours
-- Testing: 2 hours
+**Implementation Details (December 25, 2025):**
+
+1. **Database Schema:**
+   - `abnormalities` table with severity-based deadlines
+   - `documents` table with OPL/SOP types
+   - `document_acknowledgments` table for read tracking
+   - Auto-generated numbers: ABN-YYYYMM-XXX, OPL-YYYYMM-XXX, SOP-YYYYMM-XXX
+
+2. **Abnormality Workflow:**
+   - Status: open → assigned → in_progress → fixed → verified → closed
+   - Severity levels: critical (24h), high (3 days), medium (7 days), low (14 days)
+   - Overdue tracking with visual indicators
+
+3. **Document Workflow:**
+   - Status: draft → pending_review → approved → published → archived
+   - Rich text content with file attachments
+   - Acknowledgment tracking per user
+
+4. **Dashboard Widgets:**
+   - AbnormalityStatsWidget: Monthly count, open items, fix rate, critical/high priority
+   - DocumentStatsWidget: My reads, unread documents, library stats, pending review
+
+**Files Created:**
+- `database/migrations/2025_12_25_*_create_abnormalities_table.php`
+- `database/migrations/2025_12_25_*_create_documents_table.php`
+- `app/Models/Abnormality.php` - Model with workflow methods
+- `app/Models/Document.php` - Model with approval workflow
+- `app/Models/DocumentAcknowledgment.php` - Acknowledgment tracking
+- `app/Filament/Resources/AbnormalityResource.php` - Full CRUD with workflow actions
+- `app/Filament/Resources/DocumentResource.php` - Full CRUD with approval workflow
+- `app/Filament/Widgets/AbnormalityStatsWidget.php` - Dashboard statistics
+- `app/Filament/Widgets/DocumentStatsWidget.php` - Dashboard statistics
+
+**Actual Effort:** ~6 hours
 
 ---
 
-### Phase 34: CBM & Utility Cost Enhancement (Medium Priority) - 2 Weeks
+### Phase 33: CBM & Utility Cost Enhancement (Medium Priority) - 2 Weeks
 **Objective:** Enhance CBM tracking and add utility cost per kg calculation
 
 **Features:**
@@ -849,7 +890,7 @@ CREATE TABLE kpi_achievements (
 
 ---
 
-### Phase 35: RCA Enhancement & Integration (Medium Priority) - 1 Week
+### Phase 34: RCA Enhancement & Integration (Medium Priority) - 1 Week
 **Objective:** Enhance RCA compliance tracking and integrate with AI
 
 **Features:**
@@ -872,13 +913,21 @@ CREATE TABLE kpi_achievements (
 
 ## 📈 Total Implementation Estimate
 
-**Total Phases:** 5 phases (31-35)  
-**Total Duration:** 11 weeks (2.75 months)  
-**Total Effort:** 310 hours (~39 working days)
+**Total Phases:** 4 phases (31-34)  
+**Total Duration:** 8 weeks (2 months)  
+**Total Effort:** 230 hours (~29 working days)
+
+**Progress Status:**
+| Phase | Status | Completion Date |
+|-------|--------|-----------------|
+| Phase 31 | ✅ COMPLETED | December 25, 2025 |
+| Phase 32 | ✅ COMPLETED | December 25, 2025 |
+| Phase 33 | ⏳ Pending | - |
+| Phase 34 | ⏳ Pending | - |
 
 **Breakdown by Category:**
-- High Priority (Phases 31-32): 6 weeks, 160 hours
-- Medium Priority (Phases 33-35): 5 weeks, 150 hours
+- High Priority (Phases 31-32): 5 weeks, 140 hours
+- Medium Priority (Phases 33-34): 3 weeks, 90 hours
 
 **Resource Requirements:**
 - 1 Full-stack Developer (Laravel + Filament + MySQL)
@@ -893,40 +942,38 @@ CREATE TABLE kpi_achievements (
 
 ## 🎯 Success Criteria
 
-**Phase 31 Complete When:**
+**Phase 31 ✅ COMPLETED (December 25, 2025):**
 - ✅ Users can submit Kaizens with scoring
-- ✅ Managers can approve/reject Kaizens
+- ✅ Asisten Managers can review/approve/reject Kaizens
+- ✅ Department-based filtering implemented
 - ✅ WO improvements linked to Work Orders
-- ✅ Area owners assigned and tracked
-- ✅ Alerts sent when below targets (< 4 Kaizens, < 5 improvements)
+- ✅ Area owners assigned with lines (sub-areas) support
+- ✅ Score only displays after Kaizen is closed
+- ✅ Operator role restricted to Work Orders only
 
-**Phase 32 Complete When:**
-- ✅ Safety incidents tracked with investigation workflow
-- ✅ LTI count displayed (target: 0)
-- ✅ EHS observations tracked with action workflow
-- ✅ Compliance calculated (>= 4 observations/month)
-- ✅ Alerts sent for any LTI or unsafe conditions
-
-**Phase 33 Complete When:**
+**Phase 32 ✅ COMPLETED (December 25, 2025) - Abnormality & Document Management:**
 - ✅ Abnormalities tracked from finding to verification
-- ✅ Fix rate calculated (>= 5 per month per person)
-- ✅ OPL/SOP documents created with approval workflow
-- ✅ Document library searchable and downloadable
-- ✅ Read acknowledgments tracked (>= 2 documents/month)
+- ✅ Severity-based deadlines (critical: 24h, high: 3 days, medium: 7 days, low: 14 days)
+- ✅ Workflow: open → assigned → in_progress → fixed → verified → closed
+- ✅ OPL/SOP documents with rich text editor
+- ✅ Document approval workflow (draft → pending_review → approved → published)
+- ✅ Read acknowledgment tracking
+- ✅ Dashboard widgets for both Abnormality and Documents
+- ✅ Document library searchable and filterable
 
-**Phase 34 Complete When:**
-- ✅ CBM compliance calculated (>= 90%)
-- ✅ Parameter deviations trigger alerts
-- ✅ Production weight tracked per shift/day
-- ✅ Utility consumption tracked (water/electricity/gas)
-- ✅ Per-kg costs calculated and compared to targets
+**Phase 33 Pending (CBM & Utility Cost):**
+- ⏳ CBM compliance calculated (>= 90%)
+- ⏳ Parameter deviations trigger alerts
+- ⏳ Production weight tracked per shift/day
+- ⏳ Utility consumption tracked (water/electricity/gas)
+- ⏳ Per-kg costs calculated and compared to targets
 
-**Phase 35 Complete When:**
-- ✅ RCA mandatory for downtime >10 minutes
-- ✅ RCA compliance calculated (>= 90%)
-- ✅ AI suggestions provided for root cause analysis
-- ✅ WO cannot be closed without RCA completion
-- ✅ Alerts sent for pending RCAs
+**Phase 34 Pending (RCA Enhancement):**
+- ⏳ RCA mandatory for downtime >10 minutes
+- ⏳ RCA compliance calculated (>= 90%)
+- ⏳ AI suggestions provided for root cause analysis
+- ⏳ WO cannot be closed without RCA completion
+- ⏳ Alerts sent for pending RCAs
 
 ---
 
@@ -939,7 +986,7 @@ CREATE TABLE kpi_achievements (
 4. **Soft Deletes:** Consider adding deleted_at for records that need retention
 
 ### UI/UX Considerations:
-1. **Mobile PWA:** Extend existing PWA to include new forms (Kaizen, Abnormality, EHS Observation)
+1. **Mobile PWA:** Extend existing PWA to include new forms (Kaizen, Abnormality, OPL/SOP)
 2. **Notifications:** Integrate with existing Telegram/WhatsApp for alerts
 3. **Dashboard:** Use existing widget system (Filament ChartWidget/StatsWidget)
 4. **Reports:** Reuse existing export functionality (Excel/PDF)
@@ -987,7 +1034,24 @@ CREATE TABLE kpi_achievements (
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** December 24, 2025  
+## 📅 Change Log
+
+| Date | Version | Changes |
+|------|---------|---------|
+| Dec 24, 2025 | 1.0 | Initial document created |
+| Dec 25, 2025 | 1.1 | Phase 31 completed - Kaizen & Improvement Tracking |
+
+**Phase 31 Implementation Details:**
+- Kaizen Management with full workflow (Submit → Review → Approve → Start → Complete → Close)
+- Department-based filtering for data visibility
+- Area Owners with lines (sub-areas) support
+- Score display only after Kaizen is closed
+- Operator role restricted to Work Orders only
+- KaizenStatsWidget for dashboard statistics
+
+---
+
+**Document Version:** 1.1  
+**Last Updated:** December 25, 2025  
 **Author:** Nandang Wijaya  
 **Copyright © 2025 Nandang Wijaya. All Rights Reserved.**

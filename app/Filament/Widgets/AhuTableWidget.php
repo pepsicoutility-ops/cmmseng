@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\AhuChecklist;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -85,17 +86,17 @@ class AhuTableWidget extends BaseWidget
                     ->latest('created_at')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
                 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date/Time')
                     ->dateTime('M d, Y H:i')
                     ->sortable(),
                 
-                Tables\Columns\TextColumn::make('shift')
+                TextColumn::make('shift')
                     ->label('Shift')
                     ->badge()
                     ->color(fn ($state) => match($state) {
@@ -105,7 +106,7 @@ class AhuTableWidget extends BaseWidget
                         default => 'gray'
                     }),
                 
-                Tables\Columns\TextColumn::make('critical_pf_fields')
+                TextColumn::make('critical_pf_fields')
                     ->label('Critical PF')
                     ->state(function (AhuChecklist $record): string {
                         $pfFields = [
@@ -138,7 +139,7 @@ class AhuTableWidget extends BaseWidget
                     ->html()
                     ->wrap(),
                 
-                Tables\Columns\TextColumn::make('critical_mf_fields')
+                TextColumn::make('critical_mf_fields')
                     ->label('Critical MF')
                     ->state(function (AhuChecklist $record): string {
                         $mfFields = [
@@ -169,7 +170,7 @@ class AhuTableWidget extends BaseWidget
                     ->html()
                     ->wrap(),
                 
-                Tables\Columns\TextColumn::make('critical_hf_fields')
+                TextColumn::make('critical_hf_fields')
                     ->label('Critical HF')
                     ->state(function (AhuChecklist $record): string {
                         $hfFields = [
@@ -200,11 +201,11 @@ class AhuTableWidget extends BaseWidget
                     ->html()
                     ->wrap(),
                 
-                Tables\Columns\TextColumn::make('gpid')
+                TextColumn::make('gpid')
                     ->label('Created By')
                     ->searchable(),
                 
-                Tables\Columns\TextColumn::make('notes')
+                TextColumn::make('notes')
                     ->label('Notes')
                     ->limit(50)
                     ->searchable()

@@ -128,6 +128,7 @@ class EquipmentTroubleForm
                             ->directory('trouble-attachments')
                             ->image()
                             ->maxSize(5120)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->columnSpanFull()
                             ->helperText('Upload photos, diagrams, or documentation'),
                     ])

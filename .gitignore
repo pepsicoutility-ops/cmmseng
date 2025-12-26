@@ -1,44 +1,38 @@
-*.log
-.DS_Store
+# ==================================
+# CMMS Laravel Project - .gitignore
+# Updated: December 25, 2025
+# ==================================
+
+# ===============================
+# ENVIRONMENT & SENSITIVE FILES
+# ===============================
 .env
 .env.*
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
+!.env.example
+!.env.production.example
+!.env.dusk.local.example
+
+# ===============================
+# DEPENDENCIES
+# ===============================
+/vendor
 /node_modules
+
+# ===============================
+# BUILD & COMPILED FILES
+# ===============================
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
-Thumbs.db
-npm-debug.log
-yarn-error.log
+*.compiled.php
 
-# Manual book custom views
-manual-book.blade.php
-manual-book-infolist.blade.php
-/resources/views/filament/pm/manual-book.blade.php
-/resources/views/filament/pm/manual-book-infolist.blade.php
-
-# Backup files
-/resources/views/barcode/backup/
-/app/Filament/Widgets/Unused/
-
-# Cache files
+# ===============================
+# CACHE & FRAMEWORK FILES
+# ===============================
 /bootstrap/cache/*
 !/bootstrap/cache/.gitkeep
+/storage/*.key
+/storage/pail
 /storage/framework/cache/*
 !/storage/framework/cache/.gitkeep
 /storage/framework/sessions/*
@@ -46,11 +40,18 @@ manual-book-infolist.blade.php
 /storage/framework/views/*
 !/storage/framework/views/.gitkeep
 
-# Log files
+# ===============================
+# LOG FILES
+# ===============================
+*.log
 /storage/logs/*
 !/storage/logs/.gitkeep
+npm-debug.log
+yarn-error.log
 
-# Uploaded files (photos, documents)
+# ===============================
+# UPLOADED FILES (USER DATA)
+# ===============================
 /storage/app/public/wo-photos/*
 !/storage/app/public/wo-photos/.gitkeep
 /storage/app/public/pm-photos/*
@@ -59,14 +60,65 @@ manual-book-infolist.blade.php
 !/storage/app/public/trouble-photos/.gitkeep
 /storage/app/public/manual-books/*
 !/storage/app/public/manual-books/.gitkeep
-/public/storage
+/storage/app/public/kaizen-photos/*
+!/storage/app/public/kaizen-photos/.gitkeep
+/storage/app/public/imports/*
+!/storage/app/public/imports/.gitkeep
+/storage/app/public/exports/*
+!/storage/app/public/exports/.gitkeep
 
-# Testing
+# ===============================
+# TESTING FILES
+# ===============================
 /coverage
 /.phpunit.cache
+.phpunit.result.cache
 /phpunit.xml
 
-# Deployment & VPS setup scripts
+# ===============================
+# IDE & EDITOR FILES
+# ===============================
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+.project
+.settings/
+nbproject/
+*.sublime-project
+*.sublime-workspace
+.phpactor.json
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+
+# ===============================
+# OS FILES
+# ===============================
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+*~
+*.swp
+*.swo
+
+# ===============================
+# DEPLOYMENT SCRIPTS (SENSITIVE)
+# ===============================
+deploy.ps1
+deploy-simple.ps1
+setup-vps-part1.sh
+setup-vps-part2.sh
+fix-vps-errors.sh
+/scripts/backup-database.sh
+/scripts/restore-database.sh
+
+# ===============================
+# DEPLOYMENT DOCUMENTATION
+# (Contains server IPs/credentials info)
+# ===============================
 DIRECT_DEPLOYMENT_GUIDE.md
 DEPLOYMENT_INSTRUCTIONS.md
 DEPLOYMENT_CHECKLIST.md
@@ -74,50 +126,81 @@ DEPLOYMENT_READINESS_REPORT.md
 DEPLOYMENT.md
 VPS_DEPLOYMENT_GUIDE.md
 VPS_COMPLETE_CLEANUP.md
-setup-vps-part1.sh
-setup-vps-part2.sh
-fix-vps-errors.sh
-deploy.ps1
-deploy-simple.ps1
 
-# Testing & Security reports
+# ===============================
+# TESTING & SECURITY REPORTS
+# (May contain vulnerability info)
+# ===============================
 SECURITY_TEST_REPORT.md
+SECURITY_AUDIT_REPORT.md
 TESTING_SUMMARY.md
 TEST_SUITE_DOCUMENTATION.md
 
-# Phase completion summaries (optional - keep if want documentation history)
+# ===============================
+# PHASE COMPLETION SUMMARIES
+# (Internal documentation)
+# ===============================
 PHASE17_COMPLETION_SUMMARY.md
 PHASE18_COMPLETION_SUMMARY.md
+PHASE31_COMPLETION_SUMMARY.md
+PHASE33_COMPLETION_SUMMARY.md
 PRE_DEPLOYMENT_SUMMARY.md
 
-# Policy backup
+# ===============================
+# BACKUP & TEMPORARY FILES
+# ===============================
+*.backup
+*.bak
+*.tmp
 policy_permission_guide.md.backup
-
-# Temporary & work-in-progress files
-*.swp
-*.swo
-*~
-.DS_Store
-._*
 form-selector-update_Version2.md
+debug-*.php
 
-# IDE files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-.project
-.settings/
-nbproject/
-.phpstorm.meta.php
-_ide_helper.php
-_ide_helper_models.php
+# ===============================
+# HOMESTEAD/VAGRANT
+# ===============================
+Homestead.json
+Homestead.yaml
+/auth.json
 
-# OS files
-Thumbs.db
-Desktop.ini
-
-# ONNX service (if running separately)
+# ===============================
+# ONNX SERVICE (AI/ML)
+# ===============================
 /onnx-service/models/*.onnx
 /onnx-service/__pycache__/
 /onnx-service/*.pyc
+/onnx-service/venv/
+
+# ===============================
+# DATABASE EXPORTS/DUMPS
+# ===============================
+*.sql
+*.sql.gz
+/database/dumps/
+/database/backups/
+
+# ===============================
+# CUSTOM VIEWS (BACKUP)
+# ===============================
+/resources/views/barcode/backup/
+/app/Filament/Widgets/Unused/
+
+# ===============================
+# FILES TO KEEP IN REPO ✅
+# ===============================
+# These files ARE included (not ignored):
+# - .env.example (template)
+# - .env.production.example (production template)
+# - CHECKLIST.md (project status)
+# - WORKFLOW.md (system workflow)
+# - ARCHITECTURE.md (system architecture)
+# - POLICY_PERMISSION_GUIDE.md (role documentation)
+# - README.md (project overview)
+# - README_SETUP.md (setup instructions)
+# - PACKAGES_INSTALLED.md (package list)
+# - AI_*.md (AI feature documentation)
+# - POWERBI_*.md (integration guides)
+# - PWA_*.md (mobile feature docs)
+# - UTILITY_*.md (feature docs)
+# - WHATSAPP_*.md (integration docs)
+# - PERFORMANCE_*.md (KPI documentation)

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\PmCost;
+use App\Models\WoCost;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\PmExecution;
@@ -28,7 +30,7 @@ class CostAnalysisWidget extends StatsOverviewWidget
             ->whereNotNull('actual_end')
             ->pluck('id');
         
-        $pmCost = \App\Models\PmCost::whereIn('pm_execution_id', $pmExecutions)
+        $pmCost = PmCost::whereIn('pm_execution_id', $pmExecutions)
             ->sum('total_cost');
             
         // WO Cost (this month) - from wo_costs table via relationship
@@ -36,7 +38,7 @@ class CostAnalysisWidget extends StatsOverviewWidget
             ->whereYear('created_at', now()->year)
             ->pluck('id');
         
-        $woCost = \App\Models\WoCost::whereIn('work_order_id', $workOrders)
+        $woCost = WoCost::whereIn('work_order_id', $workOrders)
             ->sum('total_cost');
             
         // Parts Value (current inventory)

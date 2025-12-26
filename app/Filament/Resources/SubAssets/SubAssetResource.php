@@ -9,6 +9,7 @@ use App\Filament\Resources\SubAssets\Pages\ViewSubAsset;
 use App\Filament\Resources\SubAssets\Schemas\SubAssetForm;
 use App\Filament\Resources\SubAssets\Schemas\SubAssetInfolist;
 use App\Filament\Resources\SubAssets\Tables\SubAssetsTable;
+use App\Filament\Traits\HasRoleBasedAccess;
 use App\Models\SubAsset;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -17,13 +18,14 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 
 class SubAssetResource extends Resource
 {
+    use HasRoleBasedAccess;
+    
     protected static ?string $model = SubAsset::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCubeTransparent;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedCubeTransparent;
     
     protected static ?string $navigationLabel = 'Equipments';
     protected static ?string $modelLabel = 'Equipments';
@@ -34,8 +36,7 @@ class SubAssetResource extends Resource
     
     public static function canAccess(): bool
     {
-        $user = Auth::user();
-        return $user && in_array($user->role, ['super_admin', 'manager']);
+        return static::canAccessAdminOnly();
     }
     
     public static function getNavigationGroup(): ?string

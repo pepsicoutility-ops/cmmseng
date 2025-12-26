@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\PmExecutions\Pages;
 
+use Filament\Actions\Action;
+use App\Services\InventoryService;
+use App\Services\PmService;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\PmExecutions\PmExecutionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -13,7 +18,7 @@ class EditPmExecution extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('complete')
+            Action::make('complete')
                 ->label('Complete PM')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
@@ -45,25 +50,25 @@ class EditPmExecution extends EditRecord
                     
                     // Deduct inventory if parts were used
                     if ($execution->partsUsage()->count() > 0) {
-                        $inventoryService = app(\App\Services\InventoryService::class);
+                        $inventoryService = app(InventoryService::class);
                         $inventoryService->deductPartsFromPmExecution($execution);
                     }
                     
                     // Calculate PM cost
-                    $pmService = app(\App\Services\PmService::class);
+                    $pmService = app(PmService::class);
                     $pmService->calculateCost($execution);
                     
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('PM Execution Completed')
                         ->body('Parts inventory deducted and cost calculated.')
                         ->success()
                         ->send();
                     
-                    return redirect(\App\Filament\Resources\PmExecutions\PmExecutionResource::getUrl('index'));
+                    return redirect(PmExecutionResource::getUrl('index'));
                 })
                 ->visible(fn () => $this->record->status === 'in_progress'),
             DeleteAction::make()
-                ->visible(fn () => in_array(\Illuminate\Support\Facades\Auth::user()->role, ['super_admin', 'manager'])),
+                ->visible(fn () => in_array(Auth::user()->role, ['super_admin', 'manager'])),
         ];
     }
     
@@ -89,7 +94,7 @@ class EditPmExecution extends EditRecord
             ]);
             
             // Calculate PM cost
-            $pmService = app(\App\Services\PmService::class);
+            $pmService = app(PmService::class);
             $pmService->calculateCost($execution);
         }
     }

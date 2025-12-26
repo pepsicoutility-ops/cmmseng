@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Actions\Action;
+use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -17,7 +19,7 @@ class ChangePassword extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedKey;
 
     protected string $view = 'filament.pages.change-password';
 
@@ -76,7 +78,7 @@ class ChangePassword extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         // Verify current password
@@ -108,7 +110,7 @@ class ChangePassword extends Page implements HasForms
     protected function getFormActions(): array
     {
         return [
-            \Filament\Actions\Action::make('changePassword')
+            Action::make('changePassword')
                 ->label('Change Password')
                 ->submit('changePassword'),
         ];

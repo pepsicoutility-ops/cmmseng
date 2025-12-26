@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Inventorie;
+use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\StockAlert;
 use App\Models\Part;
@@ -11,14 +11,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('inventory has correct fillable attributes', function () {
-    $inventory = new Inventorie();
+    $inventory = new Inventory();
     
     expect($inventory->getFillable())->toContain('part_id', 'quantity', 'min_stock', 'location');
 });
 
 test('inventory belongs to part', function () {
     $part = Part::factory()->create();
-    $inventory = Inventorie::factory()->create(['part_id' => $part->id]);
+    $inventory = Inventory::factory()->create(['part_id' => $part->id]);
     
     expect($inventory->part)->toBeInstanceOf(Part::class);
     expect($inventory->part->id)->toBe($part->id);
@@ -27,7 +27,7 @@ test('inventory belongs to part', function () {
 test('inventory belongs to asset', function () {
     $asset = Asset::factory()->create();
     $part = Part::factory()->create();
-    $inventory = Inventorie::factory()->create([
+    $inventory = Inventory::factory()->create([
         'part_id' => $part->id,
         'asset_id' => $asset->id,
     ]);

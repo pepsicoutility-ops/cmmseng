@@ -33,7 +33,7 @@ class ListUsers extends ListRecords
                 ->label('Import Users (Batch)')
                 ->icon('heroicon-o-arrow-up-tray')
                 ->color('primary')
-                ->form([
+                ->schema([
                     FileUpload::make('file')
                         ->label('Excel File')
                         ->required()

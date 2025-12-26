@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Part;
+use App\Models\WoPartsUsage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\WorkOrder;
 use App\Models\WoCost;
 use App\Models\WoProcess;
@@ -28,21 +32,21 @@ class WoService
 {
     /**
      * Complete work order with parts usage, calculations, and inventory deduction
-     * 
+     *
      * This method performs the following steps:
      * 1. Calculate downtime and MTTR from process history
      * 2. Save parts usage records if provided
      * 3. Deduct parts from inventory (two-way sync)
      * 4. Calculate all costs (labor, parts, downtime)
      * 5. Update work order status to 'completed'
-     * 
+     *
      * @param WorkOrder $wo Work order instance to complete
      * @param array<string, mixed> $data Additional data including:
      *        - parts_usage: array Array of parts used [['part_id' => int, 'quantity' => int], ...]
      * @return void
-     * 
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If part not found
-     * 
+     *
+     * @throws ModelNotFoundException If part not found
+     *
      * @see calculateDowntime() For downtime calculation logic
      * @see calculateWoCost() For cost calculation logic
      * @see InventoryService::deductPartsFromWorkOrder() For inventory deduction
@@ -61,11 +65,11 @@ class WoService
         if (!empty($data['parts_usage'])) {
             foreach ($data['parts_usage'] as $partUsage) {
                 // Get part to calculate cost
-                $part = \App\Models\Part::find($partUsage['part_id']);
+                $part = Part::find($partUsage['part_id']);
                 $quantity = $partUsage['quantity'];
                 $cost = $part ? ($part->unit_price * $quantity) : 0;
                 
-                \App\Models\WoPartsUsage::create([
+                WoPartsUsage::create([
                     'work_order_id' => $wo->id,
                     'part_id' => $partUsage['part_id'],
                     'quantity' => $quantity,
@@ -91,14 +95,14 @@ class WoService
     
     /**
      * Calculate total downtime from work order processes
-     * 
+     *
      * Downtime is measured from the earliest 'start' timestamp
      * to the latest 'complete' timestamp in the wo_processes table.
      * Rounded up to nearest minute.
-     * 
-     * @param \Illuminate\Database\Eloquent\Collection<int, WoProcess> $processes WO process records ordered by timestamp
+     *
+     * @param Collection<int, WoProcess> $processes WO process records ordered by timestamp
      * @return int Total downtime in minutes (rounded up)
-     * 
+     *
      * @example
      * // Process 1: start at 08:00, Process 2: complete at 10:30
      * // Downtime = 150 minutes (2.5 hours)

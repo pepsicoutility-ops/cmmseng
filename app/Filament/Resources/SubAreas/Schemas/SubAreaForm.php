@@ -14,7 +14,7 @@ class SubAreaForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Select::make('area_id')
                     ->label('Area')
                     ->options(Area::where('is_active', true)->pluck('name', 'id'))

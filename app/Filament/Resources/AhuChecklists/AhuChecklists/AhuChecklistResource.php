@@ -19,7 +19,7 @@ class AhuChecklistResource extends Resource
 {
     protected static ?string $model = AhuChecklist::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedCloud;
 
     
     protected static ?string $navigationLabel = 'AHU';
@@ -29,6 +29,10 @@ class AhuChecklistResource extends Resource
     public static function canViewAny(): bool
     {
         $user = Auth::user();
+        // Operators can only access Work Orders
+        if ($user && $user->role === 'operator') {
+            return false;
+        }
         return $user && (
             $user->role === 'super_admin' ||
             $user->department === 'utility'

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Inventories\Schemas;
 
+use App\Models\Part;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
@@ -27,7 +28,7 @@ class InventoryForm
                             ->live()
                             ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                 if ($state) {
-                                    $part = \App\Models\Part::find($state);
+                                    $part = Part::find($state);
                                     if ($part) {
                                         $set('min_stock', $part->min_stock);
                                         $set('location', $part->location);

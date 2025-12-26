@@ -2,13 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\AhuTableWidget;
 use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
 class UtilityPerformanceAnalysis extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar-square';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar-square';
 
    //rotected string $view = 'filament.pages.utility-performance-analysis';
     
@@ -29,6 +30,10 @@ class UtilityPerformanceAnalysis extends Page
     public static function canAccess(): bool
     {
         $user = Auth::user();
+        // Operators can only access Work Orders
+        if ($user && $user->role === 'operator') {
+            return false;
+        }
         return $user && (
             $user->role === 'super_admin' ||
             $user->department === 'utility'
@@ -46,7 +51,7 @@ class UtilityPerformanceAnalysis extends Page
         
         return [
             // AHU Section - Only AHU Table Widget
-            \App\Filament\Widgets\AhuTableWidget::class,
+            AhuTableWidget::class,
         ];
     }
 }

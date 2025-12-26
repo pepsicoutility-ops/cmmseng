@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use OpenAI;
 use Illuminate\Support\Facades\Log;
 
@@ -45,7 +46,7 @@ class AiInsightService
             
             return $this->parseAiResponse($content);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("OpenAI insight error for {$equipmentType}: " . $e->getMessage());
             
             return $this->getDefaultInsight($predictionData);

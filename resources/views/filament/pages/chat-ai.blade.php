@@ -301,6 +301,28 @@
                     <div class="brand-logo">
                         <span style="letter-spacing: -0.5px;">AI ENGINEERING</span>
                     </div>
+                </div>
+                
+                {{-- Token Usage Indicator --}}
+                @if(isset($usageStats['today']))
+                <div class="flex items-center gap-3" title="Daily AI Token Usage">
+                    <div class="flex items-center gap-2 text-xs">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full 
+                            {{ $usageStats['today']['usage_percentage'] >= 90 ? 'bg-red-100 text-red-700' : 
+                               ($usageStats['today']['usage_percentage'] >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700') }}">
+                            <span class="font-semibold">{{ number_format($usageStats['today']['tokens_remaining']) }}</span>
+                            <span class="text-[10px] opacity-75">tokens left</span>
+                        </div>
+                        <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-300
+                                {{ $usageStats['today']['usage_percentage'] >= 90 ? 'bg-red-500' : 
+                                   ($usageStats['today']['usage_percentage'] >= 70 ? 'bg-amber-500' : 'bg-emerald-500') }}"
+                                 style="width: {{ min(100, $usageStats['today']['usage_percentage']) }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </header>
 
             <div class="messages-container custom-scroll" 
@@ -321,7 +343,7 @@
                     @foreach ($messages as $item)
                         <div class="bubble {{ $item['role'] === 'user' ? 'bubble-user' : 'bubble-ai' }}">
                             <div class="prose prose-sm leading-relaxed {{ $item['role'] === 'user' ? 'prose-invert' : 'prose-slate' }} max-w-none">
-                                {!! \Illuminate\Support\Str::markdown($item['content']) !!}
+                                {!! \Illuminate\Support\Str::markdown(e($item['content'])) !!}
                             </div>
                             <div class="text-[9px] mt-2 opacity-50 {{ $item['role'] === 'user' ? 'text-right' : 'text-left' }}">
                                 {{ $item['created_at'] }}

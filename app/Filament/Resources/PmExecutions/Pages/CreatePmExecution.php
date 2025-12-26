@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PmExecutions\Pages;
 
+use App\Models\PmSchedule;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\PmExecutions\PmExecutionResource;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -15,7 +17,7 @@ class CreatePmExecution extends CreateRecord
         
         // Prefill data from query parameter
         if ($pmScheduleId = request()->query('pm_schedule_id')) {
-            $pmSchedule = \App\Models\PmSchedule::find($pmScheduleId);
+            $pmSchedule = PmSchedule::find($pmScheduleId);
             
             if ($pmSchedule) {
                 $this->form->fill([
@@ -30,7 +32,7 @@ class CreatePmExecution extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Set executed_by_gpid
-        $data['executed_by_gpid'] = \Illuminate\Support\Facades\Auth::user()->gpid;
+        $data['executed_by_gpid'] = Auth::user()->gpid;
         
         // Set initial status
         $data['status'] = 'in_progress';

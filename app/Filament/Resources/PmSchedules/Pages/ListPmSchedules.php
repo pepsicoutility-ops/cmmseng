@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PmSchedules\Pages;
 
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\PmSchedules\PmScheduleResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -15,7 +16,7 @@ class ListPmSchedules extends ListRecords
         return [
             CreateAction::make()
                 ->visible(fn () => 
-                    in_array(\Illuminate\Support\Facades\Auth::user()->role, ['super_admin', 'manager', 'asisten_manager'])
+                    in_array(Auth::user()->role, ['super_admin', 'manager', 'asisten_manager'])
                 ),
         ];
     }

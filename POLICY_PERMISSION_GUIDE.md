@@ -1,9 +1,9 @@
 # 🔐 Policy & Permission Guide - CMMS Laravel + Filament v4
 
 **Author:** Nandang Wijaya  
-**Date:** November 18, 2025 (Updated)  
+**Date:** December 25, 2025 (Updated)  
 **Project:** CMMS (Computerized Maintenance Management System)  
-**Status:** ✅ 4 Policies Implemented, All Role-Based Access Verified
+**Status:** ✅ 4 Policies + HasRoleBasedAccess Trait Implemented, All Role-Based Access Verified
 
 ---
 
@@ -35,7 +35,7 @@
 - 🏢 **Asisten Managers see ONLY their department data** (filtered by department)
 - 👑 **Managers & Super Admins see ALL data** (no filtering)
 - 🔒 **Tech Store access ONLY inventory** (no PM/WO access)
-- 📱 **Operators access ONLY barcode** (no Filament panel access)
+- 📱 **Operators access ONLY Work Orders** (redirect from all other pages)
 
 ---
 
@@ -90,27 +90,47 @@
 │ (Mech/Elec/Util) │ - Assign PM to techs
 └────┬─────────────┘
      │
-┌────▼────────┐
-│ TECHNICIAN  │ ⭐ GPID-based filtering
-│ (Own PM)    │ - Execute assigned PM
-└─────────────┘
+┌────▼────────┐  ┌────────────┐
+│ TECHNICIAN  │  │  OPERATOR  │ 🔒 Work Orders ONLY
+│ (Own PM)    │  │ (Submit WO)│ - No dashboard access
+└─────────────┘  └────────────┘
 ```
 
 ### Complete Access Matrix
 
 | Module | Super Admin | Manager | Asisten Mgr | Technician | Tech Store | Operator |
 |--------|-------------|---------|-------------|------------|------------|----------|
+| **Dashboard** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **AI Chat** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | **Master Data** | ✅ CRUD | ✅ CRUD | ❌ | ❌ | ❌ | ❌ |
 | **Users** | ✅ CRUD | ✅ CRUD* | ❌ | ❌ | ❌ | ❌ |
 | **PM Schedule** | ✅ All | ✅ All | ✅ Dept | ⭐ Own GPID | ❌ | ❌ |
 | **PM Execution** | ✅ All | ✅ All | ✅ Dept | ✅ Own | ❌ | ❌ |
-| **Work Order** | ✅ All | ✅ All | ✅ Dept | ✅ Dept | ❌ | ✅ Submit |
+| **Work Order** | ✅ All | ✅ All | ✅ Dept | ✅ Dept | ❌ | ✅ View/Submit |
 | **Inventory** | ✅ CRUD | ✅ CRUD | ❌ | ❌ | ✅ CRUD | ❌ |
 | **Parts** | ✅ CRUD | ✅ CRUD | ✅ View | ✅ View | ✅ CRUD | ❌ |
 | **Stock Alerts** | ✅ All | ✅ All | ❌ | ❌ | ✅ All | ❌ |
 | **Barcode Token** | ✅ CRUD | ✅ CRUD | ❌ | ❌ | ❌ | ❌ |
+| **Kaizen** | ✅ All | ✅ All | ✅ Dept | ✅ Own | ❌ | ❌ |
+| **Area Owners** | ✅ CRUD | ✅ CRUD | ✅ View | ✅ View | ❌ | ❌ |
+| **Equipment Trouble** | ✅ CRUD | ✅ CRUD | ✅ Dept | ✅ Dept | ❌ | ❌ |
+| **Reports** | ✅ All | ✅ All | ✅ Dept | ✅ Own | ✅ Inventory | ❌ |
+| **Utility Checklists** | ✅ All | ❌ | ❌ | ✅ Utility only | ❌ | ❌ |
+| **CBM Schedules** | ✅ All | ✅ All | ✅ All | ✅ All | ❌ | ❌ |
+| **CBM Alerts** | ✅ All | ✅ All | ✅ All | ✅ All | ❌ | ❌ |
+| **Production Records** | ✅ All | ✅ All | ✅ All | ✅ All | ❌ | ❌ |
+| **Utility Consumptions** | ✅ All | ✅ All | ✅ All | ✅ All | ❌ | ❌ |
+| **Root Cause Analysis** | ✅ All | ✅ All | ✅ Dept | ✅ Dept | ❌ | ❌ |
+| **AI Usage Monitor** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Change Password** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 *Manager cannot edit/delete super_admin users
+
+**🔒 OPERATOR RESTRICTIONS:**
+- Operators can ONLY access the **Work Orders** page
+- Operators are automatically redirected from Dashboard to Work Orders
+- All other menu items are hidden from Operators
+- Operators can View and Submit Work Orders only (cannot Edit/Delete)
 
 ---
 
@@ -1128,16 +1148,77 @@ if (in_array($user->role, ['technician', 'asisten_manager'])) {
 
 ### 📊 Access Control Summary Per Role
 
-| Role | Master Data | Users | PM | WO | Inventory | Barcode |
-|------|-------------|-------|----|----|-----------|---------|
-| Super Admin | ✅ CRUD | ✅ CRUD | ✅ All | ✅ All | ✅ CRUD | ✅ CRUD |
-| Manager | ✅ CRUD | ✅ CRUD* | ✅ All | ✅ All | ✅ CRUD | ✅ CRUD |
-| Asisten Mgr | ❌ | ❌ | ✅ Dept | ✅ Dept | ❌ | ❌ |
-| Technician | ❌ | ❌ | ⭐ Own | ✅ Dept | ❌ | ❌ |
-| Tech Store | ❌ | ❌ | ❌ | ❌ | ✅ CRUD | ❌ |
-| Operator | ❌ | ❌ | ❌ | ✅ Submit | ❌ | ❌ |
+| Role | Master Data | Users | PM | WO | Inventory | Kaizen | AI Chat |
+|------|-------------|-------|----|----|-----------|--------|---------|
+| Super Admin | ✅ CRUD | ✅ CRUD | ✅ All | ✅ All | ✅ CRUD | ✅ All | ✅ |
+| Manager | ✅ CRUD | ✅ CRUD* | ✅ All | ✅ All | ✅ CRUD | ✅ All | ✅ |
+| Asisten Mgr | ❌ | ❌ | ✅ Dept | ✅ Dept | ❌ | ✅ Dept | ✅ |
+| Technician | ❌ | ❌ | ⭐ Own | ✅ Dept | ❌ | ✅ Own | ✅ |
+| Tech Store | ❌ | ❌ | ❌ | ❌ | ✅ CRUD | ❌ | ✅ |
+| Operator | ❌ | ❌ | ❌ | ✅ View/Submit | ❌ | ❌ | ❌ |
 
 *Manager cannot edit super_admin users
+
+### 🔒 Operator Role Restrictions (Updated December 25, 2025)
+
+**Implementation:** 
+1. `RedirectOperatorsToDashboard` middleware - Redirects from blocked pages
+2. `HasRoleBasedAccess` trait - Hides navigation menu items
+3. `canAccess()` method in each resource - Blocks direct URL access
+
+**Allowed Pages for Operator:**
+- `/pep/work-orders` - View and submit Work Orders
+- `/pep/work-orders/*` - View individual Work Order details
+- `/pep/change-password` - Change own password
+
+**Blocked Pages for Operator (via canAccess + middleware):**
+- Dashboard
+- AI Chat
+- AI Usage Monitor
+- PM Schedules
+- PM Executions
+- Kaizen
+- Area Owners
+- Equipment Troubles
+- All Reports
+- All Settings
+- All Master Data
+- **CBM Schedules** (added Dec 25, 2025)
+- **CBM Alerts** (added Dec 25, 2025)
+- **Production Records** (added Dec 25, 2025)
+- **Utility Consumptions** (added Dec 25, 2025)
+- **Root Cause Analysis** (added Dec 25, 2025)
+- All Utility Checklists
+
+**HasRoleBasedAccess Trait Location:** `app/Filament/Traits/HasRoleBasedAccess.php`
+
+```php
+// Available access control methods:
+canAccessAdminOnly()              // super_admin, manager
+canAccessManagement()             // super_admin, manager, asisten_manager
+canAccessManagementAndTechnician() // super_admin, manager, asisten_manager, technician
+canAccessAllRoles()               // All roles including operator
+canAccessInventory()              // super_admin, manager, tech_store
+canAccessExcludeOperator()        // All roles EXCEPT operator
+```
+
+**Resources Updated with canAccessExcludeOperator():**
+- `CbmScheduleResource.php`
+- `CbmAlertResource.php`
+- `ProductionRecordResource.php`
+- `UtilityConsumptionResource.php`
+- `RootCauseAnalysisResource.php`
+
+**Middleware Location:** `app/Http/Middleware/RedirectOperatorsToDashboard.php`
+
+```php
+// Operator is automatically redirected to Work Orders from any blocked page
+if ($user && $user->role === 'operator') {
+    if (!$isAllowed && $request->is('pep/*')) {
+        return redirect('/pep/work-orders');
+    }
+}
+```
 
 ### ✅ All Requirements from WORKFLOW.md Met
 
@@ -1146,7 +1227,7 @@ if (in_array($user->role, ['technician', 'asisten_manager'])) {
 - ✅ Department-based filtering (asisten manager sees dept only)
 - ✅ Full access for managers/super admins
 - ✅ Tech store inventory-only access
-- ✅ Operator barcode-only access
+- ✅ Operator Work Orders-only access (middleware + canAccess)
 - ✅ WO workflow actions role-gated
 - ✅ Master data restricted to super_admin/manager
 - ✅ User management restricted to super_admin/manager
@@ -1169,9 +1250,9 @@ Optional enhancements (low priority):
 
 ---
 
-**Last Updated:** 2025-11-18  
-**Verification Status:** ✅ ALL POLICIES VERIFIED AND WORKING  
-**Next:** Continue to Phase 11
+**Last Updated:** 2025-12-25  
+**Verification Status:** ✅ ALL POLICIES + TRAIT-BASED ACCESS VERIFIED AND WORKING  
+**Phase:** 34 Complete - AI Intelligence Enhancement
 
 ---
 

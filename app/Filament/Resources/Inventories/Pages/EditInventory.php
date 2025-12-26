@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Inventories\Pages;
 
+use Illuminate\Support\Facades\Auth;
+use App\Models\Part;
 use App\Filament\Resources\Inventories\InventoryResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -14,7 +16,7 @@ class EditInventory extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->visible(fn () => \Illuminate\Support\Facades\Auth::user()->role === 'super_admin'),
+                ->visible(fn () => Auth::user()->role === 'super_admin'),
         ];
     }
 
@@ -22,7 +24,7 @@ class EditInventory extends EditRecord
     {
         // Load min_stock and location from Part when editing
         if (isset($data['part_id'])) {
-            $part = \App\Models\Part::find($data['part_id']);
+            $part = Part::find($data['part_id']);
             if ($part) {
                 $data['min_stock'] = $part->min_stock;
                 $data['location'] = $part->location;
@@ -42,7 +44,7 @@ class EditInventory extends EditRecord
 
         // Always sync min_stock and location from Part
         if (isset($data['part_id'])) {
-            $part = \App\Models\Part::find($data['part_id']);
+            $part = Part::find($data['part_id']);
             if ($part) {
                 $data['min_stock'] = $part->min_stock;
                 $data['location'] = $part->location;
