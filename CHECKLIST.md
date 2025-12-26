@@ -67,9 +67,10 @@ This CMMS (Computerized Maintenance Management System) application, including al
 - **Phase 32: AI Advanced Analytics - Root Cause, Cost Optimization, Anomaly Detection (100% COMPLETE - Dec 24, 2025)** ✅
 - **Phase 33: AI Predictive & Performance - Maintenance Prediction, Benchmarking, Briefings (100% COMPLETE - Dec 25, 2025)** ✅
 - **Phase 34: AI Intelligence Enhancement - Export Upgrade, Trend Analysis, Smart Query, Usage Limits (100% COMPLETE - Dec 25, 2025)** ✅
+- **Phase 35: Performance Optimization & Bug Fixes (100% COMPLETE - Dec 26, 2025)** ✅
 
-**Current Status (December 25, 2025):**
-- **Total Phases Completed:** 34 phases ✅
+**Current Status (December 26, 2025):**
+- **Total Phases Completed:** 35 phases ✅
 - **System Status:** Production-ready with full feature set + Advanced AI Analytics
 - **All Core Features:** Operational and tested
 - **Integration Status:** Telegram, WhatsApp, AI/ML (ONNX + OpenAI GPT-4o-mini), Power BI all configured
@@ -6185,11 +6186,82 @@ Final AI enhancement phase adding export improvements, trend analysis, smart que
 
 ---
 
-**Last Updated:** 2025-12-25  
+## Phase 35: Performance Optimization & Bug Fixes (December 26, 2025) ✅
+
+### 35.1 Code Bug Fixes
+
+**Files Fixed:**
+- `app/Services/AIAnalyticsService.php`
+  - Fixed `select()` with multiple arguments → changed to `selectRaw()` (lines 2683, 2822)
+  - Fixed `\DB` undefined → changed to `DB` (imported facade) (line 2887)
+  
+- `app/Filament/Widgets/KaizenStatsWidget.php`
+  - Fixed `distinct('submitted_by_gpid')->count()` → changed to `distinct()->count('submitted_by_gpid')` (line 30)
+
+- `app/Exports/DataExport.php`
+  - Fixed duplicate `font` key in styles array → merged into single key with `bold` and `color` properties (line 50)
+
+### 35.2 Performance Dashboard Removal
+
+**Removed files to improve performance (widgets no longer needed after dashboard consolidation):**
+
+| File Removed | Description |
+|--------------|-------------|
+| `app/Filament/Pages/UtilityPerformanceAnalysis.php` | Performance Dashboard page |
+| `resources/views/filament/pages/utility-performance-analysis.blade.php` | Blade view for dashboard |
+| `app/Filament/Widgets/AhuTableWidget.php` | AHU Filter table widget |
+| `app/Filament/Widgets/UtilityPerformanceWidget.php` | Stats overview widget |
+| `app/Filament/Widgets/EnergyMetricsChartWidget.php` | Energy Performance chart (7-day trend) |
+| `app/Filament/Widgets/MasterChecklistsWidget.php` | Chiller1 Checklist table widget |
+
+**Reason:** These widgets were integrated into the main Dashboard, making the separate Performance Dashboard page redundant. Removing reduces memory usage and improves load times.
+
+### 35.3 AI Tools Configuration Enhancement
+
+**Problem:** AI Chat couldn't access database data when using custom API proxy (SumoPod).
+
+**Solution:** Added configurable `OPENAI_TOOLS_ENABLED` setting.
+
+**Files Modified:**
+
+1. **`config/openai.php`** - Added new config option:
+```php
+'tools_enabled' => env('OPENAI_TOOLS_ENABLED', true),
+```
+
+2. **`app/Services/ChatAIService.php`** - Updated tools logic:
+```php
+// Before (hardcoded check)
+$useTools = empty($baseUrl) || str_contains($baseUrl, 'api.openai.com');
+
+// After (configurable)
+$useTools = config('openai.tools_enabled', true);
+```
+
+**Environment Variable:**
+```env
+OPENAI_TOOLS_ENABLED=true  # Enable AI function calling (default: true)
+```
+
+**Result:** AI Chat now successfully retrieves data from database using SumoPod API proxy with function calling enabled.
+
+### 35.4 Summary
+
+| Category | Items | Status |
+|----------|-------|--------|
+| Bug Fixes | 4 files fixed | ✅ |
+| Files Removed | 6 unused widgets/pages | ✅ |
+| Config Added | OPENAI_TOOLS_ENABLED | ✅ |
+| AI Integration | SumoPod + Tools working | ✅ |
+
+---
+
+**Last Updated:** 2025-12-26  
 **Updated By:** Nandang Wijaya via AI Assistant  
-**Status:** 34 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
+**Status:** 35 Phases Complete ✅ | 1 Phase Attempted (Pending Resolution) ⚠️ | All Features Operational | Production Ready
 
 **Latest Additions:**
+- Phase 35: Performance Optimization & Bug Fixes - Code fixes, unused widget removal, AI config enhancement (Dec 26, 2025)
 - Phase 34: AI Intelligence Enhancement - Export Upgrade, Trend Analysis, Smart Query, Usage Limits (Dec 25, 2025)
 - Phase 33: AI Predictive & Performance - Maintenance Prediction, Benchmarking, Briefings (Dec 25, 2025)
 - Phase 32: AI Advanced Analytics - Root Cause, Cost Optimization, Anomaly Detection (Dec 24, 2025)
