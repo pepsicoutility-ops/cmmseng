@@ -59,17 +59,27 @@ class ChatAIService
         ]);
 
         try {
+            // Check if using custom API endpoint (may not support tools)
+            $baseUrl = config('openai.base_uri');
+            $useTools = empty($baseUrl) || str_contains($baseUrl, 'api.openai.com');
+            
             $payload = [
                 'model' => config('services.openai.model', 'gpt-4-turbo-preview'),
-                'temperature' => 0.7,
-                'max_tokens' => 1500,
+                'temperature' => (float) config('openai.temperature', 0.7),
+                'max_tokens' => (int) config('openai.max_tokens', 1500),
                 'messages' => $this->buildMessagesPayload($conversation),
-                'tools' => AIToolsService::getToolDefinitions(),
-                'tool_choice' => 'auto',
             ];
+            
+            // Only add tools if using official OpenAI API
+            if ($useTools) {
+                $payload['tools'] = AIToolsService::getToolDefinitions();
+                $payload['tool_choice'] = 'auto';
+            }
 
             Log::info('Sending request to AI', [
                 'model' => $payload['model'],
+                'base_url' => $baseUrl ?: 'default (api.openai.com)',
+                'tools_enabled' => $useTools,
                 'tools_count' => isset($payload['tools']) ? count($payload['tools']) : 0,
                 'messages_count' => count($payload['messages']),
             ]);
@@ -77,24 +87,52 @@ class ChatAIService
             try {
                 $response = OpenAI::chat()->create($payload);
                 
-                Log::info('AI raw response', [
+                Log::info('AI raw response received', [
                     'response_type' => get_class($response),
                     'has_choices' => isset($response->choices),
                     'choices_count' => isset($response->choices) ? count($response->choices) : 0,
-                    'first_choice' => isset($response->choices[0]) ? json_encode($response->choices[0]->toArray()) : 'null',
                 ]);
+                
+                // Validate response structure
+                if (!isset($response->choices) || empty($response->choices)) {
+                    Log::error('OpenAI response missing choices', [
+                        'response' => method_exists($response, 'toArray') ? $response->toArray() : 'N/A',
+                    ]);
+                    throw new RuntimeException('AI response was empty or invalid. Please try again.');
+                }
+                
             } catch (Throwable $exception) {
                 Log::error('OpenAI chat request failed.', [
                     'conversation_id' => $conversation->id,
                     'message' => $exception->getMessage(),
+                    'trace' => $exception->getTraceAsString(),
+                    'api_key_set' => !empty(config('services.openai.api_key')),
+                    'model' => config('services.openai.model'),
+                    'base_url' => config('openai.base_uri'),
                 ]);
 
                 $errorMessage = $exception->getMessage();
-                if (str_contains($errorMessage, 'model') || str_contains($errorMessage, 'choices')) {
-                    throw new RuntimeException('OpenAI response was invalid. Check OPENAI_API_KEY and OPENAI_MODEL.');
+                
+                // Check for specific error types
+                if (str_contains($errorMessage, 'Undefined array key') || 
+                    str_contains($errorMessage, 'choices') ||
+                    str_contains($errorMessage, 'Could not resolve')) {
+                    throw new RuntimeException('AI service connection failed. Please check API configuration.');
+                }
+                
+                if (str_contains($errorMessage, '401') || str_contains($errorMessage, 'Unauthorized')) {
+                    throw new RuntimeException('AI API key is invalid. Please check OPENAI_API_KEY.');
+                }
+                
+                if (str_contains($errorMessage, '429') || str_contains($errorMessage, 'rate limit')) {
+                    throw new RuntimeException('AI rate limit exceeded. Please wait a moment and try again.');
+                }
+                
+                if (str_contains($errorMessage, 'model')) {
+                    throw new RuntimeException('AI model not available. Please check OPENAI_MODEL setting.');
                 }
 
-                throw $exception;
+                throw new RuntimeException('AI request failed: ' . $errorMessage);
             }
 
             $choice = $response->choices[0];

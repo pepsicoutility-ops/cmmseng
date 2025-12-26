@@ -27,7 +27,7 @@ class KaizenStatsWidget extends BaseWidget
             $yearlyKaizenQuery->where('submitted_by_gpid', $user->gpid);
         }
         $yearlyKaizens = $yearlyKaizenQuery->count();
-        $yearlyTarget = $isManager ? Kaizen::distinct('submitted_by_gpid')->count() * 4 : 4;
+        $yearlyTarget = $isManager ? Kaizen::distinct()->count('submitted_by_gpid') * 4 : 4;
 
         // Kaizen count for current month
         $monthlyKaizenQuery = Kaizen::whereYear('created_at', $currentYear)

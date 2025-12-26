@@ -77,11 +77,11 @@ class Part extends Model
     /**
      * Get all inventory records for this part (location-based stock)
      * 
-     * @return HasMany<Inventorie>
+     * @return HasMany<Inventory>
      */
     public function inventories(): HasMany
     {
-        return $this->hasMany(Inventorie::class);
+        return $this->hasMany(Inventory::class);
     }
 
     /**

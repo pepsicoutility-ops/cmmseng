@@ -112,7 +112,7 @@
     <x-filament::section class="mt-6">
         <x-slot name="heading">
             <div class="flex items-center gap-2">
-                Token Pricing Info (GPT-4o-mini)
+                Token Pricing Info
             </div>
         </x-slot>
         

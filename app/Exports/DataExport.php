@@ -42,12 +42,11 @@ class DataExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
     {
         return [
             1 => [
-                'font' => ['bold' => true],
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['rgb' => '4472C4'],
                 ],
-                'font' => ['color' => ['rgb' => 'FFFFFF']],
             ],
         ];
     }

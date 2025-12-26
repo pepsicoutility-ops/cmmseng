@@ -2680,10 +2680,10 @@ class AIAnalyticsService
         }
 
         // 2. Check equipment with high trouble frequency
-        $troubleFrequency = EquipmentTrouble::select('equipment_id', DB::raw('COUNT(*) as trouble_count'))
+        $troubleFrequency = EquipmentTrouble::selectRaw('equipment_id, COUNT(*) as trouble_count')
             ->where('created_at', '>=', $now->copy()->subDays(30))
             ->groupBy('equipment_id')
-            ->having('trouble_count', '>=', 3)
+            ->havingRaw('COUNT(*) >= 3')
             ->get();
 
         foreach ($troubleFrequency as $trouble) {
@@ -2819,12 +2819,12 @@ class AIAnalyticsService
         $now = Carbon::now();
 
         // 1. High cost equipment (top spenders)
-        $highCostEquipment = WoCost::select('work_orders.sub_asset_id', DB::raw('SUM(wo_costs.labour_cost + wo_costs.parts_cost) as total_cost'))
+        $highCostEquipment = WoCost::selectRaw('work_orders.sub_asset_id, SUM(wo_costs.labour_cost + wo_costs.parts_cost) as total_cost')
             ->join('work_orders', 'wo_costs.work_order_id', '=', 'work_orders.id')
             ->where('wo_costs.created_at', '>=', $now->copy()->subDays(90))
             ->groupBy('work_orders.sub_asset_id')
-            ->having('total_cost', '>', 5000000)
-            ->orderBy('total_cost', 'desc')
+            ->havingRaw('SUM(wo_costs.labour_cost + wo_costs.parts_cost) > 5000000')
+            ->orderByRaw('SUM(wo_costs.labour_cost + wo_costs.parts_cost) desc')
             ->limit(5)
             ->get();
 
@@ -2884,7 +2884,7 @@ class AIAnalyticsService
 
         // 1. Equipment without recent safety inspection
         // pm_executions has pm_schedule_id, need to join through pm_schedules to get sub_asset_id
-        $recentlyInspectedEquipmentIds = \DB::table('pm_executions')
+        $recentlyInspectedEquipmentIds = DB::table('pm_executions')
             ->join('pm_schedules', 'pm_executions.pm_schedule_id', '=', 'pm_schedules.id')
             ->where('pm_executions.actual_end', '>=', $now->copy()->subDays(90))
             ->whereNotNull('pm_schedules.sub_asset_id')
